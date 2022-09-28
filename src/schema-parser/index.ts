@@ -1,5 +1,5 @@
 import fs from "node:fs/promises";
-import { getSchema, printSchema, Schema } from "@mrleebo/prisma-ast";
+import { getSchema, printSchema, Schema } from "./prisma-ast";
 
 export function readSchemaFile(path: string): Promise<string> {
   return fs.readFile(path, { encoding: "utf-8" });
@@ -16,6 +16,11 @@ export function parseSchemaFile(file: string): Schema {
 
 export function printSchemaFile(schema: Schema): void {
   schema.list.forEach((block) => {
-    console.log(block.type);
+    if (block.type === "validate") {
+      console.log(block.name, block.properties, block.type);
+      block.properties.forEach((property) => {
+        console.log(property);
+      })
+    }
   });
 }

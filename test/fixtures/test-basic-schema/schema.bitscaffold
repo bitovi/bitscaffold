@@ -16,11 +16,6 @@ model Employee {
 }
 
 validate Employee {
-  start_date  @lt('end_date')
-  end_date    @gt('start_date')
-}
-
-frontend Employee {
-  id @hide
-  createdAt @hide
+  start_date  @lt("end_date")
+  end_date    @gt("start_date")
 }
