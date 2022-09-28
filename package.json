@@ -1,0 +1,42 @@
+{
+  "name": "bitscaffold",
+  "version": "0.0.1",
+  "description": "Fullstack CRUD Application Solution",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:verbose": "jest --watch --verbose",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "pretty": "prettier --check .",
+    "pretty:fix": "prettier --write .",
+    "prepublishOnly": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bitovi/bitscaffold.git"
+  },
+  "author": "Mark Repka <mrepka@bitovi.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bitovi/bitscaffold/issues"
+  },
+  "homepage": "https://github.com/bitovi/bitscaffold#readme",
+  "dependencies": {
+    "@mrleebo/prisma-ast": "^0.4.1",
+    "koa": "^2.13.4"
+  },
+  "devDependencies": {
+    "@bitovi/eslint-config": "^1.4.1",
+    "@types/jest": "^29.0.3",
+    "eslint": "^8.17.0",
+    "eslint-config-prettier": "^8.5.0",
+    "jest": "^28.1.1",
+    "prettier": "^2.7.0",
+    "ts-jest": "^28.0.5",
+    "ts-node": "^10.8.1",
+    "typescript": "^4.7.3"
+  }
+}
