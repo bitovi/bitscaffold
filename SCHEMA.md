@@ -5,6 +5,8 @@ BitScaffold wouldn't be a full-stack framework without a database layer. Everyth
 
 > Q: What should this actually look like exactly? Should it directly use Sequelize names for Types? 
 
+## JSON Based Config
+
 ```json
 {
     "models": {
@@ -51,7 +53,11 @@ BitScaffold wouldn't be a full-stack framework without a database layer. Everyth
 }
 ```
 
+## JavaScript/TypeScript Based Config
+
 > Another reasonable option is JavaScript (or TypeScript) as the configuration format
+> This does take us a little bit further away from 'low code', which is probably okay but something to note.
+
 ```typescript
 export function models(DataTypes) {
     return {
@@ -76,4 +82,3 @@ export function config() {
     }
 }
 ```
-
