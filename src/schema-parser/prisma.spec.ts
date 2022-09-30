@@ -1,7 +1,7 @@
-import { parseSchemaFile, printSchemaFile, readSchemaFile } from "./index";
+import { parseSchemaFile, printSchemaFile, readSchemaFile } from "./prisma";
 
 describe("schema-parser", () => {
-  it("should parse a simple schema", async () => {
+  it("should parse a simple prisma-like schema", async () => {
     const file = await readSchemaFile(
       "test/fixtures/test-basic-schema/schema.bitscaffold"
     );

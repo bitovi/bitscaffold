@@ -1,0 +1,31 @@
+{
+    "models": {
+        "Employee": {
+            "id": {
+                "type": "String",
+                "primary": true,
+                "default": "uuid()"
+            },
+            "name": {
+                "type": "String"
+            },
+            "start_date": {
+                "type": "DateTime",
+                "required": true,
+                "validate": {
+                    "lt": "end_date"
+                }
+            },
+            "end_date": {
+                "type": "DateTime",
+                "validate": {
+                    "gt": "start_date"
+                }
+            },
+            "createdAt": {
+                "type": "DateTime",
+                "default": "now()"
+            }
+        }
+    }
+}

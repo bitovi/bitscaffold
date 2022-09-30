@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import { getSchema, printSchema, Schema } from "./prisma-ast";
 
+// Export Functions for Prisma Parser type
 export function readSchemaFile(path: string): Promise<string> {
   return fs.readFile(path, { encoding: "utf-8" });
 }
@@ -24,3 +25,5 @@ export function printSchemaFile(schema: Schema): void {
     }
   });
 }
+
+
