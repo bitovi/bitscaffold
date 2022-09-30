@@ -1,27 +1,5 @@
 import fs from "node:fs/promises";
-
-interface BitScaffoldValidator {
-    lt?: string,
-    gt?: string,
-    eq?: string
-}
-
-interface BitScaffoldField {
-    type: string,
-    primary?: boolean,
-    default?: string,
-    validate: BitScaffoldValidator
-}
-
-interface BitScaffoldModel {
-    [FieldName: string]: BitScaffoldField
-}
-
-interface BitScaffoldSchema {
-    models: {
-        [ModelName: string]: BitScaffoldModel
-    }
-}
+import { BitScaffoldSchema, } from "../types"
 
 // Export Functions for Prisma Parser type
 export function readSchemaFile(path: string): Promise<string> {

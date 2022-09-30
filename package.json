@@ -28,7 +28,8 @@
     "@koa/router": "^12.0.0",
     "chevrotain": "^10.3.0",
     "koa": "^2.13.4",
-    "koa-compose": "^4.1.0"
+    "koa-compose": "^4.1.0",
+    "sequelize": "^6.23.2"
   },
   "devDependencies": {
     "@bitovi/eslint-config": "^1.4.1",
