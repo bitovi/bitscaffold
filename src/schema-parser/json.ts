@@ -10,7 +10,7 @@ export function writeSchemaFile(path: string, schema: string): Promise<void> {
     return fs.writeFile(path, schema, { encoding: "utf-8" });
 }
 
-export function parseSchemaFile(contents: string): BitScaffoldSchema {
+export async function parseSchemaFile(contents: string): Promise<BitScaffoldSchema> {
     return JSON.parse(contents);
 }
 

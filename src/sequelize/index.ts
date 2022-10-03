@@ -1,7 +1,7 @@
 import { BitScaffoldModel, BitScaffoldSchema } from "../types"
 import { Sequelize, DataTypes } from "sequelize"
 
-export function buildModels(schema: BitScaffoldSchema): Sequelize {
+export async function buildModels(schema: BitScaffoldSchema): Promise<Sequelize> {
     const sequelize = new Sequelize('sqlite::memory:');
 
     Object.keys(schema.models).forEach((modelName) => {
@@ -9,13 +9,5 @@ export function buildModels(schema: BitScaffoldSchema): Sequelize {
         sequelize.define(modelName, {}, {});
     })
 
-
     return sequelize;
 }
-
-export function listModels() {
-
-}
-
-
-
