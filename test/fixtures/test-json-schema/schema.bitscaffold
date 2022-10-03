@@ -2,29 +2,48 @@
     "models": {
         "Employee": {
             "id": {
-                "type": "String",
+                "type": "INTEGER",
                 "primary": true,
-                "default": "uuid()"
+                "default": "uuid()",
+                "autoIncrement": true
             },
             "name": {
-                "type": "String"
+                "type": "STRING"
             },
             "start_date": {
-                "type": "DateTime",
+                "type": "DATE",
                 "required": true,
                 "validate": {
                     "lt": "end_date"
                 }
             },
             "end_date": {
-                "type": "DateTime",
+                "type": "DATE",
                 "validate": {
                     "gt": "start_date"
                 }
+            }
+        },
+        "User": {
+            "id": {
+                "type": "INTEGER",
+                "primary": true,
+                "default": "uuid()",
+                "autoIncrement": true
             },
-            "createdAt": {
-                "type": "DateTime",
-                "default": "now()"
+            "firstName": {
+                "type": "STRING"
+            },
+            "lastName": {
+                "type": "STRING"
+            }
+        },
+        "Example": {
+            "id": {
+                "type": "INTEGER",
+                "primary": true,
+                "default": "uuid()",
+                "autoIncrement": true
             }
         }
     }

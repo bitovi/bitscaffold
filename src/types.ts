@@ -21,6 +21,10 @@ export interface BitScaffoldSchema {
     models: {
         [ModelName: string]: BitScaffoldModel
     }
+    validation: {
+        [ModelName: string]: any
+    }
+    config: any
 }
 
 export const BitDataTypes = DataTypes;

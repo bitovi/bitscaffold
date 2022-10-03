@@ -13,7 +13,7 @@ export const scaffoldFindAllMiddleware = async (ctx: Koa.Context, next: Koa.Next
     console.log('scaffoldFindAllMiddleware', ctx.state.model.name);
 
     if (!ctx.state.model) {
-        signale.error('scaffoldFindAllMiddleware', ctx.state.model.name);
+        console.log('scaffoldFindAllMiddleware', ctx.state.model.name);
         return ctx.throw(500, "No Model On Context")
     }
 
@@ -30,7 +30,7 @@ export const scaffoldFindOneMiddleware = async (ctx: Koa.Context, next: Koa.Next
     console.log('scaffoldFindOneMiddleware', ctx.state.model.name);
 
     if (!ctx.state.model) {
-        signale.error('scaffoldFindAllMiddleware', ctx.state.model.name);
+        console.log('scaffoldFindAllMiddleware', ctx.state.model.name);
         return ctx.throw(500, "No Model On Context")
     }
 
@@ -51,7 +51,7 @@ export const scaffoldCreateMiddleware = async (ctx: Koa.Context, next: Koa.Next)
     console.log('scaffoldCreateMiddleware', ctx.state.model.name);
 
     if (!ctx.state.model) {
-        signale.error('scaffoldFindAllMiddleware', ctx.state.model.name);
+        console.log('scaffoldFindAllMiddleware', ctx.state.model.name);
         return ctx.throw(500, "No Model On Context")
     }
 
@@ -65,7 +65,7 @@ export const scaffoldCreateMiddleware = async (ctx: Koa.Context, next: Koa.Next)
     } catch (err) {
         ctx.throw(500, err.message);
     }
-    console.log('scaffoldCreateMiddleware', ctx.state.model.name, ctx.body, ctx.status);
+    console.log('scaffoldCreateMiddleware', ctx.state.model.name);
     await next();
 }
 
@@ -82,12 +82,12 @@ export const scaffoldFindModelMiddleware = async (ctx: Koa.Context, next: Koa.Ne
     console.log('scaffoldFindModelMiddleware', ctx.params.model);
 
     if (!ctx.models[ctx.params.model]) {
-        signale.error('scaffoldFindModelMiddleware', ctx.params.model);
+        console.log('scaffoldFindModelMiddleware', ctx.params.model);
 
-        ctx.throw(404, "Unknown Model - Not Found");
+        ctx.throw(404, "Unknown Model Name '" + ctx.params.model + "'");
     }
 
-    signale.debug("Attached Model:", ctx.params.model)
+    console.log("Attached Model:", ctx.params.model)
     // Look at the available models, the route, and attach the model to the state
     ctx.state.model = ctx.models[ctx.params.model]
     console.log('scaffoldFindModelMiddleware', ctx.params.model);
