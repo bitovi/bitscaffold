@@ -13,7 +13,7 @@ async function setup(): Promise<Koa> {
 
     app.use(KoaBodyParser())
     app.use(async (ctx: Koa.Context, next: Koa.Next) => {
-        signale.info("Incoming Request Start");
+        console.log("Incoming Request Start");
         await next();
     })
 
@@ -45,22 +45,21 @@ async function setup(): Promise<Koa> {
 
     /**
     * A wildcard route for any passed in model, the middleware function here
+    * could provide sane defaults for authorization, validation, findOne behavior
+    */
+    router.get('/api/:model/:id', scaffoldFindOneDefaultMiddleware);
+
+    /**
+    * A wildcard route for any passed in model, the middleware function here
     * could provide sane defaults for authorization, validation, findAll behavior
     */
     router.get('/api/:model', scaffoldFindAllDefaultMiddleware);
 
     /**
     * A wildcard route for any passed in model, the middleware function here
-    * could provide sane defaults for authorization, validation, findOne behavior
-    */
-    router.get('/api/:models/:id', scaffoldFindOneDefaultMiddleware);
-
-    /**
-    * A wildcard route for any passed in model, the middleware function here
     * could provide sane defaults for authorization, validation, create behavior
     */
     router.post('/api/:model', scaffoldCreateDefaultMiddleware);
-
 
     app.use(router.routes());
     app.use(router.allowedMethods());
@@ -76,7 +75,6 @@ async function start(app: Koa): Promise<Koa> {
 
 async function database(app: Koa, schema: BitScaffoldSchema): Promise<Koa> {
     const sequelize = await buildModels(schema);
-    console.log("All models were synchronized successfully.");
 
     app.context.database = sequelize;
     app.context.models = sequelize.models;
@@ -90,15 +88,15 @@ async function loadSchema() {
 }
 
 async function init() {
-    signale.info("Running setup")
+    console.log("Running setup")
     const app = await setup();
-    signale.info("Running load schema")
+    console.log("Running load schema")
     const schema = await loadSchema();
 
-    signale.info("Running datbase setup")
+    console.log("Running datbase setup")
     await database(app, schema);
 
-    signale.info("Running start service")
+    console.log("Running start service")
     await start(app);
 }
 

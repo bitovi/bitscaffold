@@ -5,7 +5,7 @@ describe("schema-parser", () => {
     const file = await readSchemaFile(
       "test/fixtures/test-json-schema/schema.bitscaffold"
     );
-    const content = parseSchemaFile(file);
+    const content = await parseSchemaFile(file);
     printSchemaFile(content);
   });
 });

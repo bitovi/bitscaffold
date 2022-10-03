@@ -10,7 +10,7 @@ export const scaffoldValidationMiddleware = async (ctx: Koa.Context, next: Koa.N
 }
 
 export const scaffoldFindAllMiddleware = async (ctx: Koa.Context, next: Koa.Next) => {
-    signale.pending('scaffoldFindAllMiddleware', ctx.state.model.name);
+    console.log('scaffoldFindAllMiddleware', ctx.state.model.name);
 
     if (!ctx.state.model) {
         signale.error('scaffoldFindAllMiddleware', ctx.state.model.name);
@@ -23,11 +23,11 @@ export const scaffoldFindAllMiddleware = async (ctx: Koa.Context, next: Koa.Next
     // Attach the results to the Koa context body
     ctx.body = result || [];
     ctx.status = 200;
-    signale.success('scaffoldFindAllMiddleware', ctx.state.model.name);
+    console.log('scaffoldFindAllMiddleware', ctx.state.model.name);
 }
 
-export const scaffoldFindOneMiddleware = async (ctx) => {
-    signale.pending('scaffoldFindOneMiddleware', ctx.state.model.name);
+export const scaffoldFindOneMiddleware = async (ctx: Koa.Context, next: Koa.Next) => {
+    console.log('scaffoldFindOneMiddleware', ctx.state.model.name);
 
     if (!ctx.state.model) {
         signale.error('scaffoldFindAllMiddleware', ctx.state.model.name);
@@ -37,14 +37,18 @@ export const scaffoldFindOneMiddleware = async (ctx) => {
     // Perform some findOne database query
     const result = await ctx.state.model.findByPk(ctx.params.id);
 
+    if (!result) {
+        ctx.throw(404, "ID " + ctx.params.id + " Not Found")
+    }
+
     // Attach the results to the Koa context body
     ctx.body = result;
     ctx.status = 200;
-    signale.success('scaffoldFindOneMiddleware', ctx.state.model.name);
+    console.log('scaffoldFindOneMiddleware', ctx.state.model.name);
 }
 
 export const scaffoldCreateMiddleware = async (ctx: Koa.Context, next: Koa.Next) => {
-    signale.pending('scaffoldCreateMiddleware', ctx.state.model.name);
+    console.log('scaffoldCreateMiddleware', ctx.state.model.name);
 
     if (!ctx.state.model) {
         signale.error('scaffoldFindAllMiddleware', ctx.state.model.name);
@@ -52,26 +56,30 @@ export const scaffoldCreateMiddleware = async (ctx: Koa.Context, next: Koa.Next)
     }
 
     // Perform some create database query
-    const result = await ctx.state.model.create(ctx.request.body);
+    try {
+        const result = await ctx.state.model.create(ctx.request.body);
 
-    // Attach the results to the Koa context body
-    ctx.body = result.toJSON();
-    ctx.status = 201;
-    signale.success('scaffoldCreateMiddleware', ctx.state.model.name, ctx.body, ctx.status);
+        // Attach the results to the Koa context body
+        ctx.body = result;
+        ctx.status = 201;
+    } catch (err) {
+        ctx.throw(500, err.message);
+    }
+    console.log('scaffoldCreateMiddleware', ctx.state.model.name, ctx.body, ctx.status);
     await next();
 }
 
 export const scaffoldAuthorizationMiddleware = async (ctx: Koa.Context, next: Koa.Next) => {
-    signale.pending('scaffoldAuthorizationMiddleware');
+    console.log('scaffoldAuthorizationMiddleware');
 
     // Perform some lookups for the model options
     // Perform some authorization checks
-    signale.success('scaffoldAuthorizationMiddleware');
+    console.log('scaffoldAuthorizationMiddleware');
     await next()
 }
 
 export const scaffoldFindModelMiddleware = async (ctx: Koa.Context, next: Koa.Next) => {
-    signale.pending('scaffoldFindModelMiddleware', ctx.params.model);
+    console.log('scaffoldFindModelMiddleware', ctx.params.model);
 
     if (!ctx.models[ctx.params.model]) {
         signale.error('scaffoldFindModelMiddleware', ctx.params.model);
@@ -82,15 +90,15 @@ export const scaffoldFindModelMiddleware = async (ctx: Koa.Context, next: Koa.Ne
     signale.debug("Attached Model:", ctx.params.model)
     // Look at the available models, the route, and attach the model to the state
     ctx.state.model = ctx.models[ctx.params.model]
-    signale.success('scaffoldFindModelMiddleware', ctx.params.model);
+    console.log('scaffoldFindModelMiddleware', ctx.params.model);
     await next()
 }
 
 export const scaffoldCreateDefaultMiddleware = compose([
     async (ctx: Koa.Context, next: Koa.Next) => {
-        signale.pending('compose scaffoldCreateDefaultMiddleware');
+        console.log('compose scaffoldCreateDefaultMiddleware');
         await next();
-        signale.success('compose scaffoldCreateDefaultMiddleware');
+        console.log('compose scaffoldCreateDefaultMiddleware');
     },
     scaffoldAuthorizationMiddleware,
     scaffoldValidationMiddleware,
@@ -100,9 +108,9 @@ export const scaffoldCreateDefaultMiddleware = compose([
 
 export const scaffoldFindOneDefaultMiddleware = compose([
     async (ctx: Koa.Context, next: Koa.Next) => {
-        signale.pending('compose scaffoldFindOneDefaultMiddleware');
+        console.log('compose scaffoldFindOneDefaultMiddleware');
         await next();
-        signale.success('compose scaffoldFindOneDefaultMiddleware');
+        console.log('compose scaffoldFindOneDefaultMiddleware');
     },
     scaffoldAuthorizationMiddleware,
     scaffoldValidationMiddleware,
@@ -112,9 +120,9 @@ export const scaffoldFindOneDefaultMiddleware = compose([
 
 export const scaffoldFindAllDefaultMiddleware = compose([
     async (ctx: Koa.Context, next: Koa.Next) => {
-        signale.pending('compose scaffoldFindAllDefaultMiddleware');
+        console.log('compose scaffoldFindAllDefaultMiddleware');
         await next();
-        signale.success('compose scaffoldFindAllDefaultMiddleware');
+        console.log('compose scaffoldFindAllDefaultMiddleware');
     },
     scaffoldAuthorizationMiddleware,
     scaffoldValidationMiddleware,
