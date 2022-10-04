@@ -21,3 +21,7 @@ export async function buildModels(schema: BitScaffoldSchema): Promise<Sequelize>
 
     return sequelize;
 }
+
+export async function buildValidation(schema: BitScaffoldSchema): Promise<any> {
+    return schema.validation;
+}

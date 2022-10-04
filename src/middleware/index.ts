@@ -5,18 +5,26 @@ import signale from "signale";
 
 export function scaffoldValidationMiddleware(): Middleware {
     return async function scaffoldValidation(ctx: Koa.Context, next: Koa.Next) {
+        ctx.state.logger.pending('scaffoldValidation', ctx.state.model.name);
+
+        const name = ctx.state.model.name;
+        if (ctx.validation[name]) {
+            ctx.state.logger.info('scaffoldValidation', 'found validation rules for', ctx.state.model.name);
+        }
+
         // Perform some lookups for the model
         // Perform some lookusp for the validation
+        ctx.state.logger.success('scaffoldValidation', ctx.state.model.name);
         await next()
     }
 }
 
 export function scaffoldFindAllMiddleware(): Middleware {
     return async function scaffoldFindAll(ctx: Koa.Context, next: Koa.Next) {
-        signale.pending('scaffoldFindAllMiddleware', ctx.state.model.name);
+        ctx.state.logger.pending('scaffoldFindAllMiddleware', ctx.state.model.name);
 
         if (!ctx.state.model) {
-            signale.error('scaffoldFindAllMiddleware', ctx.state.model.name);
+            ctx.state.logger.error('scaffoldFindAllMiddleware', ctx.state.model.name);
             return ctx.throw(500, "No Model On Context")
         }
 
@@ -26,16 +34,16 @@ export function scaffoldFindAllMiddleware(): Middleware {
         // Attach the results to the Koa context body
         ctx.body = result || [];
         ctx.status = 200;
-        signale.success('scaffoldFindAllMiddleware', ctx.state.model.name);
+        ctx.state.logger.success('scaffoldFindAllMiddleware', ctx.state.model.name);
     }
 }
 
 export function scaffoldFindOneMiddleware(): Middleware {
     return async function scaffoldFindOne(ctx: Koa.Context, next: Koa.Next) {
-        signale.pending('scaffoldFindOneMiddleware', ctx.state.model.name);
+        ctx.state.logger.pending('scaffoldFindOneMiddleware', ctx.state.model.name);
 
         if (!ctx.state.model) {
-            signale.error('scaffoldFindAllMiddleware', ctx.state.model.name);
+            ctx.state.logger.error('scaffoldFindAllMiddleware', ctx.state.model.name);
             return ctx.throw(500, "No Model On Context")
         }
 
@@ -49,16 +57,16 @@ export function scaffoldFindOneMiddleware(): Middleware {
         // Attach the results to the Koa context body
         ctx.body = result;
         ctx.status = 200;
-        signale.success('scaffoldFindOneMiddleware', ctx.state.model.name);
+        ctx.state.logger.success('scaffoldFindOneMiddleware', ctx.state.model.name);
     }
 }
 
 export function scaffoldCreateMiddleware(): Middleware {
     return async function scaffoldCreate(ctx: Koa.Context, next: Koa.Next) {
-        signale.pending('scaffoldCreateMiddleware', ctx.state.model.name);
+        ctx.state.logger.pending('scaffoldCreateMiddleware', ctx.state.model.name);
 
         if (!ctx.state.model) {
-            signale.error('scaffoldFindAllMiddleware', ctx.state.model.name);
+            ctx.state.logger.error('scaffoldFindAllMiddleware', ctx.state.model.name);
             return ctx.throw(500, "No Model On Context")
         }
 
@@ -72,25 +80,25 @@ export function scaffoldCreateMiddleware(): Middleware {
         } catch (err) {
             ctx.throw(500, err.message);
         }
-        signale.success('scaffoldCreateMiddleware', ctx.state.model.name);
+        ctx.state.logger.success('scaffoldCreateMiddleware', ctx.state.model.name);
         await next();
     }
 }
 
 export function scaffoldAuthorizationMiddleware(): Middleware {
     return async function scaffoldAuthorization(ctx: Koa.Context, next: Koa.Next) {
-        signale.pending('scaffoldAuthorizationMiddleware');
+        ctx.state.logger.pending('scaffoldAuthorizationMiddleware');
 
         // Perform some lookups for the model options
         // Perform some authorization checks
-        signale.success('scaffoldAuthorizationMiddleware');
+        ctx.state.logger.success('scaffoldAuthorizationMiddleware');
         await next()
     }
 }
 
 export function scaffoldFindModelMiddleware(override?: string): Middleware {
     return async function scaffoldFindModel(ctx: Koa.Context, next: Koa.Next) {
-        signale.pending('scaffoldFindModelMiddleware', ctx.params.model);
+        ctx.state.logger.pending('scaffoldFindModelMiddleware', ctx.params.model);
 
         let modelName = ctx.params.model;
         if (override) {
@@ -98,15 +106,15 @@ export function scaffoldFindModelMiddleware(override?: string): Middleware {
         }
 
         if (!ctx.models[modelName]) {
-            signale.error('scaffoldFindModelMiddleware', modelName);
+            ctx.state.logger.error('scaffoldFindModelMiddleware', modelName);
 
             ctx.throw(404, "Unknown Model Name '" + modelName + "'");
         }
 
-        signale.info("Attached Model:", modelName)
+        ctx.state.logger.info("Attached Model:", modelName)
         // Look at the available models, the route, and attach the model to the state
         ctx.state.model = ctx.models[modelName]
-        signale.success('scaffoldFindModelMiddleware', modelName);
+        ctx.state.logger.success('scaffoldFindModelMiddleware', modelName);
         await next()
     }
 }
@@ -114,8 +122,8 @@ export function scaffoldFindModelMiddleware(override?: string): Middleware {
 export function scaffoldCreateDefaultMiddleware(): Middleware {
     return compose([
         scaffoldAuthorizationMiddleware(),
-        scaffoldValidationMiddleware(),
         scaffoldFindModelMiddleware(),
+        scaffoldValidationMiddleware(),
         scaffoldCreateMiddleware()
     ])
 }
@@ -123,7 +131,6 @@ export function scaffoldCreateDefaultMiddleware(): Middleware {
 export function scaffoldFindOneDefaultMiddleware(): Middleware {
     return compose([
         scaffoldAuthorizationMiddleware(),
-        scaffoldValidationMiddleware(),
         scaffoldFindModelMiddleware(),
         scaffoldFindOneMiddleware()
     ])
@@ -132,7 +139,6 @@ export function scaffoldFindOneDefaultMiddleware(): Middleware {
 export function scaffoldFindAllDefaultMiddleware(): Middleware {
     return compose([
         scaffoldAuthorizationMiddleware(),
-        scaffoldValidationMiddleware(),
         scaffoldFindModelMiddleware(),
         scaffoldFindAllMiddleware()
     ])

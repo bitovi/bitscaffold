@@ -1,7 +1,7 @@
 import Koa from "koa";
 import KoaBodyParser from "koa-body";
-import signale from "signale";
-import { buildModels } from "./sequelize"
+import signale, { Signale } from "signale";
+import { buildModels, buildValidation } from "./sequelize"
 import { buildRoutes } from "./routes";
 import { BitScaffoldSchema } from "./types";
 import { readSchemaFile, parseSchemaFile } from "./schema-parser/json"
@@ -27,6 +27,7 @@ async function setup(): Promise<Koa> {
 
     app.use(async (ctx: Koa.Context, next: Koa.Next) => {
         ctx.state.uuid = v4();
+        ctx.state.logger = new Signale({ scope: ctx.state.uuid });
         await next();
     })
 
@@ -63,6 +64,22 @@ async function database(app: Koa, schema: BitScaffoldSchema): Promise<Koa> {
 }
 
 /**
+ * Takes the Schema and builds the validation rules, attaching them
+ * to the Koa Context for the rest of the application to use
+ * 
+ * @param app Koa Instance
+ * @param schema Schema JSON
+ * @returns Koa Instance
+ */
+async function validation(app: Koa, schema: BitScaffoldSchema): Promise<Koa> {
+    const rules = await buildValidation(schema);
+
+    app.context.validation = rules;
+    return app;
+}
+
+
+/**
  * Loads the schema file, parses it, and returns the 
  * validated Schema JSON contents
  * 
@@ -86,8 +103,11 @@ async function init() {
     signale.info("Running load schema")
     const schema = await loadSchema();
 
-    signale.info("Running datbase setup")
+    signale.info("Running database setup")
     await database(app, schema);
+
+    signale.info("Running validation setup");
+    await validation(app, schema);
 
     signale.info("Running start service")
     await start(app);

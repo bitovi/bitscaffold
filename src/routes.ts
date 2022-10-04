@@ -1,5 +1,6 @@
 import Router from "@koa/router";
 import Koa from "koa"
+import signale from "signale"
 import {
     scaffoldFindAllMiddleware,
     scaffoldFindAllDefaultMiddleware,
@@ -19,6 +20,7 @@ export async function buildRoutes(app): Promise<Koa> {
     router.get('/api/UserOverride',
         async (ctx, next) => {
             // do something special for test auth here!
+            signale.info("Special User Override Auth Middleware");
             await next()
         },
         scaffoldFindModelMiddleware('Example'),
