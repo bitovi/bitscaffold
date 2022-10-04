@@ -1,131 +1,139 @@
 
-import Koa from "koa";
+import Koa, { Middleware } from "koa";
 import compose from 'koa-compose';
 import signale from "signale";
 
-export const scaffoldValidationMiddleware = async (ctx: Koa.Context, next: Koa.Next) => {
-    // Perform some lookups for the model
-    // Perform some lookusp for the validation
-    await next()
+export function scaffoldValidationMiddleware(): Middleware {
+    return async function scaffoldValidation(ctx: Koa.Context, next: Koa.Next) {
+        // Perform some lookups for the model
+        // Perform some lookusp for the validation
+        await next()
+    }
 }
 
-export const scaffoldFindAllMiddleware = async (ctx: Koa.Context, next: Koa.Next) => {
-    console.log('scaffoldFindAllMiddleware', ctx.state.model.name);
+export function scaffoldFindAllMiddleware(): Middleware {
+    return async function scaffoldFindAll(ctx: Koa.Context, next: Koa.Next) {
+        signale.pending('scaffoldFindAllMiddleware', ctx.state.model.name);
 
-    if (!ctx.state.model) {
-        console.log('scaffoldFindAllMiddleware', ctx.state.model.name);
-        return ctx.throw(500, "No Model On Context")
+        if (!ctx.state.model) {
+            signale.error('scaffoldFindAllMiddleware', ctx.state.model.name);
+            return ctx.throw(500, "No Model On Context")
+        }
+
+        // Perform some lookups for the model
+        const result = await ctx.state.model.findAll();
+
+        // Attach the results to the Koa context body
+        ctx.body = result || [];
+        ctx.status = 200;
+        signale.success('scaffoldFindAllMiddleware', ctx.state.model.name);
     }
-
-    // Perform some lookups for the model
-    const result = await ctx.state.model.findAll();
-
-    // Attach the results to the Koa context body
-    ctx.body = result || [];
-    ctx.status = 200;
-    console.log('scaffoldFindAllMiddleware', ctx.state.model.name);
 }
 
-export const scaffoldFindOneMiddleware = async (ctx: Koa.Context, next: Koa.Next) => {
-    console.log('scaffoldFindOneMiddleware', ctx.state.model.name);
+export function scaffoldFindOneMiddleware(): Middleware {
+    return async function scaffoldFindOne(ctx: Koa.Context, next: Koa.Next) {
+        signale.pending('scaffoldFindOneMiddleware', ctx.state.model.name);
 
-    if (!ctx.state.model) {
-        console.log('scaffoldFindAllMiddleware', ctx.state.model.name);
-        return ctx.throw(500, "No Model On Context")
-    }
+        if (!ctx.state.model) {
+            signale.error('scaffoldFindAllMiddleware', ctx.state.model.name);
+            return ctx.throw(500, "No Model On Context")
+        }
 
-    // Perform some findOne database query
-    const result = await ctx.state.model.findByPk(ctx.params.id);
+        // Perform some findOne database query
+        const result = await ctx.state.model.findByPk(ctx.params.id);
 
-    if (!result) {
-        ctx.throw(404, "ID " + ctx.params.id + " Not Found")
-    }
-
-    // Attach the results to the Koa context body
-    ctx.body = result;
-    ctx.status = 200;
-    console.log('scaffoldFindOneMiddleware', ctx.state.model.name);
-}
-
-export const scaffoldCreateMiddleware = async (ctx: Koa.Context, next: Koa.Next) => {
-    console.log('scaffoldCreateMiddleware', ctx.state.model.name);
-
-    if (!ctx.state.model) {
-        console.log('scaffoldFindAllMiddleware', ctx.state.model.name);
-        return ctx.throw(500, "No Model On Context")
-    }
-
-    // Perform some create database query
-    try {
-        const result = await ctx.state.model.create(ctx.request.body);
+        if (!result) {
+            ctx.throw(404, "ID " + ctx.params.id + " Not Found")
+        }
 
         // Attach the results to the Koa context body
         ctx.body = result;
-        ctx.status = 201;
-    } catch (err) {
-        ctx.throw(500, err.message);
+        ctx.status = 200;
+        signale.success('scaffoldFindOneMiddleware', ctx.state.model.name);
     }
-    console.log('scaffoldCreateMiddleware', ctx.state.model.name);
-    await next();
 }
 
-export const scaffoldAuthorizationMiddleware = async (ctx: Koa.Context, next: Koa.Next) => {
-    console.log('scaffoldAuthorizationMiddleware');
+export function scaffoldCreateMiddleware(): Middleware {
+    return async function scaffoldCreate(ctx: Koa.Context, next: Koa.Next) {
+        signale.pending('scaffoldCreateMiddleware', ctx.state.model.name);
 
-    // Perform some lookups for the model options
-    // Perform some authorization checks
-    console.log('scaffoldAuthorizationMiddleware');
-    await next()
-}
+        if (!ctx.state.model) {
+            signale.error('scaffoldFindAllMiddleware', ctx.state.model.name);
+            return ctx.throw(500, "No Model On Context")
+        }
 
-export const scaffoldFindModelMiddleware = async (ctx: Koa.Context, next: Koa.Next) => {
-    console.log('scaffoldFindModelMiddleware', ctx.params.model);
+        // Perform some create database query
+        try {
+            const result = await ctx.state.model.create(ctx.request.body);
 
-    if (!ctx.models[ctx.params.model]) {
-        console.log('scaffoldFindModelMiddleware', ctx.params.model);
-
-        ctx.throw(404, "Unknown Model Name '" + ctx.params.model + "'");
+            // Attach the results to the Koa context body
+            ctx.body = result;
+            ctx.status = 201;
+        } catch (err) {
+            ctx.throw(500, err.message);
+        }
+        signale.success('scaffoldCreateMiddleware', ctx.state.model.name);
+        await next();
     }
-
-    console.log("Attached Model:", ctx.params.model)
-    // Look at the available models, the route, and attach the model to the state
-    ctx.state.model = ctx.models[ctx.params.model]
-    console.log('scaffoldFindModelMiddleware', ctx.params.model);
-    await next()
 }
 
-export const scaffoldCreateDefaultMiddleware = compose([
-    async (ctx: Koa.Context, next: Koa.Next) => {
-        console.log('compose scaffoldCreateDefaultMiddleware');
-        await next();
-        console.log('compose scaffoldCreateDefaultMiddleware');
-    },
-    scaffoldAuthorizationMiddleware,
-    scaffoldValidationMiddleware,
-    scaffoldFindModelMiddleware,
-    scaffoldCreateMiddleware
-]);
+export function scaffoldAuthorizationMiddleware(): Middleware {
+    return async function scaffoldAuthorization(ctx: Koa.Context, next: Koa.Next) {
+        signale.pending('scaffoldAuthorizationMiddleware');
 
-export const scaffoldFindOneDefaultMiddleware = compose([
-    async (ctx: Koa.Context, next: Koa.Next) => {
-        console.log('compose scaffoldFindOneDefaultMiddleware');
-        await next();
-        console.log('compose scaffoldFindOneDefaultMiddleware');
-    },
-    scaffoldAuthorizationMiddleware,
-    scaffoldValidationMiddleware,
-    scaffoldFindModelMiddleware,
-    scaffoldFindOneMiddleware
-]);
+        // Perform some lookups for the model options
+        // Perform some authorization checks
+        signale.success('scaffoldAuthorizationMiddleware');
+        await next()
+    }
+}
 
-export const scaffoldFindAllDefaultMiddleware = compose([
-    async (ctx: Koa.Context, next: Koa.Next) => {
-        console.log('compose scaffoldFindAllDefaultMiddleware');
-        await next();
-        console.log('compose scaffoldFindAllDefaultMiddleware');
-    },
-    scaffoldAuthorizationMiddleware,
-    scaffoldValidationMiddleware,
-    scaffoldFindModelMiddleware,
-    scaffoldFindAllMiddleware
-]);
+export function scaffoldFindModelMiddleware(override?: string): Middleware {
+    return async function scaffoldFindModel(ctx: Koa.Context, next: Koa.Next) {
+        signale.pending('scaffoldFindModelMiddleware', ctx.params.model);
+
+        let modelName = ctx.params.model;
+        if (override) {
+            modelName = override;
+        }
+
+        if (!ctx.models[modelName]) {
+            signale.error('scaffoldFindModelMiddleware', modelName);
+
+            ctx.throw(404, "Unknown Model Name '" + modelName + "'");
+        }
+
+        signale.info("Attached Model:", modelName)
+        // Look at the available models, the route, and attach the model to the state
+        ctx.state.model = ctx.models[modelName]
+        signale.success('scaffoldFindModelMiddleware', modelName);
+        await next()
+    }
+}
+
+export function scaffoldCreateDefaultMiddleware(): Middleware {
+    return compose([
+        scaffoldAuthorizationMiddleware(),
+        scaffoldValidationMiddleware(),
+        scaffoldFindModelMiddleware(),
+        scaffoldCreateMiddleware()
+    ])
+}
+
+export function scaffoldFindOneDefaultMiddleware(): Middleware {
+    return compose([
+        scaffoldAuthorizationMiddleware(),
+        scaffoldValidationMiddleware(),
+        scaffoldFindModelMiddleware(),
+        scaffoldFindOneMiddleware()
+    ])
+}
+
+export function scaffoldFindAllDefaultMiddleware(): Middleware {
+    return compose([
+        scaffoldAuthorizationMiddleware(),
+        scaffoldValidationMiddleware(),
+        scaffoldFindModelMiddleware(),
+        scaffoldFindAllMiddleware()
+    ])
+}

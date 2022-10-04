@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/bitovi/bitscaffold#readme",
   "dependencies": {
+    "@koa/cors": "^3.4.1",
     "@koa/router": "^12.0.0",
     "chevrotain": "^10.3.0",
     "koa": "^2.13.4",
@@ -32,7 +33,8 @@
     "koa-compose": "^4.1.0",
     "sequelize": "^6.23.2",
     "signale": "^1.4.0",
-    "sqlite3": "^5.1.2"
+    "sqlite3": "^5.1.2",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@bitovi/eslint-config": "^1.4.1",

@@ -1,78 +1,59 @@
 import Koa from "koa";
-import Router from "@koa/router";
 import KoaBodyParser from "koa-body";
-import { scaffoldFindAllMiddleware, scaffoldFindAllDefaultMiddleware, scaffoldFindOneDefaultMiddleware, scaffoldCreateDefaultMiddleware, scaffoldValidationMiddleware } from "./middleware";
 import signale from "signale";
 import { buildModels } from "./sequelize"
+import { buildRoutes } from "./routes";
 import { BitScaffoldSchema } from "./types";
 import { readSchemaFile, parseSchemaFile } from "./schema-parser/json"
+import KoaCors from "@koa/cors";
+import { v4 } from "uuid";
+import os from "os";
 
+/**
+ * Creates a Koa server and attaches the default configuration middleware
+ * @returns Koa
+ */
 async function setup(): Promise<Koa> {
     const app = new Koa();
-    const router = new Router();
 
-    app.use(KoaBodyParser())
+    app.use(KoaCors({ origin: "*" }));
+
+    app.use(KoaBodyParser({
+        parsedMethods: ['POST', 'PUT', 'PATCH', 'DELETE'],
+        multipart: true,
+        includeUnparsed: true,
+        formidable: { multiples: true, uploadDir: os.tmpdir() },
+    }))
+
     app.use(async (ctx: Koa.Context, next: Koa.Next) => {
-        console.log("Incoming Request Start");
+        ctx.state.uuid = v4();
         await next();
     })
-
-    /**
-     * A generated, or maybe user defined, route for the 'users' model
-     * provides a custom middleware to do something special, but then 
-     * falls back to the internal scaffold provided middleware
-     */
-    router.get('/api/test',
-        async (ctx, next) => {
-            // do something special for users auth here!
-            await next()
-        },
-        scaffoldValidationMiddleware, // built in, used by the default handlers
-        scaffoldFindAllMiddleware // built in, used by the default handler
-    )
-
-    /**
-     * A generated, or maybe user defined, route for the 'users' model
-     * provides a custom middleware to do something special, but then 
-     * falls back to the internal scaffold provided middleware
-     */
-    router.get('/meta/models',
-        async (ctx, next) => {
-            ctx.body = Object.keys(ctx.models);
-            await next()
-        },
-    )
-
-    /**
-    * A wildcard route for any passed in model, the middleware function here
-    * could provide sane defaults for authorization, validation, findOne behavior
-    */
-    router.get('/api/:model/:id', scaffoldFindOneDefaultMiddleware);
-
-    /**
-    * A wildcard route for any passed in model, the middleware function here
-    * could provide sane defaults for authorization, validation, findAll behavior
-    */
-    router.get('/api/:model', scaffoldFindAllDefaultMiddleware);
-
-    /**
-    * A wildcard route for any passed in model, the middleware function here
-    * could provide sane defaults for authorization, validation, create behavior
-    */
-    router.post('/api/:model', scaffoldCreateDefaultMiddleware);
-
-    app.use(router.routes());
-    app.use(router.allowedMethods());
 
     return app;
 }
 
+/**
+ * Starts the Koa instance listening on port 3000
+ * resolves when the service has started
+ * 
+ * @param app Koa Instance
+ * @returns Koa Instance
+ */
 async function start(app: Koa): Promise<Koa> {
     return new Promise((resolve) => {
         app.listen(3000, () => { resolve(app) });
     })
 }
 
+/**
+ * Takes the Schema and builds the ORM models, attaching them
+ * to the Koa Context for the rest of the application to use
+ * 
+ * @param app Koa Instance
+ * @param schema Schema JSON
+ * @returns Koa Instance
+ */
 async function database(app: Koa, schema: BitScaffoldSchema): Promise<Koa> {
     const sequelize = await buildModels(schema);
 
@@ -81,22 +62,34 @@ async function database(app: Koa, schema: BitScaffoldSchema): Promise<Koa> {
     return app;
 }
 
+/**
+ * Loads the schema file, parses it, and returns the 
+ * validated Schema JSON contents
+ * 
+ * @returns Schema JSON
+ */
 async function loadSchema() {
     const result = await readSchemaFile('test/fixtures/test-json-schema/schema.bitscaffold');
     const schema = await parseSchemaFile(result);
     return schema;
 }
 
+/**
+ * Entrypoint
+ */
 async function init() {
-    console.log("Running setup")
-    const app = await setup();
-    console.log("Running load schema")
+    signale.info("Running setup")
+    let app = await setup();
+    app = await buildRoutes(app)
+
+
+    signale.info("Running load schema")
     const schema = await loadSchema();
 
-    console.log("Running datbase setup")
+    signale.info("Running datbase setup")
     await database(app, schema);
 
-    console.log("Running start service")
+    signale.info("Running start service")
     await start(app);
 }
 
