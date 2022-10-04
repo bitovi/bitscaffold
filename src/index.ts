@@ -16,8 +16,10 @@ import os from "os";
 async function setup(): Promise<Koa> {
     const app = new Koa();
 
+    // Hook up cors
     app.use(KoaCors({ origin: "*" }));
 
+    // Enable the body parser for relevant methods
     app.use(KoaBodyParser({
         parsedMethods: ['POST', 'PUT', 'PATCH', 'DELETE'],
         multipart: true,
@@ -25,9 +27,14 @@ async function setup(): Promise<Koa> {
         formidable: { multiples: true, uploadDir: os.tmpdir() },
     }))
 
+    // Attach some debugging uuid information to 
+    // state, logging, and response headers
     app.use(async (ctx: Koa.Context, next: Koa.Next) => {
         ctx.state.uuid = v4();
         ctx.state.logger = new Signale({ scope: ctx.state.uuid });
+
+        ctx.set('x-koa-uuid', ctx.state.uuid);
+
         await next();
     })
 

@@ -62,6 +62,7 @@ BitScaffold wouldn't be a full-stack framework without a database layer. Everyth
             "id": {
                 "type": "UUID",
                 "primary": true,
+                "autoIncrement": true
             },
             "firstName": {
                 "type": "String"
@@ -72,7 +73,7 @@ BitScaffold wouldn't be a full-stack framework without a database layer. Everyth
         }
     },
     "config": {
-
+        
     }
 }
 ```

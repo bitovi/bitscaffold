@@ -4,7 +4,6 @@
             "id": {
                 "type": "INTEGER",
                 "primary": true,
-                "default": "uuid()",
                 "autoIncrement": true
             },
             "name": {
@@ -28,7 +27,6 @@
             "id": {
                 "type": "INTEGER",
                 "primary": true,
-                "default": "uuid()",
                 "autoIncrement": true
             },
             "firstName": {
@@ -42,7 +40,6 @@
             "id": {
                 "type": "INTEGER",
                 "primary": true,
-                "default": "uuid()",
                 "autoIncrement": true
             }
         }
