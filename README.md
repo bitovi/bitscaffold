@@ -48,7 +48,7 @@ Create a BitScaffold project with `npx bitscaffold my-bitscaffold-project`:
 Then change into that directory and create your project definition file:
 
 > ```
-> cd my-redwood-project
+> cd my-bitscaffold-project
 > ```
 
 ## Project Schema
@@ -65,15 +65,15 @@ BitScaffold wouldn't be a full-stack framework without a database layer. Everyth
                 "autoIncrement": true
             },
             "firstName": {
-                "type": "String"
+                "type": "STRING"
             },
             "lastName": {
-                "type": "String"
+                "type": "STRING"
             }
         }
     },
     "config": {
-        
+
     }
 }
 ```
@@ -94,3 +94,151 @@ Navigate to [http://localhost:3000/users](http://localhost:3000/users), and you 
 
 
 Just like that we created an example User within the database. When you ran `npm run start` Scaffold did all the work to connect to your database, create all the pages, routes, forms and services necessary to perform all CRUD operations against the User table.
+
+## Project Customization
+
+While Scaffold gives you a lot of power out of the box, if you do require custom logic outside of the defaults, it is easy to start creating your own override routes. For example, if you had a `User` table that needed special authorization rules you can quickly add this functionality yourself while still retaining all the other benefits of the Scaffold system.
+
+Inside the `Routes.ts` file you can see the main `/api/:model` routes that, by default, call into the Scaffold Default Middleware functions. These functions are really a collection of other middleware functions that provide the default behavior.
+
+To create custom route behavior, first create a new override route:
+```typescript
+    router.get('/api/User',
+    // No behavior defined yet
+    )
+```
+
+This route tells the Scaffold that if it sees `GET /api/User` it should now use this route instead of the default. You can, optionally, import more granular middleware functions and use them as needed or handle everything yourself and write your own.
+
+```typescript
+    import {
+        scaffoldFindAllMiddleware,
+        scaffoldFindModelMiddleware
+    } from "./middleware";
+```
+
+Taking a look at these functions as examples, the `scaffoldFindModelMiddleware` is used to tell Scaffold which database table is relevant for this request. By default Scaffold will use the URL to determine this, but you can also pass an override directly to the middleware function.
+
+This will tell the function that it should use the User table, even if the URL was defined as something different. 
+```typescript
+scaffoldFindModelMiddleware('User')
+```
+
+The `scaffoldFindAllMiddleware` can be used next to tell Scaffold to perform a 'find all' against the User table
+
+These built in functions are, under the hood, Koa Middleware. More documentation of how exactly this works can be found with the [Koa project](). You can also define your own Middleware functions to provide any custom logic that you see fit.
+
+
+In short, you will create an `async` function that takes two parameters, a `ctx` or Context and a `next` function. The Context will contain information about the incoming request, the request body, headers, and more. The `next` function should be called when your middleware is complete.
+
+The most basic middleware we could create
+```typescript
+        async (ctx, next) => {
+            // do something special for test auth here!
+            console.log("You hit the custom function! Cool!")
+            await next()
+        }
+```
+
+Putting it all together, we can create a custom route, with custom logic, while still letting Scaffold do most of the heavy lifting for you. Here is a more complete example:
+
+```typescript
+    router.post('/api/User',
+        scaffoldAuthorizationMiddleware(),
+        async (ctx, next) => {
+            // do something special for test auth here!
+            signale.info("Special User Override Auth Middleware");
+            await next()
+        },
+        scaffoldFindModelMiddleware('User'),
+        scaffoldValidationMiddleware(), // built in, used by the default handlers
+        scaffoldCreateMiddleware() // built in, used by the default handler
+    )
+```
+
+
+## Application Data Validation
+
+
+
+
+
+## Model Relationships
+Scaffold can help you define and build relationships between different models within your application. For example, if you had a system that delt with scheduling employees on certain projects, you might have a User as well as a Project. However, a Project should have a manager (who is a user) as well as N number of people working on that project. Similarly, we should be able to check a user to find out what project they are on. 
+
+If we expand our config example from before, we have added additional fields that define the relationships between different models within the system.
+
+the `type` is defined here as a relationship type followed by the Model that it relates to. The sourceKey for the relationship is provided as the name of the property and the foreignKey can be set if needed (the default is id).
+
+```json
+{
+    "models": {
+        "User": {
+            "id": {
+                "type": "UUID",
+                "primary": true,
+                "autoIncrement": true
+            },
+            "firstName": {
+                "type": "STRING",
+                "required": true
+            },
+            "lastName": {
+                "type": "STRING",
+                "required": true
+            },
+            "projects": {
+                "required": false,
+                "type": "hasMany:Projects",
+                "foreignKey": "id",
+            }
+        },
+        "Project": {
+            "id": {
+                "type": "UUID",
+                "primary": true,
+                "autoIncrement": true
+            },
+            "name": {
+                "type": "STRING"
+            },
+            "manager": {
+                "type":"hasOne:User",
+                "foreignKey": "id",
+            },
+            "users": {
+                "type":"hasMany:User",
+                "foreignKey": "id",
+            }
+        }
+    },
+    "config": {
+
+    }
+}
+```
+
+Given this definition file, Scaffold can provide this additional joined information if requested. Same on the frontend, if you want to create a new project, you will see a drop down with a list of users to assign. The relationship type can also hint to the frontend what type of form you should see displayed.
+
+<img src="" alt="Create a new user with project dropdown" /> [no frontend exists yet to show this]
+
+
+
+
+## Integrating With Your Existing App
+
+
+
+
+## Key Features
+
+1. Ability to overwrite the logic that the system produces 'by default')*
+2. Getting started simplicity, CRUD page for a single table, Demoability.
+3. Ability to leverage benefits of the system even after overwriting the default logic
+4. Natural interfaces to manipulate and explore the joins and relationships, both backend and frontend
+5. Validations defined in one place, work for both the frontend and backend
+6. Ability to integrate with existing Koa or Express projects
+
+7. Support of 'business logic' side effects
+8. Can be used as a no-code solution for the lifetime of the project/application
+9. Works with the users chosen tech stack [Angular, Vie, Python, etc] 
