@@ -1,0 +1,47 @@
+{
+    "models": {
+        "Employee": {
+            "id": {
+                "type": "INTEGER",
+                "primary": true,
+                "autoIncrement": true
+            },
+            "name": {
+                "type": "STRING"
+            },
+            "start_date": {
+                "type": "DATE",
+                "required": true,
+                "validate": {
+                    "lt": "end_date"
+                }
+            },
+            "end_date": {
+                "type": "DATE",
+                "validate": {
+                    "gt": "start_date"
+                }
+            }
+        },
+        "User": {
+            "id": {
+                "type": "INTEGER",
+                "primary": true,
+                "autoIncrement": true
+            },
+            "firstName": {
+                "type": "STRING"
+            },
+            "lastName": {
+                "type": "STRING"
+            }
+        },
+        "Example": {
+            "id": {
+                "type": "INTEGER",
+                "primary": true,
+                "autoIncrement": true
+            }
+        }
+    }
+}
