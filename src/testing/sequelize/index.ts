@@ -1,8 +1,8 @@
 import { Sequelize, DataTypes } from "sequelize";
 import signale from "signale";
 
-import schema from "./schema.json";
-
+//import schema from "./schema.json";
+import * as schema from "./schema";
 
 async function buildModels(schema: BitScaffoldSchema): Promise<Sequelize> {
     // Create a sequelize instance to use for connections later
@@ -37,7 +37,7 @@ async function buildModels(schema: BitScaffoldSchema): Promise<Sequelize> {
 }
 
 async function init() {
-    const parsed = await parseSchemaFile(schema)
+    const parsed = await parseSchemaFileTs(schema)
     const seq = await buildModels(parsed);
 
     const Employee = seq.models['Employee'];
@@ -80,6 +80,65 @@ interface BitScaffoldSchema {
 }
 
 const BitDataTypes = DataTypes;
+
+async function parseSchemaFileTs(contents: any): Promise<BitScaffoldSchema> {
+    const schema = { models: {}, validation: {}, config: {} };
+
+    const models = Object.keys(contents);
+    console.log("Models", models);
+    models.forEach((modelName) => {
+        schema.models[modelName] = {};
+        const ModelClass = contents[modelName];
+        const model = new ModelClass();
+
+        const fields = Object.keys(ModelClass.fields);
+        const relationships = Object.keys(ModelClass.relationships);
+
+
+        fields.forEach((fieldName) => {
+            const fieldData = ModelClass.fields[fieldName];
+            schema.models[modelName][fieldName] = {};
+
+            if (!fieldData.type) {
+                throw new Error("Invalid Model Definition: Missing type")
+            }
+
+            if (fieldData.type === "datetime") {
+                fieldData.type = "DATE";
+            }
+
+            if (!DataTypes[fieldData.type.toUpperCase()]) {
+                throw new Error("Invalid Model Definition: Unknown type '" + fieldData.type + "'")
+            }
+
+            schema.models[modelName][fieldName].type = DataTypes[fieldData.type.toUpperCase()];
+
+            if (fieldData.primary) {
+                schema.models[modelName][fieldName].primaryKey = fieldData.primary;
+            }
+
+            if (fieldData.default) {
+                // schema.models[modelName][fieldName].default = fieldData.default;
+            }
+
+            if (fieldData.autoIncrement) {
+                schema.models[modelName][fieldName].autoIncrement = fieldData.autoIncrement;
+            }
+
+            if (fieldData.validate) {
+                if (!schema.validation[modelName]) {
+                    schema.validation[modelName] = {};
+                }
+
+                schema.validation[modelName][fieldName] = { hasValidationRule: true };
+            }
+        });
+
+
+    });
+    return schema;
+}
+
 
 async function parseSchemaFile(contents: any): Promise<BitScaffoldSchema> {
     let raw = contents;
