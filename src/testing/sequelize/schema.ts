@@ -38,16 +38,11 @@ export class Employee {
 
     static get relationships() {
         return {
-            skills: {
-                relation: 'ManyToManyRelation',
-                modelClass: Skill,
-                join: {
-                    from: 'employee.id',
-                    through: {
-                        from: 'employee__skill.employee_id',
-                        to: 'employee__skill.skill_id'
-                    },
-                    to: 'skill.id'
+            HasMany: {
+                Skill: {
+                    from: "id", // employee.id
+                    to: "id", // skill.id
+                    through: "employee__skill" // employee__skill.employee_id and employee__skill.skill.id
                 }
             }
         }
@@ -77,16 +72,11 @@ export class Skill {
 
     static get relationships() {
         return {
-            employees: {
-                relation: 'ManyToManyRelation',
-                modelClass: Employee,
-                join: {
-                    from: 'skill.id',
-                    through: {
-                        from: 'employee__skill.skill_id',
-                        to: 'employee__skill.employee_id'
-                    },
-                    to: 'employee.id'
+            HasMany: {
+                Employee: {
+                    from: "id", // skill.id
+                    to: "id", // employee.id
+                    through: "employee__skill" // employee__skill.employee_id and employee__skill.skill.id
                 }
             }
         }
