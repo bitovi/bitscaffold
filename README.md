@@ -78,6 +78,34 @@ BitScaffold wouldn't be a full-stack framework without a database layer. Everyth
 }
 ```
 
+```typescript
+export class User {
+    static get tableName() {
+        return 'user'
+    }
+
+    static get fields() {
+        return {
+            id: {
+                type: "uuid",
+                primary: true,
+                required: true
+            },
+            firstName: {
+                type: "string",
+                required: true,
+            },
+            lastName: {
+                type: "date",
+                required: false
+            }
+        }
+    }
+}
+
+```
+
+
 BitScaffold uses Sequelize, a Node.js and TypeScript compatible ORM, under the hood to talk to your database. BitScaffold will do all the work for you to convert your `schema.bitscaffold` file into ORM Models and validation middleware at runtime. 
 
 Now let's start up the service to see our CRUD app in action. Thats it!
@@ -158,10 +186,37 @@ Putting it all together, we can create a custom route, with custom logic, while 
 
 
 ## Application Data Validation
+Scaffold allows you to define validation rules within your models to make sure that the data that ends up in your database takes the form you expect. You can define these rules in one place and they will be automatically used in both the frontend and backend, stopping most invalid requests from ever reaching your backend in the first place.
 
 
+Inside your schema file, you can optionally define a validation function. Within this function you can specify field names, mongodb-style operators, and which other field they might rely on. In the example below we can validate that an employee start date must be before their end date, and the end date must be after the start date.
 
+```typescript
+    static get validation() {
+        return {
+            start_date: {
+                lt: "end_date"
+            },
+            end_date: {
+                gt: "start_date"
+            }
+        }
+    }
+```
 
+For more open ended examples, you can use the `regex` operator to do some basic validation for string length, emails, or other more specific types.
+```typescript
+    static get validation() {
+        return {
+            name: {
+                regex: "^[a-zA-Z]{7}$"
+            },
+            end_date: {
+                gt: "start_date"
+            }
+        }
+    }
+```
 
 ## Model Relationships
 Scaffold can help you define and build relationships between different models within your application. For example, if you had a system that delt with scheduling employees on certain projects, you might have a User as well as a Project. However, a Project should have a manager (who is a user) as well as N number of people working on that project. Similarly, we should be able to check a user to find out what project they are on. 
@@ -218,6 +273,28 @@ the `type` is defined here as a relationship type followed by the Model that it 
 }
 ```
 
+Inside your typescript config file you can add an optional `relationships` function that provides that mapping between different models.
+
+```typescript
+    static get relationships() {
+        return {
+            skills: {
+                relation: 'ManyToManyRelation',
+                modelClass: Skill,
+                join: {
+                    from: 'employee.id',
+                    through: {
+                        from: 'employee__skill.employee_id',
+                        to: 'employee__skill.skill_id'
+                    },
+                    to: 'skill.id'
+                }
+            }
+        }
+    }
+```
+
+
 Given this definition file, Scaffold can provide this additional joined information if requested. Same on the frontend, if you want to create a new project, you will see a drop down with a list of users to assign. The relationship type can also hint to the frontend what type of form you should see displayed.
 
 <img src="" alt="Create a new user with project dropdown" /> [no frontend exists yet to show this]
@@ -226,8 +303,11 @@ Given this definition file, Scaffold can provide this additional joined informat
 
 
 ## Integrating With Your Existing App
+If you already have an existing Koa or Express application you can still take advantage of Scaffold! Because Scaffold is enabled through Koa Middleware, you can simply use the `ScaffoldWrapperMiddleware` and add it to the top `app.use` section of your project. Then simply provide a Scaffold schema file as usual and you're good to go.
 
+At runtime, just like normal, the middleware will parse your Scaffold schema to create models and will update your REST server to add the normal scaffold routes.
 
+@TODO: Some way to deal with route collision. 
 
 
 ## Key Features

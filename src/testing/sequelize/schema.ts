@@ -3,6 +3,17 @@ export class Employee {
         return 'employee'
     }
 
+    static get validation() {
+        return {
+            start_date: {
+                lt: "end_date"
+            },
+            end_date: {
+                gt: "start_date"
+            }
+        }
+    }
+
     static get fields() {
         return {
             id: {
@@ -15,11 +26,11 @@ export class Employee {
                 required: true, // NOT NULL
             },
             start_date: {
-                type: "datetime",
+                type: "date",
                 required: false
             },
             end_date: {
-                type: "datetime",
+                type: "date",
                 required: false
             }
         }
@@ -90,11 +101,11 @@ export class Skill {
 -- DROP TABLE employee;
 
 CREATE TABLE employee (
-	id uuid NOT NULL DEFAULT uuid_generate_v4(),
-	"name" varchar(255) NOT NULL,
-	start_date date NULL,
-	end_date date NULL,
-	CONSTRAINT employee_pkey PRIMARY KEY (id)
+    id uuid NOT NULL DEFAULT uuid_generate_v4(),
+    "name" varchar(255) NOT NULL,
+    start_date date NULL,
+    end_date date NULL,
+    CONSTRAINT employee_pkey PRIMARY KEY (id)
 );
  */
 
@@ -107,10 +118,10 @@ CREATE TABLE employee (
 -- DROP TABLE skill;
 
 CREATE TABLE skill (
-	id uuid NOT NULL DEFAULT uuid_generate_v4(),
-	"name" varchar(255) NULL,
-	CONSTRAINT skill_name_unique UNIQUE (name),
-	CONSTRAINT skill_pkey PRIMARY KEY (id)
+    id uuid NOT NULL DEFAULT uuid_generate_v4(),
+    "name" varchar(255) NULL,
+    CONSTRAINT skill_name_unique UNIQUE (name),
+    CONSTRAINT skill_pkey PRIMARY KEY (id)
 );
  */
 
@@ -123,9 +134,9 @@ CREATE TABLE skill (
 -- DROP TABLE employee__skill;
 
 CREATE TABLE employee__skill (
-	employee_id uuid NOT NULL,
-	skill_id uuid NOT NULL,
-	CONSTRAINT employee__skill_pkey PRIMARY KEY (employee_id, skill_id)
+    employee_id uuid NOT NULL,
+    skill_id uuid NOT NULL,
+    CONSTRAINT employee__skill_pkey PRIMARY KEY (employee_id, skill_id)
 );
 
 

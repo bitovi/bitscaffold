@@ -1,10 +1,11 @@
+import { table } from "console";
 import { Sequelize, DataTypes } from "sequelize";
 import signale from "signale";
 
 //import schema from "./schema.json";
 import * as schema from "./schema";
 
-async function buildModels(schema: BitScaffoldSchema): Promise<Sequelize> {
+async function buildModels(schema: any): Promise<Sequelize> {
     // Create a sequelize instance to use for connections later
     const sequelize = new Sequelize('sqlite::memory:', {
         logging: (message) => {
@@ -12,19 +13,62 @@ async function buildModels(schema: BitScaffoldSchema): Promise<Sequelize> {
         }
     });
 
-    // Go through each of the models creating a Model within sequelize
-    // Skip any fields with relationship definitions, we cant do those yet until
-    // all the other models have been defined. Otherwise it just wont work...
-    Object.keys(schema.models).forEach((modelName) => {
-        const model: any = schema.models[modelName];
-        signale.info("Creating Model: ", modelName);
-        sequelize.define(modelName, model, { createdAt: false, updatedAt: false });
+    const models = Object.keys(schema);
+    models.forEach((model) => {
+        signale.info("Creating Model: ", model);
+        const fields = Object.keys(schema[model].fields);
+        const tableName = schema[model].tableName;
+
+        const parsedFields = {};
+        fields.forEach((field) => {
+            parsedFields[field] = {};
+            const fieldData = schema[model].fields[field];
+
+            if (fieldData.primary) {
+                parsedFields[field].primaryKey = true;
+            }
+
+            if (fieldData.required) {
+                parsedFields[field].required = true
+            } else {
+                parsedFields[field].required = false;
+            }
+
+            if (!fieldData.type) {
+                throw new Error("Must supply type")
+            }
+
+            parsedFields[field].type = fieldData.type.toUpperCase();
+        });
+
+        sequelize.define(model, parsedFields, { createdAt: false, updatedAt: false, tableName: tableName });
+    });
+
+    // Handle the relationship building
+    models.forEach((model) => {
+        const relationships = Object.keys(schema[model].relationships);
+        relationships.forEach((relationship) => {
+            const relationData = schema[model].relationships[relationship];
+            signale.info(relationship);
+
+            if (!sequelize.models[relationData.modelClass.name]) {
+                throw new Error("Unknown Relation Model:" + relationData.modelClass.name);
+            }
+
+            switch (relationData.relation) {
+                case "ManyToManyRelation": {
+                    sequelize.models[model].belongsToMany(sequelize.models[relationData.modelClass.name], { through: relationData.join })
+                    sequelize.models[relationData.modelClass.name].belongsToMany(sequelize.models[model], { through: relationData.join })
+                    break;
+                }
+
+                default: {
+                    signale.error("Unhandled relation type:" + relationData.relation);
+                }
+            }
+        });
     })
 
-
-    // Loop over the list of relationship fields? 
-
-    // Link the models together to create relationships?
 
 
     // Force the schema into the in memory database
@@ -37,8 +81,8 @@ async function buildModels(schema: BitScaffoldSchema): Promise<Sequelize> {
 }
 
 async function init() {
-    const parsed = await parseSchemaFileTs(schema)
-    const seq = await buildModels(parsed);
+    //const parsed = await parseSchemaFileTs(schema)
+    const seq = await buildModels(schema);
 
     const Employee = seq.models['Employee'];
 
