@@ -1,7 +1,6 @@
 
 import Koa, { Middleware } from "koa";
 import compose from 'koa-compose';
-import signale from "signale";
 
 export function scaffoldValidationMiddleware(): Middleware {
     return async function scaffoldValidation(ctx: Koa.Context, next: Koa.Next) {

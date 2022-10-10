@@ -80,7 +80,6 @@ async function database(app: Koa, schema: BitScaffoldSchema): Promise<Koa> {
  */
 async function validation(app: Koa, schema: BitScaffoldSchema): Promise<Koa> {
     const rules = await buildValidation(schema);
-
     app.context.validation = rules;
     return app;
 }

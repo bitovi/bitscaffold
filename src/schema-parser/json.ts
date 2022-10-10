@@ -12,57 +12,7 @@ export function writeSchemaFile(path: string, schema: string): Promise<void> {
 }
 
 export async function parseSchemaFile(contents: string): Promise<BitScaffoldSchema> {
-    const raw = JSON.parse(contents);
-
-    const schema = { models: {}, validation: {}, config: {} };
-
-    if (!raw.models) {
-        throw new Error("Invalid Schema File: Missing models");
-    }
-
-    const models = Object.keys(raw.models);
-    models.forEach((modelName) => {
-        schema.models[modelName] = {};
-        const modelData = raw.models[modelName];
-
-        const fields = Object.keys(modelData);
-        fields.forEach((fieldName) => {
-            const fieldData = modelData[fieldName];
-            schema.models[modelName][fieldName] = {};
-
-
-            if (!fieldData.type) {
-                throw new Error("Invalid Model Definition: Missing type")
-            }
-
-            if (!DataTypes[fieldData.type]) {
-                throw new Error("Invalid Model Definition: Unknown type '" + fieldData.type + "'")
-            }
-
-            schema.models[modelName][fieldName].type = DataTypes[fieldData.type];
-
-            if (fieldData.primary) {
-                schema.models[modelName][fieldName].primaryKey = fieldData.primary;
-            }
-
-            if (fieldData.default) {
-                // schema.models[modelName][fieldName].default = fieldData.default;
-            }
-
-            if (fieldData.autoIncrement) {
-                schema.models[modelName][fieldName].autoIncrement = fieldData.autoIncrement;
-            }
-
-            if (fieldData.validate) {
-                if (!schema.validation[modelName]) {
-                    schema.validation[modelName] = {};
-                }
-
-                schema.validation[modelName][fieldName] = { hasValidationRule: true };
-            }
-        });
-    });
-
+    const schema = JSON.parse(contents);
     return schema;
 }
 
