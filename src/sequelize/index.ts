@@ -16,7 +16,13 @@ export async function buildModels(schema: BitScaffoldSchema): Promise<Sequelize>
         for (const [fieldName, fieldData] of Object.entries(modelData.fields)) {
             sequelizeModelFields[fieldName] = normalizeSequelizeField(fieldName, fieldData);
         }
-        sequelize.define(modelName, sequelizeModelFields, { createdAt: false, updatedAt: false });
+
+        let tableName = modelName.toLowerCase();
+        if (modelData.name) {
+            tableName = modelData.name;
+        }
+
+        sequelize.define(modelName, sequelizeModelFields, { createdAt: false, updatedAt: false, tableName: tableName });
     }
 
     signale.info("Starting Model Sync");

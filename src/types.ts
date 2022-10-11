@@ -26,7 +26,7 @@ export interface BitScaffoldRelation {
 }
 
 export interface BitScaffoldModel {
-    tableName: string,
+    name?: string,
     fields: { [FieldName: string]: BitScaffoldField }
     relationships?: {
         HasMany?: {
