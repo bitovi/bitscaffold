@@ -13,8 +13,10 @@ import os from "os";
  * Creates a Koa server and attaches the default configuration middleware
  * @returns Koa
  */
-async function setup(): Promise<Koa> {
-    const app = new Koa();
+export async function setup(app?: Koa): Promise<Koa> {
+    if (!app) {
+        app = new Koa();
+    }
 
     // Hook up cors
     app.use(KoaCors({ origin: "*" }));
@@ -48,7 +50,7 @@ async function setup(): Promise<Koa> {
  * @param app Koa Instance
  * @returns Koa Instance
  */
-async function start(app: Koa): Promise<Koa> {
+export async function start(app: Koa): Promise<Koa> {
     return new Promise((resolve) => {
         app.listen(3000, () => { resolve(app) });
     })
@@ -62,7 +64,7 @@ async function start(app: Koa): Promise<Koa> {
  * @param schema Schema JSON
  * @returns Koa Instance
  */
-async function database(app: Koa, schema: BitScaffoldSchema): Promise<Koa> {
+export async function database(app: Koa, schema: BitScaffoldSchema): Promise<Koa> {
     const sequelize = await buildModels(schema);
 
     app.context.database = sequelize;
@@ -78,7 +80,7 @@ async function database(app: Koa, schema: BitScaffoldSchema): Promise<Koa> {
  * @param schema Schema JSON
  * @returns Koa Instance
  */
-async function validation(app: Koa, schema: BitScaffoldSchema): Promise<Koa> {
+export async function validation(app: Koa, schema: BitScaffoldSchema): Promise<Koa> {
     const rules = await buildValidation(schema);
     app.context.validation = rules;
     return app;
@@ -91,8 +93,8 @@ async function validation(app: Koa, schema: BitScaffoldSchema): Promise<Koa> {
  * 
  * @returns Schema JSON
  */
-async function loadSchema() {
-    const result = await readSchemaFile('test/fixtures/test-json-schema/schema.bitscaffold');
+export async function loadSchema(config: string) {
+    const result = await readSchemaFile(config);
     const schema = await parseSchemaFile(result);
     return schema;
 }
@@ -100,14 +102,14 @@ async function loadSchema() {
 /**
  * Entrypoint
  */
-async function init() {
+export async function init(config: string): Promise<Koa<Koa.DefaultState, Koa.DefaultContext>> {
     signale.info("Running setup")
     let app = await setup();
     app = await buildRoutes(app)
 
 
     signale.info("Running load schema")
-    const schema = await loadSchema();
+    const schema = await loadSchema(config);
 
     signale.info("Running database setup")
     await database(app, schema);
@@ -115,8 +117,5 @@ async function init() {
     signale.info("Running validation setup");
     await validation(app, schema);
 
-    signale.info("Running start service")
-    await start(app);
+    return app;
 }
-
-init();

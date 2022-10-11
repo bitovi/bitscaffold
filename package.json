@@ -2,7 +2,7 @@
   "name": "bitscaffold",
   "version": "0.0.1",
   "description": "Fullstack CRUD Application Solution",
-  "main": "index.js",
+  "main": "dist/exports.js",
   "scripts": {
     "build": "tsc",
     "test": "jest",
