@@ -34,12 +34,14 @@ export async function buildModels(schema: BitScaffoldSchema): Promise<Sequelize>
         const ModelA = sequelize.models[modelName];
 
         if (modelData.hasOne) {
+            let associatedModelName: string = modelData.hasOne;
+
             // Check if the requested model is one we know about
-            if (!sequelize.isDefined(modelData.hasOne)) {
-                throw new Error("Unknown Model requested in hasOne relationship: " + modelData.hasOne)
+            if (!sequelize.isDefined(associatedModelName)) {
+                throw new Error("Unknown Model requested in hasOne relationship: " + associatedModelName)
             }
 
-            const ModelB = sequelize.models[modelData.hasOne];
+            const ModelB = sequelize.models[associatedModelName];
             ModelA.hasOne(ModelB);
         }
 
@@ -55,11 +57,12 @@ export async function buildModels(schema: BitScaffoldSchema): Promise<Sequelize>
 
             if (typeof modelData.hasMany === "string") {
                 associatedModelName = modelData.hasMany;
+                hasManyOptions.as = modelData.hasMany;
             }
 
             // Check if the requested model is one we know about
             if (!sequelize.isDefined(associatedModelName)) {
-                throw new Error("Unknown Model requested in hasMany relationship: " + modelData.hasMany)
+                throw new Error("Unknown Model requested in hasMany relationship: " + associatedModelName)
             }
 
             const ModelB = sequelize.models[associatedModelName];
@@ -67,29 +70,30 @@ export async function buildModels(schema: BitScaffoldSchema): Promise<Sequelize>
         }
 
         if (modelData.belongsTo) {
+            let associatedModelName: string = modelData.belongsTo;
+
             // Check if the requested model is one we know about
-            if (!sequelize.isDefined(modelData.belongsTo)) {
-                throw new Error("Unknown Model requested in belongsTo relationship: " + modelData.belongsTo)
+            if (!sequelize.isDefined(associatedModelName)) {
+                throw new Error("Unknown Model requested in belongsTo relationship: " + associatedModelName)
             }
 
-            const ModelB = sequelize.models[modelData.belongsTo];
+            const ModelB = sequelize.models[associatedModelName];
             ModelA.belongsTo(ModelB);
         }
 
         if (modelData.belongsToMany) {
+            let associatedModelName: string = modelData.belongsToMany;
+
             // Check if the requested model is one we know about
-            if (!sequelize.isDefined(modelData.belongsToMany)) {
-                throw new Error("Unknown Model requested in belongsToMany relationship: " + modelData.belongsToMany)
+            if (!sequelize.isDefined(associatedModelName)) {
+                throw new Error("Unknown Model requested in belongsToMany relationship: " + associatedModelName)
             }
 
-            const ModelB = sequelize.models[modelData.belongsToMany];
-            const through = modelName + "__" + modelData.belongsToMany;
+            const ModelB = sequelize.models[associatedModelName];
+            const through = modelName + "__" + associatedModelName;
             ModelA.belongsToMany(ModelB, { through: through });
         }
     }
-
-
-
 
     signale.info("Starting Model Sync");
     await sequelize.sync({ force: true });

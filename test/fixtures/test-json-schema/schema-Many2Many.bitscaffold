@@ -1,6 +1,6 @@
 {
     "models": {
-        "Team": {
+        "Movie": {
             "fields": {
                 "id": {
                     "type": "integer",
@@ -13,9 +13,9 @@
                     "required": true
                 }
             },
-            "hasMany": "Player"
+            "belongsToMany": "Actor"
         },
-        "Player": {
+        "Actor": {
             "fields": {
                 "id": {
                     "type": "integer",
@@ -32,7 +32,7 @@
                     "required": true
                 }
             },
-            "belongsTo": "Team"
+            "belongsToMany": "Movie"
         }
     }
 }

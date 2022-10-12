@@ -18,6 +18,10 @@ export async function setup(app?: Koa): Promise<Koa> {
         app = new Koa();
     }
 
+    app.on('error', (err, ctx) => {
+        err.expose = true;
+    });
+
     // Hook up cors
     app.use(KoaCors({ origin: "*" }));
 
