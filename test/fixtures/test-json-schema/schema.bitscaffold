@@ -1,7 +1,29 @@
 {
     "models": {
-        "Employee": {
-            "tableName": "employee",
+        "Foo": {
+            "tableName": "foo",
+            "fields": {
+                "id": {
+                    "type": "integer",
+                    "primary": true,
+                    "required": true,
+                    "autoIncrement": true
+                }
+            },
+            "hasOne": "Bar"
+        },
+        "Bar": {
+            "fields": {
+                "id": {
+                    "type": "integer",
+                    "primary": true,
+                    "required": true,
+                    "autoIncrement": true
+                }
+            },
+            "belongsTo": "Foo"
+        },
+        "Team": {
             "fields": {
                 "id": {
                     "type": "integer",
@@ -12,56 +34,83 @@
                 "name": {
                     "type": "string",
                     "required": true
-                },
-                "start_date": {
-                    "type": "date",
-                    "required": false
-                },
-                "end_date": {
-                    "type": "date",
-                    "required": false
                 }
             },
-            "relationships": {
-                "HasMany": {
-                    "Skill": {
-                        "from": "id",
-                        "to": "id",
-                        "through": "employee__skill"
-                    }
+            "hasMany": "Player"
+        },
+        "Player": {
+            "fields": {
+                "id": {
+                    "type": "integer",
+                    "primary": true,
+                    "required": true,
+                    "autoIncrement": true
+                },
+                "firstName": {
+                    "type": "string",
+                    "required": true
+                },
+                "lastName": {
+                    "type": "string",
+                    "required": true
+                },
+                "startDate": {
+                    "type": "date",
+                    "required": true
+                },
+                "endDate": {
+                    "type": "date",
+                    "required": true
                 }
             },
+            "belongsTo": "Team",
             "validations": {
-                "start_date": {
-                    "lt": "end_date"
+                "startDate": {
+                    "lt": "endDate"
                 },
-                "end_date": {
-                    "gt": "start_date"
+                "endDate": {
+                    "gt": "startDate"
                 }
             }
         },
-        "Skill": {
-            "tableName": "skill",
+        "Movie": {
             "fields": {
                 "id": {
-                    "type": "uuid",
+                    "type": "integer",
                     "primary": true,
-                    "required": true
+                    "required": true,
+                    "autoIncrement": true
                 },
                 "name": {
                     "type": "string",
-                    "required": true,
-                    "unique": true
+                    "required": true
                 }
             },
-            "relationships": {
-                "HasMany": {
-                    "Employee": {
-                        "from": "id",
-                        "to": "id",
-                        "through": "employee__skill"
-                    }
+            "belongsToMany": {
+                "model": "Actor",
+                "through": "actor__movie"
+            }
+        },
+        "Actor": {
+            "fields": {
+                "id": {
+                    "type": "integer",
+                    "primary": true,
+                    "required": true,
+                    "autoIncrement": true
+                },
+                "firstName": {
+                    "type": "string",
+                    "required": true
+                },
+                "lastName": {
+                    "type": "string",
+                    "required": true
                 }
+            },
+            "belongsToMany": {
+                "model": "Movie",
+                "through": "actor__movie"
             }
         }
     }

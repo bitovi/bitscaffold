@@ -82,7 +82,7 @@ export async function buildModels(schema: BitScaffoldSchema): Promise<Sequelize>
         }
 
         if (modelData.belongsToMany) {
-            let associatedModelName: string = modelData.belongsToMany;
+            let associatedModelName: string = modelData.belongsToMany.model;
 
             // Check if the requested model is one we know about
             if (!sequelize.isDefined(associatedModelName)) {
@@ -90,8 +90,7 @@ export async function buildModels(schema: BitScaffoldSchema): Promise<Sequelize>
             }
 
             const ModelB = sequelize.models[associatedModelName];
-            const through = modelName + "__" + associatedModelName;
-            ModelA.belongsToMany(ModelB, { through: through });
+            ModelA.belongsToMany(ModelB, { through: modelData.belongsToMany.through, as: associatedModelName });
         }
     }
 

@@ -47,6 +47,11 @@ interface HasManyAssociation {
     as: string
 }
 
+interface BelongsToManyAssociation {
+    model: string,
+    through: string
+}
+
 export interface BitScaffoldModel {
     name?: string,
     fields: { [FieldName: string]: BitScaffoldField }
@@ -54,7 +59,7 @@ export interface BitScaffoldModel {
     hasOne?: string
     hasMany?: string | HasManyAssociation
     belongsTo?: string
-    belongsToMany?: string
+    belongsToMany?: BelongsToManyAssociation
 }
 
 export interface BitScaffoldSchema {
