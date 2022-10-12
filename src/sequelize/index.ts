@@ -1,5 +1,5 @@
 import { BitScaffoldField, BitScaffoldSchema, BitScaffoldValidatorContext } from "../types"
-import { Sequelize, ModelAttributeColumnOptions, ModelAttributes, DataTypes } from "sequelize"
+import { Sequelize, ModelAttributeColumnOptions, ModelAttributes, DataTypes, HasManyOptions } from "sequelize"
 import signale from "signale";
 
 export async function buildModels(schema: BitScaffoldSchema): Promise<Sequelize> {
@@ -45,13 +45,25 @@ export async function buildModels(schema: BitScaffoldSchema): Promise<Sequelize>
 
 
         if (modelData.hasMany) {
+            const hasManyOptions: HasManyOptions = {}
+
+            let associatedModelName: string = "";
+            if (typeof modelData.hasMany === "object") {
+                associatedModelName = modelData.hasMany.model;
+                hasManyOptions.as = modelData.hasMany.as;
+            }
+
+            if (typeof modelData.hasMany === "string") {
+                associatedModelName = modelData.hasMany;
+            }
+
             // Check if the requested model is one we know about
-            if (!sequelize.isDefined(modelData.hasMany)) {
+            if (!sequelize.isDefined(associatedModelName)) {
                 throw new Error("Unknown Model requested in hasMany relationship: " + modelData.hasMany)
             }
 
-            const ModelB = sequelize.models[modelData.hasMany];
-            ModelA.hasMany(ModelB);
+            const ModelB = sequelize.models[associatedModelName];
+            ModelA.hasMany(ModelB, hasManyOptions);
         }
 
         if (modelData.belongsTo) {

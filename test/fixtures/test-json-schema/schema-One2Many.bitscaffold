@@ -1,0 +1,41 @@
+{
+    "models": {
+        "Team": {
+            "fields": {
+                "id": {
+                    "type": "integer",
+                    "primary": true,
+                    "required": true,
+                    "autoIncrement": true
+                },
+                "name": {
+                    "type": "string",
+                    "required": true
+                }
+            },
+            "hasMany": {
+                "model": "Player",
+                "as": "Player"
+            }
+        },
+        "Player": {
+            "fields": {
+                "id": {
+                    "type": "integer",
+                    "primary": true,
+                    "required": true,
+                    "autoIncrement": true
+                },
+                "firstName": {
+                    "type": "string",
+                    "required": true
+                },
+                "lastName": {
+                    "type": "string",
+                    "required": true
+                }
+            },
+            "belongsTo": "Team"
+        }
+    }
+}

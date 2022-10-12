@@ -42,12 +42,17 @@ export interface BitScaffoldRelation {
     through?: string
 }
 
+interface HasManyAssociation {
+    model: string,
+    as: string
+}
+
 export interface BitScaffoldModel {
     name?: string,
     fields: { [FieldName: string]: BitScaffoldField }
     validations?: { [FieldName: string]: BitScaffoldValidator }
     hasOne?: string
-    hasMany?: string
+    hasMany?: string | HasManyAssociation
     belongsTo?: string
     belongsToMany?: string
 }
