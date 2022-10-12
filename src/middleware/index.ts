@@ -1,9 +1,11 @@
 
 import Koa, { Middleware } from "koa";
 import compose from 'koa-compose';
+import { FindOptions } from "sequelize";
+import { ScaffoldModelContext, ScaffoldContext } from "../types";
 
 export function scaffoldValidationMiddleware(): Middleware {
-    return async function scaffoldValidation(ctx: Koa.Context, next: Koa.Next) {
+    return async function scaffoldValidation(ctx: ScaffoldModelContext, next: Koa.Next) {
         ctx.state.logger.pending('scaffoldValidation', ctx.state.model.name);
 
         const name = ctx.state.model.name;
@@ -19,16 +21,32 @@ export function scaffoldValidationMiddleware(): Middleware {
 }
 
 export function scaffoldFindAllMiddleware(): Middleware {
-    return async function scaffoldFindAll(ctx: Koa.Context, next: Koa.Next) {
+    return async function scaffoldFindAll(ctx: ScaffoldModelContext, next: Koa.Next) {
         ctx.state.logger.pending('scaffoldFindAllMiddleware', ctx.state.model.name);
 
         if (!ctx.state.model) {
-            ctx.state.logger.error('scaffoldFindAllMiddleware', ctx.state.model.name);
+            ctx.state.logger.error('scaffoldFindAllMiddleware, No Model On Context');
             return ctx.throw(500, "No Model On Context")
         }
 
+        const options: FindOptions = {};
+
+        if (ctx.query && ctx.query.include) {
+            ctx.state.logger.info("Include:", ctx.query.include);
+
+            if (Array.isArray(ctx.query.include)) {
+                return ctx.throw(500, "Cannot (currently) include multiple models!");
+            }
+
+            if (!ctx.models[ctx.query.include]) {
+                return ctx.throw(500, "No Model To Include")
+            }
+
+            options.include = ctx.query.include;
+        }
+
         // Perform some lookups for the model
-        const result = await ctx.state.model.findAll();
+        const result = await ctx.state.model.findAll(options);
 
         // Attach the results to the Koa context body
         ctx.body = result || [];
@@ -38,16 +56,32 @@ export function scaffoldFindAllMiddleware(): Middleware {
 }
 
 export function scaffoldFindOneMiddleware(): Middleware {
-    return async function scaffoldFindOne(ctx: Koa.Context, next: Koa.Next) {
+    return async function scaffoldFindOne(ctx: ScaffoldModelContext, next: Koa.Next) {
         ctx.state.logger.pending('scaffoldFindOneMiddleware', ctx.state.model.name);
 
         if (!ctx.state.model) {
-            ctx.state.logger.error('scaffoldFindAllMiddleware', ctx.state.model.name);
+            ctx.state.logger.error('scaffoldFindAllMiddleware, No Model On Context');
             return ctx.throw(500, "No Model On Context")
         }
 
+        const options: Omit<FindOptions<any>, "where"> = {};
+
+        if (ctx.query && ctx.query.include) {
+            ctx.state.logger.info("Include:", ctx.query.include);
+
+            if (Array.isArray(ctx.query.include)) {
+                return ctx.throw(500, "Cannot (currently) include multiple models!");
+            }
+
+            if (!ctx.models[ctx.query.include]) {
+                return ctx.throw(500, "No Model To Include")
+            }
+
+            options.include = ctx.query.include;
+        }
+
         // Perform some findOne database query
-        const result = await ctx.state.model.findByPk(ctx.params.id);
+        const result = await ctx.state.model.findByPk(ctx.params.id, options);
 
         if (!result) {
             ctx.throw(404, "ID " + ctx.params.id + " Not Found")
@@ -61,11 +95,11 @@ export function scaffoldFindOneMiddleware(): Middleware {
 }
 
 export function scaffoldCreateMiddleware(): Middleware {
-    return async function scaffoldCreate(ctx: Koa.Context, next: Koa.Next) {
+    return async function scaffoldCreate(ctx: ScaffoldModelContext, next: Koa.Next) {
         ctx.state.logger.pending('scaffoldCreateMiddleware', ctx.state.model.name);
 
         if (!ctx.state.model) {
-            ctx.state.logger.error('scaffoldFindAllMiddleware', ctx.state.model.name);
+            ctx.state.logger.error('scaffoldCreateMiddleware, No Model On Context');
             return ctx.throw(500, "No Model On Context")
         }
 
@@ -85,7 +119,7 @@ export function scaffoldCreateMiddleware(): Middleware {
 }
 
 export function scaffoldAuthorizationMiddleware(): Middleware {
-    return async function scaffoldAuthorization(ctx: Koa.Context, next: Koa.Next) {
+    return async function scaffoldAuthorization(ctx: ScaffoldModelContext, next: Koa.Next) {
         ctx.state.logger.pending('scaffoldAuthorizationMiddleware');
 
         // Perform some lookups for the model options
@@ -96,7 +130,7 @@ export function scaffoldAuthorizationMiddleware(): Middleware {
 }
 
 export function scaffoldFindModelMiddleware(override?: string): Middleware {
-    return async function scaffoldFindModel(ctx: Koa.Context, next: Koa.Next) {
+    return async function scaffoldFindModel(ctx: ScaffoldContext, next: Koa.Next) {
         ctx.state.logger.pending('scaffoldFindModelMiddleware', ctx.params.model);
 
         let modelName = ctx.params.model;

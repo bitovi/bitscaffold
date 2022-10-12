@@ -1,4 +1,21 @@
-import { DataTypes } from "sequelize"
+import { Context } from "koa"
+import { DataTypes, ModelStatic, Model, Sequelize } from "sequelize"
+import signale, { Signale } from "signale";
+
+export interface ScaffoldModelContext extends ScaffoldContext {
+    state: ScaffoldContext['state'] & {
+        model: ModelStatic<Model>
+    }
+}
+
+export interface ScaffoldContext extends Context {
+    state: Context['state'] & {
+        logger: signale
+    }
+    database: Sequelize,
+    models: { [ModelName: string]: ModelStatic<Model> }
+}
+
 
 export interface BitScaffoldValidator {
     lt?: string,
@@ -28,21 +45,11 @@ export interface BitScaffoldRelation {
 export interface BitScaffoldModel {
     name?: string,
     fields: { [FieldName: string]: BitScaffoldField }
-    relationships?: {
-        HasMany?: {
-            [ModelName: string]: BitScaffoldRelation
-        },
-        HasOne?: {
-            [ModelName: string]: BitScaffoldRelation
-        },
-        BelongsTo?: {
-            [ModelName: string]: BitScaffoldRelation
-        },
-        BelongsToMany?: {
-            [ModelName: string]: BitScaffoldRelation
-        }
-    },
     validations?: { [FieldName: string]: BitScaffoldValidator }
+    hasOne?: string
+    hasMany?: string
+    belongsTo?: string
+    belongsToMany?: string
 }
 
 export interface BitScaffoldSchema {

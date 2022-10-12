@@ -1,0 +1,27 @@
+{
+    "models": {
+        "Foo": {
+            "tableName": "foo",
+            "fields": {
+                "id": {
+                    "type": "integer",
+                    "primary": true,
+                    "required": true,
+                    "autoIncrement": true
+                }
+            },
+            "hasOne": "Bar"
+        },
+        "Bar": {
+            "fields": {
+                "id": {
+                    "type": "integer",
+                    "primary": true,
+                    "required": true,
+                    "autoIncrement": true
+                }
+            },
+            "belongsTo": "Foo"
+        }
+    }
+}

@@ -7,34 +7,30 @@ import { v4 } from "uuid"
 import signale, { Signale } from "signale";
 
 async function singleton(config, app) {
-    instance = true;
+    if (!app.context.bitscaffold) {
+        app.context.bitscaffold = true;
 
-    signale.info("Running Setup")
-    app = await setup(app);
+        signale.info("Running Setup")
+        app = await setup(app);
 
-    signale.info("Attaching Routes")
-    app = await buildRoutes(app)
+        signale.info("Attaching Routes")
+        app = await buildRoutes(app)
 
-    signale.info("Running load schema")
-    const schema = await loadSchema(config);
+        signale.info("Running load schema")
+        const schema = await loadSchema(config);
 
-    signale.info("Running database setup")
-    await database(app, schema);
+        signale.info("Running database setup")
+        await database(app, schema);
 
-    signale.info("Running validation setup");
-    await validation(app, schema);
-
-    app.context.bitscaffold = true;
+        signale.info("Running validation setup");
+        await validation(app, schema);
+    }
 }
-
-let instance: boolean = false;
 
 
 function BitScaffoldMiddleware(config: string, app: Koa): Middleware {
     // Set up the whole application and attach it to the provided Koa application
-    if (!instance) {
-        singleton(config, app);
-    }
+    singleton(config, app);
 
     return async function BitScaffold(ctx: Koa.Context, next: Koa.Next) {
         if (!ctx.bitscaffold) {
