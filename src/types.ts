@@ -1,5 +1,5 @@
 import { Context } from "koa"
-import { DataTypes, ModelStatic, Model, Sequelize } from "sequelize"
+import { DataTypes, ModelStatic, Model, Sequelize, BelongsTo } from "sequelize"
 import signale, { Signale } from "signale";
 
 export enum ScaffoldOperation {
@@ -9,7 +9,6 @@ export enum ScaffoldOperation {
     ReadOne,
     ReadMany
 }
-
 
 export interface ScaffoldModelContext extends ScaffoldContext {
     state: ScaffoldContext['state'] & {
@@ -56,7 +55,7 @@ interface HasManyAssociation {
     as: string
 }
 
-interface BelongsToManyAssociation {
+export interface BelongsToManyAssociation {
     model: string,
     through: string
 }
@@ -65,10 +64,10 @@ export interface BitScaffoldModel {
     name?: string,
     fields: { [FieldName: string]: BitScaffoldField }
     validations?: { [FieldName: string]: BitScaffoldValidator }
-    hasOne?: string
-    hasMany?: string | HasManyAssociation
-    belongsTo?: string
-    belongsToMany?: BelongsToManyAssociation
+    hasOne?: string | string[]
+    hasMany?: string | string[]
+    belongsTo?: string | string[]
+    belongsToMany?: BelongsToManyAssociation | BelongsToManyAssociation[]
 }
 
 export interface BitScaffoldSchema {

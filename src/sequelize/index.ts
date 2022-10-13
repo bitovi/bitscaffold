@@ -1,4 +1,4 @@
-import { BitScaffoldField, BitScaffoldSchema, BitScaffoldValidatorContext } from "../types"
+import { BitScaffoldField, BitScaffoldSchema, BitScaffoldValidatorContext, BelongsToManyAssociation } from "../types"
 import { Sequelize, ModelAttributeColumnOptions, ModelAttributes, DataTypes, HasManyOptions } from "sequelize"
 import signale from "signale";
 
@@ -34,63 +34,109 @@ export async function buildModels(schema: BitScaffoldSchema): Promise<Sequelize>
         const ModelA = sequelize.models[modelName];
 
         if (modelData.hasOne) {
-            let associatedModelName: string = modelData.hasOne;
 
-            // Check if the requested model is one we know about
-            if (!sequelize.isDefined(associatedModelName)) {
-                throw new Error("Unknown Model requested in hasOne relationship: " + associatedModelName)
+            // Handle string and string[] type inputs for relationships
+            let hasOneData: string[];
+            if (!Array.isArray(modelData.hasOne)) {
+                hasOneData = [modelData.hasOne];
+            } else {
+                hasOneData = modelData.hasOne;
             }
 
-            const ModelB = sequelize.models[associatedModelName];
-            ModelA.hasOne(ModelB);
+            // Loop over the relationships and attach them to the main model
+            hasOneData.forEach((associatedModelName) => {
+                // Check if the requested model is one we know about
+                if (!sequelize.isDefined(associatedModelName)) {
+                    throw new Error("Unknown Model requested in hasOne relationship: " + associatedModelName)
+                }
+
+                const ModelB = sequelize.models[associatedModelName];
+                ModelA.hasOne(ModelB);
+                signale.info(ModelA.name, "has one", ModelB.name)
+            });
         }
 
 
         if (modelData.hasMany) {
-            const hasManyOptions: HasManyOptions = {}
 
-            let associatedModelName: string = "";
-            if (typeof modelData.hasMany === "object") {
-                associatedModelName = modelData.hasMany.model;
-                hasManyOptions.as = modelData.hasMany.as;
+            // Handle string and string[] type inputs for relationships
+            let hasManyData: string[];
+            if (!Array.isArray(modelData.hasMany)) {
+                hasManyData = [modelData.hasMany];
+            } else {
+                hasManyData = modelData.hasMany;
             }
 
-            if (typeof modelData.hasMany === "string") {
-                associatedModelName = modelData.hasMany;
-                hasManyOptions.as = modelData.hasMany;
-            }
+            hasManyData.forEach((associatedModelName) => {
+                const hasManyOptions: HasManyOptions = {}
 
-            // Check if the requested model is one we know about
-            if (!sequelize.isDefined(associatedModelName)) {
-                throw new Error("Unknown Model requested in hasMany relationship: " + associatedModelName)
-            }
+                // if (typeof modelData.hasMany === "object") {
+                //     associatedModelName = modelData.hasMany.model;
+                //     hasManyOptions.as = modelData.hasMany.as;
+                // }
 
-            const ModelB = sequelize.models[associatedModelName];
-            ModelA.hasMany(ModelB, hasManyOptions);
+                // if (typeof modelData.hasMany === "string") {
+                //     associatedModelName = modelData.hasMany;
+                //     hasManyOptions.as = modelData.hasMany;
+                // }
+
+                hasManyOptions.as = associatedModelName;
+
+                // Check if the requested model is one we know about
+                if (!sequelize.isDefined(associatedModelName)) {
+                    throw new Error("Unknown Model requested in hasMany relationship: " + associatedModelName)
+                }
+
+                const ModelB = sequelize.models[associatedModelName];
+                ModelA.hasMany(ModelB, hasManyOptions);
+                signale.info(ModelA.name, "has many", ModelB.name)
+            });
         }
 
         if (modelData.belongsTo) {
-            let associatedModelName: string = modelData.belongsTo;
 
-            // Check if the requested model is one we know about
-            if (!sequelize.isDefined(associatedModelName)) {
-                throw new Error("Unknown Model requested in belongsTo relationship: " + associatedModelName)
+            // Handle string and string[] type inputs for relationships
+            let belongsToData: string[];
+            if (!Array.isArray(modelData.belongsTo)) {
+                belongsToData = [modelData.belongsTo];
+            } else {
+                belongsToData = modelData.belongsTo;
             }
 
-            const ModelB = sequelize.models[associatedModelName];
-            ModelA.belongsTo(ModelB);
+            belongsToData.forEach((associatedModelName) => {
+                // Check if the requested model is one we know about
+                if (!sequelize.isDefined(associatedModelName)) {
+                    throw new Error("Unknown Model requested in belongsTo relationship: " + associatedModelName)
+                }
+
+                const ModelB = sequelize.models[associatedModelName];
+                ModelA.belongsTo(ModelB);
+                signale.info(ModelA.name, "belongs to", ModelB.name)
+            })
         }
 
         if (modelData.belongsToMany) {
-            let associatedModelName: string = modelData.belongsToMany.model;
 
-            // Check if the requested model is one we know about
-            if (!sequelize.isDefined(associatedModelName)) {
-                throw new Error("Unknown Model requested in belongsToMany relationship: " + associatedModelName)
+            // More special case, this isnt just a string / string[], there are required options...
+            let belongsToManyData: BelongsToManyAssociation[];
+            if (!Array.isArray(modelData.belongsToMany)) {
+                belongsToManyData = [modelData.belongsToMany];
+            } else {
+                belongsToManyData = modelData.belongsToMany;
             }
 
-            const ModelB = sequelize.models[associatedModelName];
-            ModelA.belongsToMany(ModelB, { through: modelData.belongsToMany.through, as: associatedModelName });
+            belongsToManyData.forEach((belongsToManyAssociation) => {
+                let associatedModelName: string = belongsToManyAssociation.model;
+
+                // Check if the requested model is one we know about
+                if (!sequelize.isDefined(associatedModelName)) {
+                    throw new Error("Unknown Model requested in belongsToMany relationship: " + associatedModelName)
+                }
+
+                const ModelB = sequelize.models[associatedModelName];
+                ModelA.belongsToMany(ModelB, { through: belongsToManyAssociation.through, as: associatedModelName });
+                signale.info(ModelA.name, "belongs to many", ModelB.name, "through", belongsToManyAssociation.through);
+            });
         }
     }
 

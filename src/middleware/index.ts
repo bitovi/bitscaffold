@@ -1,7 +1,7 @@
 
 import Koa, { Middleware } from "koa";
 import compose from 'koa-compose';
-import { FindOptions } from "sequelize";
+import { CreateOptions, FindOptions, Includeable } from "sequelize";
 import { ScaffoldModelContext, ScaffoldContext } from "../types";
 
 export function scaffoldValidationMiddleware(): Middleware {
@@ -103,9 +103,34 @@ export function scaffoldCreateMiddleware(): Middleware {
             return ctx.throw(500, "No Model On Context")
         }
 
+        // https://sequelize.org/docs/v6/advanced-association-concepts/creating-with-associations/
+
+        // {
+        //     include: [{
+        //         association: Product.User,
+        //         include: [User.Addresses]
+        //     }]
+        // }
+
+        // Create the `create` options based on the incoming request and the model properties
+        const include: any[] = [];
+        Object.keys(ctx.state.model.associations).forEach((association) => {
+            // Check if this key is found on the request body. If it is, include that as an association
+            // so that we can cascade the create call
+            if (ctx.request.body[association]) {
+                const AssociationModel = ctx.models[association];
+                // This needs to reference the Alias that we used to create the model.
+                // This is probably discoverable via the model itself...
+                include.push({
+                    association: AssociationModel,
+                    as: AssociationModel.name
+                });
+            }
+        })
+
         // Perform some create database query
         try {
-            const result = await ctx.state.model.create(ctx.request.body);
+            const result = await ctx.state.model.create(ctx.request.body, { include });
 
             // Attach the results to the Koa context body
             ctx.body = result;

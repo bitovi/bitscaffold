@@ -10,7 +10,10 @@
                     "autoIncrement": true
                 }
             },
-            "hasOne": "Bar"
+            "hasOne": [
+                "Bar",
+                "Baz"
+            ]
         },
         "Bar": {
             "fields": {
@@ -21,7 +24,28 @@
                     "autoIncrement": true
                 }
             },
-            "belongsTo": "Foo"
+            "belongsTo": [
+                "Foo"
+            ],
+            "hasOne": "Baz"
+        },
+        "Baz": {
+            "fields": {
+                "id": {
+                    "type": "integer",
+                    "primary": true,
+                    "required": true,
+                    "autoIncrement": true
+                },
+                "example": {
+                    "type": "string",
+                    "required": true
+                }
+            },
+            "belongsTo": [
+                "Foo",
+                "Bar"
+            ]
         },
         "Team": {
             "fields": {
@@ -36,7 +60,9 @@
                     "required": true
                 }
             },
-            "hasMany": "Player"
+            "hasMany": [
+                "Player"
+            ]
         },
         "Player": {
             "fields": {
@@ -63,15 +89,10 @@
                     "required": true
                 }
             },
-            "belongsTo": "Team",
-            "validations": {
-                "startDate": {
-                    "lt": "endDate"
-                },
-                "endDate": {
-                    "gt": "startDate"
-                }
-            }
+            "belongsTo": [
+                "Team"
+            ],
+            "validate": {}
         },
         "Movie": {
             "fields": {
