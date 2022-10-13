@@ -7,11 +7,13 @@ import {
     scaffoldFindOneDefaultMiddleware,
     scaffoldCreateDefaultMiddleware,
     scaffoldValidationMiddleware,
-    scaffoldFindModelMiddleware
+    scaffoldFindModelMiddleware,
+    scaffoldDeleteDefaultMiddleware,
+    scaffoldUpdateDefaultMiddleware
 } from "./middleware";
 
 export async function buildRoutes(app): Promise<Koa> {
-    const router = new Router();
+    const router: Router = new Router();
     /**
      * A generated, or maybe user defined, route for the 'test' model
      * provides a custom middleware to do something special, but then 
@@ -43,6 +45,18 @@ export async function buildRoutes(app): Promise<Koa> {
     * could provide sane defaults for authorization, validation, findOne behavior
     */
     router.get('/api/:model/:id', scaffoldFindOneDefaultMiddleware());
+
+    /**
+    * A wildcard route for any passed in model, the middleware function here
+    * could provide sane defaults for authorization, validation, update behavior
+    */
+    router.put('/api/:model/:id', scaffoldUpdateDefaultMiddleware());
+
+    /**
+    * A wildcard route for any passed in model, the middleware function here
+    * could provide sane defaults for authorization, validation, delete behavior
+    */
+    router.del('/api/:model/:id', scaffoldDeleteDefaultMiddleware());
 
     /**
     * A wildcard route for any passed in model, the middleware function here

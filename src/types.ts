@@ -2,6 +2,15 @@ import { Context } from "koa"
 import { DataTypes, ModelStatic, Model, Sequelize } from "sequelize"
 import signale, { Signale } from "signale";
 
+export enum ScaffoldOperation {
+    Create,
+    Update,
+    Delete,
+    ReadOne,
+    ReadMany
+}
+
+
 export interface ScaffoldModelContext extends ScaffoldContext {
     state: ScaffoldContext['state'] & {
         model: ModelStatic<Model>

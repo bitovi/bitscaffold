@@ -118,6 +118,63 @@ export function scaffoldCreateMiddleware(): Middleware {
     }
 }
 
+
+export function scaffoldDeleteMiddleware(): Middleware {
+    return async function scaffoldDelete(ctx: ScaffoldModelContext, next: Koa.Next) {
+        ctx.state.logger.pending('scaffoldDeleteMiddleware', ctx.state.model.name);
+
+        if (!ctx.state.model) {
+            ctx.state.logger.error('scaffoldDeleteMiddleware, No Model On Context');
+            return ctx.throw(500, "No Model On Context")
+        }
+
+        // Perform some delete database query
+        try {
+            const result = await ctx.state.model.destroy({
+                where: {
+                    id: ctx.params.id
+                }
+            });
+
+            // Attach the results to the Koa context body
+            ctx.body = null;
+        } catch (err) {
+            ctx.throw(500, err.message);
+        }
+        ctx.state.logger.success('scaffoldDeleteMiddleware', ctx.state.model.name);
+        await next();
+    }
+}
+
+
+export function scaffoldUpdateMiddleware(): Middleware {
+    return async function scaffoldUpdate(ctx: ScaffoldModelContext, next: Koa.Next) {
+        ctx.state.logger.pending('scaffoldUpdateMiddleware', ctx.state.model.name);
+
+        if (!ctx.state.model) {
+            ctx.state.logger.error('scaffoldUpdateMiddleware, No Model On Context');
+            return ctx.throw(500, "No Model On Context")
+        }
+
+        // Perform some update database query
+        try {
+            const result = await ctx.state.model.update(ctx.request.body, {
+                where: {
+                    id: ctx.params.id
+                }
+            });
+
+            // Attach the results to the Koa context body
+            ctx.body = result;
+            ctx.status = 200;
+        } catch (err) {
+            ctx.throw(500, err.message);
+        }
+        ctx.state.logger.success('scaffoldUpdateMiddleware', ctx.state.model.name);
+        await next();
+    }
+}
+
 export function scaffoldAuthorizationMiddleware(): Middleware {
     return async function scaffoldAuthorization(ctx: ScaffoldModelContext, next: Koa.Next) {
         ctx.state.logger.pending('scaffoldAuthorizationMiddleware');
@@ -160,6 +217,24 @@ export function scaffoldCreateDefaultMiddleware(): Middleware {
         scaffoldCreateMiddleware()
     ])
 }
+
+export function scaffoldDeleteDefaultMiddleware(): Middleware {
+    return compose([
+        scaffoldAuthorizationMiddleware(),
+        scaffoldFindModelMiddleware(),
+        scaffoldDeleteMiddleware()
+    ])
+}
+
+export function scaffoldUpdateDefaultMiddleware(): Middleware {
+    return compose([
+        scaffoldAuthorizationMiddleware(),
+        scaffoldFindModelMiddleware(),
+        scaffoldValidationMiddleware(),
+        scaffoldUpdateMiddleware()
+    ])
+}
+
 
 export function scaffoldFindOneDefaultMiddleware(): Middleware {
     return compose([
