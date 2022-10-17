@@ -8,6 +8,7 @@ import { readSchemaFile, parseSchemaFile } from "./schema-parser/json"
 import KoaCors from "@koa/cors";
 import { v4 } from "uuid";
 import os from "os";
+import { Model, ModelCtor } from "sequelize-typescript";
 
 /**
  * Creates a Koa server and attaches the default configuration middleware
@@ -68,8 +69,8 @@ export async function start(app: Koa): Promise<Koa> {
  * @param schema Schema JSON
  * @returns Koa Instance
  */
-export async function database(app: Koa, schema: BitScaffoldSchema): Promise<Koa> {
-    const sequelize = await loadModels();
+export async function database(app: Koa, models: ModelCtor<Model<any, any>>[]): Promise<Koa> {
+    const sequelize = await loadModels(models);
 
     app.context.database = sequelize;
     app.context.models = sequelize.models;
@@ -106,16 +107,13 @@ export async function loadSchema(config: string) {
 /**
  * Entrypoint
  */
-export async function init(config: BitScaffoldSchema): Promise<Koa<Koa.DefaultState, Koa.DefaultContext>> {
+export async function init(models: ModelCtor<Model<any, any>>[]): Promise<Koa<Koa.DefaultState, Koa.DefaultContext>> {
     signale.info("Running setup")
     let app = await setup();
     app = await buildRoutes(app)
 
     signale.info("Running database setup")
-    await database(app, config);
-
-    signale.info("Running validation setup");
-    await validation(app, config);
+    await database(app, models);
 
     return app;
 }

@@ -8,6 +8,11 @@ export function scaffoldValidationMiddleware(): Middleware {
     return async function scaffoldValidation(ctx: ScaffoldModelContext, next: Koa.Next) {
         ctx.state.logger.pending('scaffoldValidation', ctx.state.model.name);
 
+        if (!ctx.validation) {
+            ctx.state.logger.warn('scaffoldValidation no validation on context');
+            return await next();
+        }
+
         const name = ctx.state.model.name;
         if (ctx.validation[name]) {
             ctx.state.logger.info('scaffoldValidation', 'found validation rules for', ctx.state.model.name);
@@ -52,8 +57,8 @@ export function scaffoldFindAllMiddleware(): Middleware {
         const result = await ctx.state.model.findAll(options);
 
         // Attach the results to the Koa context body
-        ctx.body = result || [];
-        ctx.status = 200;
+        ctx.state.body = result || [];
+        ctx.state.status = 200;
         ctx.state.logger.success('scaffoldFindAllMiddleware', ctx.state.model.name);
     }
 }
@@ -91,8 +96,8 @@ export function scaffoldFindOneMiddleware(): Middleware {
         }
 
         // Attach the results to the Koa context body
-        ctx.body = result;
-        ctx.status = 200;
+        ctx.state.body = result;
+        ctx.state.status = 200;
         ctx.state.logger.success('scaffoldFindOneMiddleware', ctx.state.model.name);
     }
 }
@@ -137,8 +142,8 @@ export function scaffoldCreateMiddleware(): Middleware {
             const result = await ctx.state.model.create(ctx.request.body, { include });
 
             // Attach the results to the Koa context body
-            ctx.body = result;
-            ctx.status = 201;
+            ctx.state.body = result;
+            ctx.state.status = 201;
         } catch (err) {
             ctx.throw(500, err.message);
         }
@@ -166,7 +171,7 @@ export function scaffoldDeleteMiddleware(): Middleware {
             });
 
             // Attach the results to the Koa context body
-            ctx.body = null;
+            ctx.state.body = null;
         } catch (err) {
             ctx.throw(500, err.message);
         }
@@ -194,8 +199,8 @@ export function scaffoldUpdateMiddleware(): Middleware {
             });
 
             // Attach the results to the Koa context body
-            ctx.body = result;
-            ctx.status = 200;
+            ctx.state.body = result;
+            ctx.state.status = 200;
         } catch (err) {
             ctx.throw(500, err.message);
         }
@@ -238,12 +243,36 @@ export function scaffoldFindModelMiddleware(override?: string): Middleware {
     }
 }
 
+export function scaffoldAPIResponseMiddleware(): Middleware {
+    return async function scaffoldAPIResponse(ctx: ScaffoldContext, next: Koa.Next) {
+        ctx.state.logger.pending('scaffoldAPIResponseMiddleware');
+
+        if (!ctx.state.body) {
+            ctx.throw("Bad Middleware Order");
+        }
+
+        ctx.body = {
+            errors: [],
+            data: ctx.state.body,
+            meta: null
+        }
+
+        if (ctx.state.status) {
+            ctx.status = ctx.state.status;
+        }
+
+        ctx.state.logger.success('scaffoldAPIResponseMiddleware');
+        await next();
+    }
+}
+
 export function scaffoldCreateDefaultMiddleware(): Middleware {
     return compose([
         scaffoldAuthorizationMiddleware(),
         scaffoldFindModelMiddleware(),
         scaffoldValidationMiddleware(),
-        scaffoldCreateMiddleware()
+        scaffoldCreateMiddleware(),
+        scaffoldAPIResponseMiddleware()
     ])
 }
 
@@ -251,7 +280,8 @@ export function scaffoldDeleteDefaultMiddleware(): Middleware {
     return compose([
         scaffoldAuthorizationMiddleware(),
         scaffoldFindModelMiddleware(),
-        scaffoldDeleteMiddleware()
+        scaffoldDeleteMiddleware(),
+        scaffoldAPIResponseMiddleware()
     ])
 }
 
@@ -260,7 +290,8 @@ export function scaffoldUpdateDefaultMiddleware(): Middleware {
         scaffoldAuthorizationMiddleware(),
         scaffoldFindModelMiddleware(),
         scaffoldValidationMiddleware(),
-        scaffoldUpdateMiddleware()
+        scaffoldUpdateMiddleware(),
+        scaffoldAPIResponseMiddleware()
     ])
 }
 
@@ -269,7 +300,8 @@ export function scaffoldFindOneDefaultMiddleware(): Middleware {
     return compose([
         scaffoldAuthorizationMiddleware(),
         scaffoldFindModelMiddleware(),
-        scaffoldFindOneMiddleware()
+        scaffoldFindOneMiddleware(),
+        scaffoldAPIResponseMiddleware()
     ])
 }
 
@@ -277,6 +309,7 @@ export function scaffoldFindAllDefaultMiddleware(): Middleware {
     return compose([
         scaffoldAuthorizationMiddleware(),
         scaffoldFindModelMiddleware(),
-        scaffoldFindAllMiddleware()
+        scaffoldFindAllMiddleware(),
+        scaffoldAPIResponseMiddleware()
     ])
 }

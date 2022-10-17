@@ -17,13 +17,13 @@ async function singleton(config, app) {
         app = await buildRoutes(app)
 
         signale.info("Running load schema")
-        const schema = await loadSchema(config);
+        //const schema = await loadSchema(config);
 
         signale.info("Running database setup")
-        await database(app, schema);
+        //await database(app, schema);
 
         signale.info("Running validation setup");
-        await validation(app, schema);
+        //await validation(app, schema);
     }
 }
 

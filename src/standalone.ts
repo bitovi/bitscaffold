@@ -1,7 +1,8 @@
 import { init, start } from ".";
-import schema from "./schema";
+import { Team } from "./sequelize/models/Team.model"
+import { Player } from "./sequelize/models/Player.model"
 
-init(schema).then((app) => {
+init([Team, Player]).then((app) => {
     start(app);
 });
 

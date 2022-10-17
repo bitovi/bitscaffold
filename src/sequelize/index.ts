@@ -1,26 +1,16 @@
 import { BitScaffoldField, BitScaffoldSchema, BitScaffoldValidatorContext, BelongsToManyAssociation } from "../types"
 import { Sequelize, ModelAttributeColumnOptions, ModelAttributes, DataTypes, HasManyOptions } from "sequelize"
-import { Sequelize as SequelizeTypescript } from "sequelize-typescript"
+import { Model, ModelCtor, Sequelize as SequelizeTypescript } from "sequelize-typescript"
 import signale from "signale";
 
-import { Team } from "./models-js/Team.model"
-import { Player } from "./models-js/Player.model"
-
-export async function loadModels(): Promise<Sequelize> {
+export async function loadModels(models: ModelCtor<Model<any, any>>[]): Promise<Sequelize> {
     const sequelize = new SequelizeTypescript('sqlite::memory:', {
         logging: (message) => {
             signale.info("  SQL:", message)
-        }
+        },
     });
 
-    Team.initModel(sequelize);
-    Player.initModel(sequelize);
-
-    Team.initAssociate(sequelize.models)
-    Player.initAssociate(sequelize.models)
-
-
-    //sequelize.addModels([Team, Player]);
+    sequelize.addModels(models);
 
     signale.info("Starting Model Sync");
     await sequelize.sync({ force: true });
