@@ -3,8 +3,8 @@ import { Sequelize, ModelAttributeColumnOptions, ModelAttributes, DataTypes, Has
 import { Sequelize as SequelizeTypescript } from "sequelize-typescript"
 import signale from "signale";
 
-import { Team } from "./models/Team.model"
-import { Player } from "./models/Player.model"
+import { Team } from "./models-js/Team.model"
+import { Player } from "./models-js/Player.model"
 
 export async function loadModels(): Promise<Sequelize> {
     const sequelize = new SequelizeTypescript('sqlite::memory:', {
@@ -13,7 +13,14 @@ export async function loadModels(): Promise<Sequelize> {
         }
     });
 
-    sequelize.addModels([Team, Player]);
+    Team.initModel(sequelize);
+    Player.initModel(sequelize);
+
+    Team.initAssociate(sequelize.models)
+    Player.initAssociate(sequelize.models)
+
+
+    //sequelize.addModels([Team, Player]);
 
     signale.info("Starting Model Sync");
     await sequelize.sync({ force: true });

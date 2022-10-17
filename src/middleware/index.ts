@@ -1,7 +1,7 @@
 
 import Koa, { Middleware } from "koa";
 import compose from 'koa-compose';
-import {  FindOptions } from "sequelize";
+import { FindOptions } from "sequelize";
 import { ScaffoldModelContext, ScaffoldContext } from "../types";
 
 export function scaffoldValidationMiddleware(): Middleware {
@@ -38,11 +38,14 @@ export function scaffoldFindAllMiddleware(): Middleware {
                 return ctx.throw(500, "Cannot (currently) include multiple models!");
             }
 
-            if (!ctx.models[ctx.query.include]) {
+            if (!ctx.state.model.associations[ctx.query.include]) {
                 return ctx.throw(500, "No Model To Include")
             }
 
-            options.include = ctx.models[ctx.query.include];
+            options.include = {
+                model: ctx.state.model.associations[ctx.query.include].target,
+                as: ctx.query.include
+            };
         }
 
         // Perform some lookups for the model
