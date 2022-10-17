@@ -1,4 +1,4 @@
-import { Sequelize, DataTypes } from "sequelize";
+import { Sequelize, DataTypes } from "sequelize-typescript";
 import signale from "signale";
 
 //import schema from "./schema.json";

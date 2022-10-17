@@ -1,6 +1,26 @@
 import { BitScaffoldField, BitScaffoldSchema, BitScaffoldValidatorContext, BelongsToManyAssociation } from "../types"
 import { Sequelize, ModelAttributeColumnOptions, ModelAttributes, DataTypes, HasManyOptions } from "sequelize"
+import { Sequelize as SequelizeTypescript } from "sequelize-typescript"
 import signale from "signale";
+
+import { Team } from "./models/Team.model"
+import { Player } from "./models/Player.model"
+
+export async function loadModels(): Promise<Sequelize> {
+    const sequelize = new SequelizeTypescript('sqlite::memory:', {
+        logging: (message) => {
+            signale.info("  SQL:", message)
+        }
+    });
+
+    sequelize.addModels([Team, Player]);
+
+    signale.info("Starting Model Sync");
+    await sequelize.sync({ force: true });
+    signale.info("Finished Model Sync");
+
+    return sequelize;
+}
 
 export async function buildModels(schema: BitScaffoldSchema): Promise<Sequelize> {
     const sequelize = new Sequelize('sqlite::memory:', {

@@ -1,7 +1,7 @@
 import Koa from "koa";
 import KoaBodyParser from "koa-body";
 import signale, { Signale } from "signale";
-import { buildModels, buildValidation } from "./sequelize"
+import { buildModels, buildValidation, loadModels } from "./sequelize"
 import { buildRoutes } from "./routes";
 import { BitScaffoldSchema } from "./types";
 import { readSchemaFile, parseSchemaFile } from "./schema-parser/json"
@@ -18,9 +18,9 @@ export async function setup(app?: Koa): Promise<Koa> {
         app = new Koa();
     }
 
-    app.on('error', (err, ctx) => {
-        err.expose = true;
-    });
+    // app.on('error', (err, ctx) => {
+    //     err.expose = true;
+    // });
 
     // Hook up cors
     app.use(KoaCors({ origin: "*" }));
@@ -69,7 +69,7 @@ export async function start(app: Koa): Promise<Koa> {
  * @returns Koa Instance
  */
 export async function database(app: Koa, schema: BitScaffoldSchema): Promise<Koa> {
-    const sequelize = await buildModels(schema);
+    const sequelize = await loadModels();
 
     app.context.database = sequelize;
     app.context.models = sequelize.models;
@@ -106,20 +106,16 @@ export async function loadSchema(config: string) {
 /**
  * Entrypoint
  */
-export async function init(config: string): Promise<Koa<Koa.DefaultState, Koa.DefaultContext>> {
+export async function init(config: BitScaffoldSchema): Promise<Koa<Koa.DefaultState, Koa.DefaultContext>> {
     signale.info("Running setup")
     let app = await setup();
     app = await buildRoutes(app)
 
-
-    signale.info("Running load schema")
-    const schema = await loadSchema(config);
-
     signale.info("Running database setup")
-    await database(app, schema);
+    await database(app, config);
 
     signale.info("Running validation setup");
-    await validation(app, schema);
+    await validation(app, config);
 
     return app;
 }

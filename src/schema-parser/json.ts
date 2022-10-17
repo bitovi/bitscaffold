@@ -1,5 +1,4 @@
 import fs from "node:fs/promises";
-import { DataTypes } from "sequelize";
 import { BitScaffoldSchema, } from "../types"
 
 // Export Functions for Prisma Parser type

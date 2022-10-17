@@ -24,6 +24,9 @@ export interface ScaffoldContext extends Context {
     models: { [ModelName: string]: ModelStatic<Model> }
 }
 
+export interface ScaffoldModel extends Model {
+    constructor: any
+}
 
 export interface BitScaffoldValidator {
     lt?: string,

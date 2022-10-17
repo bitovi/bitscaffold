@@ -1,7 +1,7 @@
 
 import Koa, { Middleware } from "koa";
 import compose from 'koa-compose';
-import { CreateOptions, FindOptions, Includeable } from "sequelize";
+import {  FindOptions } from "sequelize";
 import { ScaffoldModelContext, ScaffoldContext } from "../types";
 
 export function scaffoldValidationMiddleware(): Middleware {
@@ -42,7 +42,7 @@ export function scaffoldFindAllMiddleware(): Middleware {
                 return ctx.throw(500, "No Model To Include")
             }
 
-            options.include = ctx.query.include;
+            options.include = ctx.models[ctx.query.include];
         }
 
         // Perform some lookups for the model
@@ -121,6 +121,7 @@ export function scaffoldCreateMiddleware(): Middleware {
                 const AssociationModel = ctx.models[association];
                 // This needs to reference the Alias that we used to create the model.
                 // This is probably discoverable via the model itself...
+                ctx.state.logger.info("Adding create association for ", AssociationModel.name)
                 include.push({
                     association: AssociationModel,
                     as: AssociationModel.name

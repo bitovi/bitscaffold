@@ -1,6 +1,7 @@
 import { init, start } from ".";
+import schema from "./schema";
 
-init('test/fixtures/test-json-schema/schema.bitscaffold').then((app) => {
+init(schema).then((app) => {
     start(app);
 });
 
