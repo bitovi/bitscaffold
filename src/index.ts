@@ -109,8 +109,11 @@ export async function loadSchema(config: string) {
  */
 export async function init(models: ModelCtor<Model<any, any>>[]): Promise<Koa<Koa.DefaultState, Koa.DefaultContext>> {
     signale.info("Running setup")
-    let app = await setup();
-    app = await buildRoutes(app)
+    const app = await setup();
+
+    const router = await buildRoutes(app)
+    app.use(router.routes());
+    app.use(router.allowedMethods());
 
     signale.info("Running database setup")
     await database(app, models);

@@ -1,12 +1,12 @@
 import Koa, { Middleware } from "koa"
-import * as BitMiddleware from "./middleware";
 import { database, init, setup, start, validation, loadSchema } from ".";
 import { buildRoutes } from "./routes";
 import { v4 } from "uuid"
-
+import * as BitMiddleware from "./middleware";
 import signale, { Signale } from "signale";
+import { Model, ModelCtor } from "sequelize-typescript";
 
-async function singleton(config, app) {
+async function singleton(models, app) {
     if (!app.context.bitscaffold) {
         app.context.bitscaffold = true;
 
@@ -16,21 +16,16 @@ async function singleton(config, app) {
         signale.info("Attaching Routes")
         app = await buildRoutes(app)
 
-        signale.info("Running load schema")
-        //const schema = await loadSchema(config);
-
         signale.info("Running database setup")
-        //await database(app, schema);
+        await database(app, models);
 
         signale.info("Running validation setup");
-        //await validation(app, schema);
     }
 }
 
-
-function BitScaffoldMiddleware(config: string, app: Koa): Middleware {
+function BitScaffoldMiddleware(models: ModelCtor<Model<any, any>>[], app: Koa): Middleware {
     // Set up the whole application and attach it to the provided Koa application
-    singleton(config, app);
+    singleton(models, app);
 
     return async function BitScaffold(ctx: Koa.Context, next: Koa.Next) {
         if (!ctx.bitscaffold) {
@@ -46,5 +41,12 @@ function BitScaffoldMiddleware(config: string, app: Koa): Middleware {
     }
 }
 
-
-export { BitScaffoldMiddleware, BitMiddleware, database, init, setup, start, validation };
+export {
+    BitScaffoldMiddleware,
+    database,
+    init,
+    setup,
+    start,
+    validation,
+    BitMiddleware
+};

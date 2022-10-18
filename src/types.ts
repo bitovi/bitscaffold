@@ -1,5 +1,6 @@
 import { Context } from "koa"
 import { DataTypes, ModelStatic, Model, Sequelize, BelongsTo } from "sequelize"
+import { ModelCtor, Repository } from "sequelize-typescript";
 import signale, { Signale } from "signale";
 
 export enum ScaffoldOperation {
@@ -12,7 +13,7 @@ export enum ScaffoldOperation {
 
 export interface ScaffoldModelContext extends ScaffoldContext {
     state: ScaffoldContext['state'] & {
-        model: ModelStatic<Model>
+        model: Repository<Model>
     }
 }
 
