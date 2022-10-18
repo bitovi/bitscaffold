@@ -60,6 +60,7 @@ export function scaffoldFindAllMiddleware(): Middleware {
         ctx.state.body = result || [];
         ctx.state.status = 200;
         ctx.state.logger.success('scaffoldFindAllMiddleware', ctx.state.model.name);
+        await next();
     }
 }
 
@@ -99,6 +100,7 @@ export function scaffoldFindOneMiddleware(): Middleware {
         ctx.state.body = result;
         ctx.state.status = 200;
         ctx.state.logger.success('scaffoldFindOneMiddleware', ctx.state.model.name);
+        await next();
     }
 }
 
