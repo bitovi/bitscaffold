@@ -2,7 +2,7 @@
 import Koa, { Middleware } from "koa";
 import compose from 'koa-compose';
 import { FindOptions } from "sequelize";
-import { ScaffoldModelContext, ScaffoldContext } from "../types";
+import { ScaffoldModelContext, ScaffoldContext } from "@scaffold/types";
 
 export function scaffoldValidationMiddleware(): Middleware {
     return async function scaffoldValidation(ctx: ScaffoldModelContext, next: Koa.Next) {

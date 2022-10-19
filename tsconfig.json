@@ -10,8 +10,19 @@
     "sourceMap": true,
     "resolveJsonModule": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "baseUrl": ".",
+    "paths": {
+      "@scaffold/*": [
+        "src/*"
+      ]
+    },
   },
-  "include": ["./src/**/*"],
-  "exclude": ["./dist/**/*", "./bin/**/*"]
+  "include": [
+    "./src/**/*"
+  ],
+  "exclude": [
+    "./dist/**/*",
+    "./bin/**/*"
+  ]
 }

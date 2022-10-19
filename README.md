@@ -316,10 +316,11 @@ Assuming you keep your repositories somewhere like `~/GitHub/`...
 
 1) Clone this repository: git@github.com:bitovi/bitscaffold.git
 2) `cd bitscaffold`
-3) Run `npm link`. This will create a link from the global node_modules folder to your bitscaffold directory
-4) Switch over to your existing BitScaffold project directory, `cd my-scaffold-project`
-5) Create the link to this project with `npm link bitscaffold`
-6) You may need to re-run `npm link bitscaffold` if you run other `npm install` like commands in this repository
+3) Run `npm run build` to create the JavaScript needed for external projects
+4) Run `npm link`. This will create a link from the global node_modules folder to your bitscaffold directory
+5) Switch over to your existing BitScaffold project directory, `cd my-scaffold-project`
+6) Create the link to this project with `npm link bitscaffold`
+7) You may need to re-run `npm link bitscaffold` if you run other `npm install` like commands in this repository
 
 
 ## Key Features
