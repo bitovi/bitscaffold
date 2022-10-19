@@ -5,7 +5,7 @@ import {
     scaffoldCreateDefaultMiddleware,
     scaffoldDeleteDefaultMiddleware,
     scaffoldUpdateDefaultMiddleware
-} from "./middleware";
+} from "../middleware";
 
 export async function prepareDefaultRoutes(): Promise<Router> {
     const router: Router = new Router();
