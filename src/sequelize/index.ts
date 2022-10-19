@@ -3,14 +3,34 @@ import { Sequelize, ModelAttributeColumnOptions, ModelAttributes, DataTypes, Has
 import { Model, ModelCtor, Sequelize as SequelizeTypescript } from "sequelize-typescript"
 import signale from "signale";
 
-export async function loadModels(models: ModelCtor<Model<any, any>>[]): Promise<Sequelize> {
+export async function loadModels(models: any[]): Promise<Sequelize> {
     const sequelize = new SequelizeTypescript('sqlite::memory:', {
         logging: (message) => {
-            signale.info("  SQL:", message)
+            signale.info("  SQL:", message) // ModelCtor<Model<any, any>>[]
         },
     });
 
-    sequelize.addModels(models);
+    // This filter finds all the models that are of the newer decorator class type
+    // that can be added via sequelize.addModels
+    const bulkModels = models.filter((model) => {
+        return !model.initModel && !model.initAssociate;
+    });
+
+    sequelize.addModels(bulkModels);
+
+    // This filter finds all of the older JavaScript style models that
+    // need to be added in two steps, create and then relationship 
+    const standardModels = models.filter((model) => {
+        return model.initModel && model.initAssociate;
+    });
+
+    standardModels.forEach((model) => {
+        model.initModel(sequelize);
+    })
+
+    standardModels.forEach((model) => {
+        model.initAssociate(sequelize.models);
+    })
 
     signale.info("Starting Model Sync");
     await sequelize.sync({ force: true });

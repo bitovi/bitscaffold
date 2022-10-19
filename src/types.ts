@@ -11,6 +11,8 @@ export enum ScaffoldOperation {
     ReadMany
 }
 
+export * from "sequelize-typescript";
+
 export interface ScaffoldModelContext extends ScaffoldContext {
     state: ScaffoldContext['state'] & {
         model: Repository<Model>

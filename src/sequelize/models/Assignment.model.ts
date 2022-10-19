@@ -1,4 +1,4 @@
-import { Table, Column, Model, HasMany } from 'sequelize-typescript';
+import { Table, Column, HasMany, Model } from "../../types";
 import { Player } from "./Player.model"
 
 @Table

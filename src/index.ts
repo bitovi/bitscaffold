@@ -1,7 +1,8 @@
 import Koa from "koa";
 import KoaBodyParser from "koa-body";
+import Router from "@koa/router";
 import signale, { Signale } from "signale";
-import { buildModels, buildValidation, loadModels } from "./sequelize"
+import { buildValidation, loadModels } from "./sequelize"
 import { buildRoutes } from "./routes";
 import { BitScaffoldSchema } from "./types";
 import { readSchemaFile, parseSchemaFile } from "./schema-parser/json"
@@ -107,9 +108,14 @@ export async function loadSchema(config: string) {
 /**
  * Entrypoint
  */
-export async function init(models: ModelCtor<Model<any, any>>[]): Promise<Koa<Koa.DefaultState, Koa.DefaultContext>> {
+export async function init(models: ModelCtor<Model<any, any>>[], externalRoutes?: Router): Promise<Koa<Koa.DefaultState, Koa.DefaultContext>> {
     signale.info("Running setup")
     const app = await setup();
+
+    if (externalRoutes) {
+        app.use(externalRoutes.routes());
+        app.use(externalRoutes.allowedMethods());
+    }
 
     const router = await buildRoutes(app)
     app.use(router.routes());

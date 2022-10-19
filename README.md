@@ -309,6 +309,18 @@ At runtime, just like normal, the middleware will parse your Scaffold schema to 
 
 @TODO: Some way to deal with route collision. 
 
+## Local Development
+If you want to develop the Scaffold Framework itself, locally, you can use `npm link` to point a scaffold project to your local Scaffold repository.
+
+Assuming you keep your repositories somewhere like `~/GitHub/`... 
+
+1) Clone this repository: git@github.com:bitovi/bitscaffold.git
+2) `cd bitscaffold`
+3) Run `npm link`. This will create a link from the global node_modules folder to your bitscaffold directory
+4) Switch over to your existing BitScaffold project directory, `cd my-scaffold-project`
+5) Create the link to this project with `npm link bitscaffold`
+6) You may need to re-run `npm link bitscaffold` if you run other `npm install` like commands in this repository
+
 
 ## Key Features
 

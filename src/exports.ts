@@ -1,10 +1,10 @@
 import Koa, { Middleware } from "koa"
-import { database, init, setup, start, validation, loadSchema } from ".";
+import { database, setup } from ".";
 import { buildRoutes } from "./routes";
 import { v4 } from "uuid"
-import * as BitMiddleware from "./middleware";
 import signale, { Signale } from "signale";
 import { Model, ModelCtor } from "sequelize-typescript";
+
 
 async function singleton(models, app) {
     if (!app.context.bitscaffold) {
@@ -23,7 +23,11 @@ async function singleton(models, app) {
     }
 }
 
-function BitScaffoldMiddleware(models: ModelCtor<Model<any, any>>[], app: Koa): Middleware {
+// Re-export middleware at the top level
+export * from "./middleware";
+export * from "./index"
+
+export function BitScaffoldMiddleware(models: ModelCtor<Model<any, any>>[], app: Koa): Middleware {
     // Set up the whole application and attach it to the provided Koa application
     singleton(models, app);
 
@@ -40,13 +44,3 @@ function BitScaffoldMiddleware(models: ModelCtor<Model<any, any>>[], app: Koa): 
         await next();
     }
 }
-
-export {
-    BitScaffoldMiddleware,
-    database,
-    init,
-    setup,
-    start,
-    validation,
-    BitMiddleware
-};
