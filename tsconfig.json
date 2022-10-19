@@ -11,12 +11,6 @@
     "resolveJsonModule": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "baseUrl": ".",
-    "paths": {
-      "@scaffold/*": [
-        "src/*"
-      ]
-    },
   },
   "include": [
     "./src/**/*"

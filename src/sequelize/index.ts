@@ -1,7 +1,7 @@
 import Koa from "koa";
 import { Sequelize } from "sequelize"
 import signale from "signale";
-import { ScaffoldModel } from "@scaffold/types"
+import { ScaffoldModel } from "../types"
 
 export async function prepareSequelize(app: Koa): Promise<any> {
     if (!app.context.database) {

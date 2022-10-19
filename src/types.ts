@@ -18,7 +18,7 @@ export interface ScaffoldContext extends Context {
     models: { [ModelName: string]: ModelStatic<Model> }
 }
 
-export interface ScaffoldModel extends Model {
+export interface ScaffoldModel extends ModelStatic<Model> {
     initModel: (sequelize: Sequelize) => void;
     initAssociations: (sequelize: Sequelize) => void;
 }

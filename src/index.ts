@@ -1,27 +1,37 @@
 import Koa, { Middleware } from "koa";
 import KoaBodyParser from "koa-body";
+import Router from "@koa/router";
 import { Signale } from "signale";
 import KoaCors from "@koa/cors";
 import { v4 } from "uuid";
 import os from "os";
-import { prepareDefaultRoutes } from "@scaffold/routes";
-import { ScaffoldApplication, ScaffoldModel } from "@scaffold/types";
-import { prepareModels, prepareSequelize } from "@scaffold/sequelize";
+import { prepareDefaultRoutes } from "./routes";
+import { ScaffoldApplication, ScaffoldModel } from "./types";
+import { prepareModels, prepareSequelize } from "./sequelize";
 
 /**
  * Entrypoint
  */
-export async function createScaffoldApplication(models: ScaffoldModel[]): Promise<ScaffoldApplication> {
+export async function createScaffoldApplication(models: ScaffoldModel[], routes?: Router): Promise<ScaffoldApplication> {
     const app = new Koa();
     await prepareKoaApplication(app);
     await prepareSequelize(app);
     await prepareModels(app, models)
+
+    if (routes) {
+        app.use(routes.routes())
+        app.use(routes.allowedMethods())
+    }
 
     const router = await prepareDefaultRoutes();
     app.use(router.routes());
     app.use(router.allowedMethods())
 
     return app;
+}
+
+export async function startScaffoldApplication(app: ScaffoldApplication, port?: number): Promise<void> {
+    await app.listen(port || 3000);
 }
 
 export function attachScaffoldDefaultMiddleware(models: ScaffoldModel[], app: Koa): Middleware {
