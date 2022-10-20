@@ -214,9 +214,12 @@ export function scaffoldUpdateMiddleware(): Middleware {
 export function scaffoldAuthorizationMiddleware(): Middleware {
     return async function scaffoldAuthorization(ctx: ScaffoldModelContext, next: Koa.Next) {
         ctx.state.logger.pending('scaffoldAuthorizationMiddleware');
-
-        // Perform some lookups for the model options
         // Perform some authorization checks
+        if (!ctx.headers.authorization) {
+            ctx.throw(401, "No Auth Header");
+        }
+        ctx.state.logger.info('scaffoldAuthorizationMiddleware token was', ctx.headers.authorization);
+
         ctx.state.logger.success('scaffoldAuthorizationMiddleware');
         await next()
     }

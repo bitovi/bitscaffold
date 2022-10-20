@@ -52,7 +52,7 @@ export function attachScaffoldDefaultMiddleware(models: ScaffoldModel[], app: Ko
     }
 }
 
-async function prepareKoaApplication(app: Koa) {
+async function prepareKoaApplication(app: Koa): Promise<void> {
     if (!app.context.bitscaffold) {
         signale.info("Creating Koa Application Defaults")
         // Check if this koa app has already been processed
