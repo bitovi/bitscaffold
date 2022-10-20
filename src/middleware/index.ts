@@ -43,24 +43,34 @@ export function scaffoldFindAllMiddleware(): Middleware {
       return ctx.throw(500, "No Model On Context");
     }
 
-    const options: FindOptions = {};
+    const options: FindOptions = { include: [] };
 
-    if (ctx.query && ctx.query.include) {
-      ctx.state.logger.info("Include:", ctx.query.include);
+    //if (ctx.query && ctx.query.include) {
+    // ctx.state.logger.info("Include:", ctx.query.include);
 
-      if (Array.isArray(ctx.query.include)) {
-        return ctx.throw(500, "Cannot (currently) include multiple models!");
+    // if (Array.isArray(ctx.query.include)) {
+    //   return ctx.throw(500, "Cannot (currently) include multiple models!");
+    // }
+
+    // if (!ctx.state.model.associations[ctx.query.include]) {
+    //   return ctx.throw(500, "No Model To Include");
+    // }
+
+    Object.keys(ctx.state.model.associations).forEach((name) => {
+      const association = ctx.state.model.associations[name];
+      if (Array.isArray(options.include)) {
+        options.include.push({
+          model: association.target,
+          as: association.as,
+        });
       }
+    });
 
-      if (!ctx.state.model.associations[ctx.query.include]) {
-        return ctx.throw(500, "No Model To Include");
-      }
-
-      options.include = {
-        model: ctx.state.model.associations[ctx.query.include].target,
-        as: ctx.query.include,
-      };
-    }
+    // options.include = {
+    //   model: ctx.state.model.associations[ctx.query.include].target,
+    //   as: ctx.query.include,
+    // };
+    //}
 
     // Perform some lookups for the model
     const result = await ctx.state.model.findAll(options);
@@ -139,20 +149,19 @@ export function scaffoldCreateMiddleware(): Middleware {
 
     // Create the `create` options based on the incoming request and the model properties
     const include: any[] = [];
-    Object.keys(ctx.state.model.associations).forEach((association) => {
+    Object.keys(ctx.state.model.associations).forEach((name) => {
       // Check if this key is found on the request body. If it is, include that as an association
       // so that we can cascade the create call
-      if (ctx.request.body[association]) {
-        const AssociationModel = ctx.models[association];
+      if (ctx.request.body[name]) {
         // This needs to reference the Alias that we used to create the model.
         // This is probably discoverable via the model itself...
         ctx.state.logger.info(
           "Adding create association for ",
-          AssociationModel.name
+          ctx.state.model.associations[name].target.name
         );
         include.push({
-          association: AssociationModel,
-          as: AssociationModel.name,
+          association: ctx.state.model.associations[name].target,
+          as: ctx.state.model.associations[name].as,
         });
       }
     });
