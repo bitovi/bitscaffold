@@ -14,7 +14,7 @@ describe("Demo", () => {
     // If this was an external application that uses Scaffold, this would
     // be what we import from the module. We pass in our models, and it gives us back
     // a Koa app ready to go.
-    const app = await createScaffoldApplication([PlayerTS, TeamTS]);
+    const app = await createScaffoldApplication([new PlayerTS, new TeamTS]);
     const server = http.createServer(app.callback());
 
     console.log("Creating a new Team");

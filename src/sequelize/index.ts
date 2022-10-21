@@ -1,7 +1,60 @@
 import Koa from "koa";
-import { Sequelize } from "sequelize";
+import { Sequelize, Model, BelongsToManyOptions, ModelValidateOptions, ModelAttributes, ModelStatic, BelongsToOptions, HasOneOptions, HasManyOptions } from "sequelize";
 import signale from "signale";
-import { ScaffoldModel } from "../types";
+
+export interface Models {
+  [key: string]: ModelStatic<Model<any, any>>;
+}
+
+export interface BelongsToManyResult {
+  target: ModelStatic<Model<any, any>>
+  options: BelongsToManyOptions
+}
+
+export interface BelongsToResult {
+  target: ModelStatic<Model<any, any>>
+  options?: BelongsToOptions
+}
+
+export interface HasOneResult {
+  target: ModelStatic<Model<any, any>>
+  options?: HasOneOptions
+}
+
+export interface HasManyResult {
+  target: ModelStatic<Model<any, any>>
+  options?: HasManyOptions
+}
+
+export abstract class ScaffoldModelBase {
+  tableName?: string;
+  tablePluralName?: string;
+  declare name: string;
+
+  useCreatedAt: boolean;
+  useUpdatedAt: boolean;
+
+  abstract attributes(): ModelAttributes;
+  validation(): ModelValidateOptions {
+    return {};
+  }
+
+  belongsTo(models: Models): BelongsToResult[] {
+    return [];
+  }
+
+  belongsToMany(models: Models): BelongsToManyResult[] {
+    return [];
+  }
+
+  hasOne(models: Models): HasOneResult[] {
+    return [];
+  }
+
+  hasMany(models: Models): HasManyResult[] {
+    return [];
+  }
+}
 
 export async function prepareSequelize(app: Koa, sync?: boolean): Promise<any> {
   if (!app.context.database) {
@@ -20,22 +73,54 @@ export async function prepareSequelize(app: Koa, sync?: boolean): Promise<any> {
 
 export async function prepareModels(
   app: Koa,
-  models: ScaffoldModel[]
+  models: ScaffoldModelBase[]
 ): Promise<any> {
   if (!app.context.database) {
     await prepareSequelize(app);
   }
 
   signale.info("Attaching Models to Sequelize instance");
-  const sequelize = app.context.database;
+  const sequelize: Sequelize = app.context.database;
   models.forEach((model) => {
-    signale.info("Creating Model", model.name);
-    model.initModel(sequelize);
+    const modelName = model.constructor.name;
+    signale.info("Creating Model", modelName);
+    sequelize.define(modelName, model.attributes(), {
+      validate: model.validation(),
+      createdAt: model.useCreatedAt || false,
+      updatedAt: model.useUpdatedAt || false
+    })
   });
 
   models.forEach((model) => {
-    signale.info("Creating Model associations", model.name);
-    model.initAssociations(sequelize);
+    const modelName = model.constructor.name;
+    signale.info("Creating Model associations", modelName);
+    model.belongsTo(sequelize.models).forEach(({ target, options }) => {
+      if (!target) {
+        throw new Error("Unknown Model association for " + modelName + " in belongsTo");
+      }
+      sequelize.models[modelName].belongsTo(target, options);
+    });
+
+    model.belongsToMany(sequelize.models).forEach(({ target, options }) => {
+      if (!target) {
+        throw new Error("Unknown Model association for " + modelName + " in belongsToMany");
+      }
+      sequelize.models[modelName].belongsToMany(target, options);
+    });
+
+    model.hasOne(sequelize.models).forEach(({ target, options }) => {
+      if (!target) {
+        throw new Error("Unknown Model association for " + modelName + " in hasOne");
+      }
+      sequelize.models[modelName].hasOne(target, options);
+    });
+
+    model.hasMany(sequelize.models).forEach(({ target, options }) => {
+      if (!target) {
+        throw new Error("Unknown Model association for " + modelName + " in hasMany");
+      }
+      sequelize.models[modelName].hasMany(target, options);
+    });
   });
 
   signale.info("Running Sequelize Model Sync");

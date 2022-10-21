@@ -1,22 +1,20 @@
-import { Sequelize, Model, DataTypes } from "sequelize";
+import { Model, DataTypes, ModelAttributes } from "sequelize";
+import { BelongsToManyResult, Models, ScaffoldModelBase } from "../../../sequelize";
 
-export default class Movie extends Model {
-  static initModel(sequelize: Sequelize) {
-    Movie.init(
-      {
-        id: {
-          type: DataTypes.INTEGER,
-          primaryKey: true,
-          autoIncrement: true,
-          allowNull: false,
-        },
-        name: DataTypes.STRING,
+export default class Movie extends ScaffoldModelBase {
+  attributes(): ModelAttributes<Model<any, any>, any> {
+    return {
+      id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+        allowNull: false,
       },
-      { sequelize, createdAt: false, updatedAt: false }
-    );
+      name: DataTypes.STRING,
+    }
   }
 
-  static initAssociations(sequelize: Sequelize) {
-    Movie.belongsToMany(sequelize.models.Actor, { through: "ActorMovies" });
+  belongsToMany(models: Models): BelongsToManyResult[] {
+    return [{ target: models.Actor, options: { through: "ActorMovies" } }]
   }
 }

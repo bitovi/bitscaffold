@@ -1,22 +1,20 @@
-import { Model, DataTypes, Sequelize } from "sequelize";
+import { Model, DataTypes, Sequelize, ModelAttributes } from "sequelize";
+import { HasManyResult, Models, ScaffoldModelBase } from "../../../sequelize";
 
-export default class Team extends Model {
-  static initModel(sequelize: Sequelize) {
-    Team.init(
-      {
-        id: {
-          type: DataTypes.INTEGER,
-          primaryKey: true,
-          autoIncrement: true,
-          allowNull: false,
-        },
-        name: DataTypes.STRING,
+export default class Team extends ScaffoldModelBase {
+  attributes(): ModelAttributes<Model<any, any>, any> {
+    return {
+      id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+        allowNull: false,
       },
-      { sequelize, createdAt: false, updatedAt: false }
-    );
+      name: DataTypes.STRING,
+    }
   }
 
-  static initAssociations(sequelize: Sequelize) {
-    Team.hasMany(sequelize.models.Player, { as: "players" });
+  hasMany(models: Models): HasManyResult[] {
+    return [{ target: models.Player, options: { as: "players" } }];
   }
 }

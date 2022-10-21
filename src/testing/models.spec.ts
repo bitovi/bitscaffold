@@ -1,5 +1,5 @@
 import { createScaffoldApplication } from "../index";
-import request from "supertest";
+import { GET, POST } from "./utils";
 import http from "node:http";
 
 import PlayerTS from "./models/ts/Player";
@@ -12,8 +12,8 @@ describe("Model Tests", () => {
     jest.setTimeout(60000);
   });
 
-  it.skip("One-To-Many Testing", async () => {
-    const app = await createScaffoldApplication([PlayerTS, TeamTS]);
+  it("One-To-Many Testing", async () => {
+    const app = await createScaffoldApplication([new PlayerTS, new TeamTS]);
     const server = http.createServer(app.callback());
 
     console.log("Creating a new Team");
@@ -56,7 +56,7 @@ describe("Model Tests", () => {
   });
 
   it("Many-To-Many Testing", async () => {
-    const app = await createScaffoldApplication([MovieTS, ActorTS]);
+    const app = await createScaffoldApplication([new MovieTS, new ActorTS]);
     const server = http.createServer(app.callback());
 
     console.log("Creating a new Movie");
@@ -108,42 +108,3 @@ describe("Model Tests", () => {
     expect(result5.json.data[0].Actors).toHaveLength(2);
   });
 });
-
-async function GET(server, path) {
-  const result = await request(server).get(path).set("authorization", "test");
-
-  let json;
-  try {
-    json = JSON.parse(result.text);
-  } catch (err) {
-    console.error(result.text);
-    throw err;
-  }
-
-  return {
-    text: result.text,
-    status: result.statusCode,
-    json: json,
-  };
-}
-
-async function POST(server, path, payload) {
-  const result = await request(server)
-    .post(path)
-    .set("authorization", "test")
-    .send(payload);
-
-  let json;
-  try {
-    json = JSON.parse(result.text);
-  } catch (err) {
-    console.error(result.text);
-    throw err;
-  }
-
-  return {
-    text: result.text,
-    status: result.statusCode,
-    json: json,
-  };
-}

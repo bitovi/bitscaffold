@@ -1,26 +1,24 @@
-const { Model, DataTypes } = require("sequelize");
+const { DataTypes } = require("sequelize");
+const { ScaffoldModelBase } = require("../../../sequelize");
 
-class Player extends Model {
-  static initModel(sequelize) {
-    Player.init(
-      {
-        id: {
-          type: DataTypes.INTEGER,
-          primaryKey: true,
-          autoIncrement: true,
-          allowNull: false,
-        },
-        firstName: DataTypes.STRING,
-        lastName: DataTypes.STRING,
-        startDate: DataTypes.DATE,
-        endDate: DataTypes.DATE,
+class Player extends ScaffoldModelBase {
+  attributes() {
+    return {
+      id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+        allowNull: false,
       },
-      { sequelize, createdAt: false, updatedAt: false }
-    );
+      firstName: DataTypes.STRING,
+      lastName: DataTypes.STRING,
+      startDate: DataTypes.DATE,
+      endDate: DataTypes.DATE,
+    }
   }
 
-  static initAssociations(sequelize) {
-    Player.belongsTo(sequelize.models.Team);
+  belongsTo(models) {
+    return [{ target: models.Team }]
   }
 }
 

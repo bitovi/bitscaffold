@@ -10,6 +10,23 @@ export function scaffoldValidationMiddleware(): Middleware {
   ) {
     ctx.state.logger.pending("scaffoldValidation", ctx.state.model.name);
 
+    const invalid: string[] = [];
+    if (ctx.request.body) {
+      const attributes = Object.keys(ctx.state.model.getAttributes());
+      const associations = Object.keys(ctx.state.model.associations)
+      Object.keys(ctx.request.body).forEach((key) => {
+        if (!attributes.includes(key)) {
+          if (!associations.includes(key)) {
+            invalid.push(key);
+          }
+        }
+      });
+    }
+
+    if (invalid.length > 0) {
+      ctx.throw(400, "Invalid properties found for " + ctx.state.model.name + ": " + invalid.join(","));
+    }
+
     if (!ctx.validation) {
       ctx.state.logger.warn("scaffoldValidation no validation on context");
       return await next();
@@ -23,6 +40,7 @@ export function scaffoldValidationMiddleware(): Middleware {
         ctx.state.model.name
       );
     }
+
 
     // Perform some lookups for the model
     // Perform some lookusp for the validation
@@ -165,6 +183,14 @@ export function scaffoldCreateMiddleware(): Middleware {
         });
       }
     });
+
+    // Attempt to validate before create
+    try {
+      const temp = ctx.state.model.build(ctx.request.body)
+      await temp.validate();
+    } catch (err) {
+      ctx.throw(400, err);
+    }
 
     // Perform some create database query
     try {

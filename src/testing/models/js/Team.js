@@ -1,23 +1,21 @@
-const { Model, DataTypes } = require("sequelize");
+const { DataTypes } = require("sequelize");
+const { ScaffoldModelBase } = require("../../../sequelize");
 
-class Team extends Model {
-  static initModel(sequelize) {
-    Team.init(
-      {
-        id: {
-          type: DataTypes.INTEGER,
-          primaryKey: true,
-          autoIncrement: true,
-          allowNull: false,
-        },
-        name: DataTypes.STRING,
+class Team extends ScaffoldModelBase {
+  attributes() {
+    return {
+      id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+        allowNull: false,
       },
-      { sequelize, createdAt: false, updatedAt: false }
-    );
+      name: DataTypes.STRING,
+    }
   }
 
-  static initAssociations(sequelize) {
-    Team.hasMany(sequelize.models.Player, { as: "players" });
+  hasMany(models) {
+    return [{ target: models.Player }]
   }
 }
 

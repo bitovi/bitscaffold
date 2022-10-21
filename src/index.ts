@@ -6,14 +6,14 @@ import KoaCors from "@koa/cors";
 import { v4 } from "uuid";
 import os from "os";
 import { prepareDefaultRoutes } from "./routes";
-import { ScaffoldApplication, ScaffoldModel } from "./types";
-import { prepareModels, prepareSequelize } from "./sequelize";
+import { ScaffoldApplication } from "./types";
+import { prepareModels, prepareSequelize, ScaffoldModelBase } from "./sequelize";
 
 /**
  * Entrypoint
  */
 export async function createScaffoldApplication(
-  models: ScaffoldModel[],
+  models: ScaffoldModelBase[],
   routes?: Router
 ): Promise<ScaffoldApplication> {
   signale.info("Creating Scaffold Application");
@@ -45,7 +45,7 @@ export async function startScaffoldApplication(
 }
 
 export function attachScaffoldDefaultMiddleware(
-  models: ScaffoldModel[],
+  models: ScaffoldModelBase[],
   app: Koa
 ): Middleware {
   const setup = async () => {
@@ -66,6 +66,9 @@ async function prepareKoaApplication(app: Koa): Promise<void> {
     signale.info("Creating Koa Application Defaults");
     // Check if this koa app has already been processed
     app.context.bitscaffold = true;
+
+    // Catch top level errors and format them correctly
+    app.use(ErrorHandler())
 
     // Hook up cors
     app.use(KoaCors({ origin: "*" }));
@@ -88,6 +91,28 @@ async function prepareKoaApplication(app: Koa): Promise<void> {
 
       ctx.set("x-koa-uuid", ctx.state.uuid);
       await next();
+    });
+  }
+}
+
+
+function ErrorHandler() {
+  return async function ErrorHandlerMiddleware(ctx: Koa.Context, next: Koa.Next) {
+    return next().catch((err) => {
+      ctx.type = 'json';
+
+      ctx.status = err.statusCode || 500
+      ctx.body = {
+        errors: [err.message],
+        data: null,
+        meta: err,
+      };
+
+      if (ctx.state.logger) {
+        ctx.state.logger.error(err.message, err)
+      }
+
+      ctx.app.emit('error', err, ctx);
     });
   }
 }
