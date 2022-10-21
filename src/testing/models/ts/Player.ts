@@ -1,5 +1,5 @@
-import { Sequelize, DataTypes, Model, ModelAttributes, ModelStatic, ModelValidateOptions } from "sequelize";
-import { BelongsToResult, Models, ScaffoldModelBase } from "../../../sequelize";
+import { DataTypes, Model, ModelAttributes, ModelValidateOptions } from "sequelize";
+import { BelongsToResult, LoadedModels, ScaffoldModelBase } from "../../../types";
 
 export default class Player extends ScaffoldModelBase {
 
@@ -33,7 +33,7 @@ export default class Player extends ScaffoldModelBase {
     }
   }
 
-  belongsTo(models: Models): BelongsToResult[] {
+  belongsTo(models: LoadedModels): BelongsToResult[] {
     return [{ target: models.Team }];
   }
 }

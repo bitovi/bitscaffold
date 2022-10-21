@@ -1,5 +1,5 @@
 const { DataTypes } = require("sequelize");
-const { ScaffoldModelBase } = require("../../../sequelize");
+const { ScaffoldModelBase } = require("../../../types");
 
 class Team extends ScaffoldModelBase {
   attributes() {

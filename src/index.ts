@@ -6,8 +6,8 @@ import KoaCors from "@koa/cors";
 import { v4 } from "uuid";
 import os from "os";
 import { prepareDefaultRoutes } from "./routes";
-import { ScaffoldApplication } from "./types";
-import { prepareModels, prepareSequelize, ScaffoldModelBase } from "./sequelize";
+import { ScaffoldApplication, ScaffoldModelBase } from "./types";
+import { prepareModels, prepareSequelize } from "./sequelize";
 
 /**
  * Entrypoint

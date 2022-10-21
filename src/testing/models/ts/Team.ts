@@ -1,5 +1,5 @@
-import { Model, DataTypes, Sequelize, ModelAttributes } from "sequelize";
-import { HasManyResult, Models, ScaffoldModelBase } from "../../../sequelize";
+import { Model, DataTypes, ModelAttributes } from "sequelize";
+import { HasManyResult, LoadedModels, ScaffoldModelBase } from "../../../types";
 
 export default class Team extends ScaffoldModelBase {
   attributes(): ModelAttributes<Model<any, any>, any> {
@@ -14,7 +14,7 @@ export default class Team extends ScaffoldModelBase {
     }
   }
 
-  hasMany(models: Models): HasManyResult[] {
+  hasMany(models: LoadedModels): HasManyResult[] {
     return [{ target: models.Player, options: { as: "players" } }];
   }
 }

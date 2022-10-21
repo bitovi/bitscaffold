@@ -1,5 +1,5 @@
 import { Model, DataTypes, ModelAttributes } from "sequelize";
-import { BelongsToManyResult, Models, ScaffoldModelBase } from "../../../sequelize";
+import { BelongsToManyResult, LoadedModels, ScaffoldModelBase } from "../../../types";
 
 export default class Actor extends ScaffoldModelBase {
   attributes(): ModelAttributes<Model<any, any>, any> {
@@ -14,7 +14,7 @@ export default class Actor extends ScaffoldModelBase {
     }
   }
 
-  belongsToMany(models: Models): BelongsToManyResult[] {
+  belongsToMany(models: LoadedModels): BelongsToManyResult[] {
     return [{ target: models.Movie, options: { through: "ActorMovies" } }]
   }
 }

@@ -1,60 +1,7 @@
 import Koa from "koa";
-import { Sequelize, Model, BelongsToManyOptions, ModelValidateOptions, ModelAttributes, ModelStatic, BelongsToOptions, HasOneOptions, HasManyOptions } from "sequelize";
+import { Sequelize } from "sequelize";
 import signale from "signale";
-
-export interface Models {
-  [key: string]: ModelStatic<Model<any, any>>;
-}
-
-export interface BelongsToManyResult {
-  target: ModelStatic<Model<any, any>>
-  options: BelongsToManyOptions
-}
-
-export interface BelongsToResult {
-  target: ModelStatic<Model<any, any>>
-  options?: BelongsToOptions
-}
-
-export interface HasOneResult {
-  target: ModelStatic<Model<any, any>>
-  options?: HasOneOptions
-}
-
-export interface HasManyResult {
-  target: ModelStatic<Model<any, any>>
-  options?: HasManyOptions
-}
-
-export abstract class ScaffoldModelBase {
-  tableName?: string;
-  tablePluralName?: string;
-  declare name: string;
-
-  useCreatedAt: boolean;
-  useUpdatedAt: boolean;
-
-  abstract attributes(): ModelAttributes;
-  validation(): ModelValidateOptions {
-    return {};
-  }
-
-  belongsTo(models: Models): BelongsToResult[] {
-    return [];
-  }
-
-  belongsToMany(models: Models): BelongsToManyResult[] {
-    return [];
-  }
-
-  hasOne(models: Models): HasOneResult[] {
-    return [];
-  }
-
-  hasMany(models: Models): HasManyResult[] {
-    return [];
-  }
-}
+import { ScaffoldModelBase } from "../types";
 
 export async function prepareSequelize(app: Koa, sync?: boolean): Promise<any> {
   if (!app.context.database) {
