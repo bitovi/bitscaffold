@@ -1,8 +1,13 @@
-import { Model, DataTypes, ModelAttributes } from "sequelize";
-import { HasManyResult, LoadedModels, ScaffoldModelBase } from "../../../types";
+import { DataTypes } from "sequelize";
+import {
+  HasManyResult,
+  LoadedModels,
+  ScaffoldModelBase,
+  ScaffoldAttributes,
+} from "../../../types";
 
 export default class Team extends ScaffoldModelBase {
-  attributes(): ModelAttributes<Model<any, any>, any> {
+  attributes(): ScaffoldAttributes {
     return {
       id: {
         type: DataTypes.INTEGER,
@@ -11,7 +16,7 @@ export default class Team extends ScaffoldModelBase {
         allowNull: false,
       },
       name: DataTypes.STRING,
-    }
+    };
   }
 
   hasMany(models: LoadedModels): HasManyResult[] {

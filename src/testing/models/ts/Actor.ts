@@ -1,8 +1,13 @@
 import { Model, DataTypes, ModelAttributes } from "sequelize";
-import { BelongsToManyResult, LoadedModels, ScaffoldModelBase } from "../../../types";
+import {
+  BelongsToManyResult,
+  LoadedModels,
+  ScaffoldAttributes,
+  ScaffoldModelBase,
+} from "../../../types";
 
 export default class Actor extends ScaffoldModelBase {
-  attributes(): ModelAttributes<Model<any, any>, any> {
+  attributes(): ScaffoldAttributes {
     return {
       id: {
         type: DataTypes.INTEGER,
@@ -11,10 +16,10 @@ export default class Actor extends ScaffoldModelBase {
         allowNull: false,
       },
       name: DataTypes.STRING,
-    }
+    };
   }
 
   belongsToMany(models: LoadedModels): BelongsToManyResult[] {
-    return [{ target: models.Movie, options: { through: "ActorMovies" } }]
+    return [{ target: models.Movie, options: { through: "ActorMovies" } }];
   }
 }

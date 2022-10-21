@@ -1,5 +1,6 @@
 import Koa, { Middleware } from "koa";
 import KoaBodyParser from "koa-body";
+import http, { Server } from "node:http";
 import Router from "@koa/router";
 import signale, { Signale } from "signale";
 import KoaCors from "@koa/cors";
@@ -36,6 +37,13 @@ export async function createScaffoldApplication(
   return app;
 }
 
+export async function __mockApplication(
+  models: ScaffoldModelBase[]
+): Promise<Server> {
+  const app = await createScaffoldApplication(models);
+  return http.createServer(app.callback());
+}
+
 export async function startScaffoldApplication(
   app: ScaffoldApplication,
   port?: number
@@ -68,7 +76,7 @@ async function prepareKoaApplication(app: Koa): Promise<void> {
     app.context.bitscaffold = true;
 
     // Catch top level errors and format them correctly
-    app.use(ErrorHandler())
+    app.use(ErrorHandler());
 
     // Hook up cors
     app.use(KoaCors({ origin: "*" }));
@@ -95,13 +103,15 @@ async function prepareKoaApplication(app: Koa): Promise<void> {
   }
 }
 
-
 function ErrorHandler() {
-  return async function ErrorHandlerMiddleware(ctx: Koa.Context, next: Koa.Next) {
+  return async function ErrorHandlerMiddleware(
+    ctx: Koa.Context,
+    next: Koa.Next
+  ) {
     return next().catch((err) => {
-      ctx.type = 'json';
+      ctx.type = "json";
 
-      ctx.status = err.statusCode || 500
+      ctx.status = err.statusCode || 500;
       ctx.body = {
         errors: [err.message],
         data: null,
@@ -109,10 +119,10 @@ function ErrorHandler() {
       };
 
       if (ctx.state.logger) {
-        ctx.state.logger.error(err.message, err)
+        ctx.state.logger.error(err.message, err);
       }
 
-      ctx.app.emit('error', err, ctx);
+      ctx.app.emit("error", err, ctx);
     });
-  }
+  };
 }

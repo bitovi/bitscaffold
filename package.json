@@ -4,6 +4,7 @@
   "description": "Fullstack CRUD Application Solution",
   "main": "dist/exports.js",
   "scripts": {
+    "prebuild": "npm run pretty:fix",
     "build": "tsc",
     "test": "jest",
     "test:watch": "jest --watch",

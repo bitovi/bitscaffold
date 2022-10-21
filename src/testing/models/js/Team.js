@@ -11,11 +11,11 @@ class Team extends ScaffoldModelBase {
         allowNull: false,
       },
       name: DataTypes.STRING,
-    }
+    };
   }
 
   hasMany(models) {
-    return [{ target: models.Player }]
+    return [{ target: models.Player }];
   }
 }
 

@@ -34,8 +34,8 @@ export async function prepareModels(
     sequelize.define(modelName, model.attributes(), {
       validate: model.validation(),
       createdAt: model.useCreatedAt || false,
-      updatedAt: model.useUpdatedAt || false
-    })
+      updatedAt: model.useUpdatedAt || false,
+    });
   });
 
   models.forEach((model) => {
@@ -43,28 +43,36 @@ export async function prepareModels(
     signale.info("Creating Model associations", modelName);
     model.belongsTo(sequelize.models).forEach(({ target, options }) => {
       if (!target) {
-        throw new Error("Unknown Model association for " + modelName + " in belongsTo");
+        throw new Error(
+          "Unknown Model association for " + modelName + " in belongsTo"
+        );
       }
       sequelize.models[modelName].belongsTo(target, options);
     });
 
     model.belongsToMany(sequelize.models).forEach(({ target, options }) => {
       if (!target) {
-        throw new Error("Unknown Model association for " + modelName + " in belongsToMany");
+        throw new Error(
+          "Unknown Model association for " + modelName + " in belongsToMany"
+        );
       }
       sequelize.models[modelName].belongsToMany(target, options);
     });
 
     model.hasOne(sequelize.models).forEach(({ target, options }) => {
       if (!target) {
-        throw new Error("Unknown Model association for " + modelName + " in hasOne");
+        throw new Error(
+          "Unknown Model association for " + modelName + " in hasOne"
+        );
       }
       sequelize.models[modelName].hasOne(target, options);
     });
 
     model.hasMany(sequelize.models).forEach(({ target, options }) => {
       if (!target) {
-        throw new Error("Unknown Model association for " + modelName + " in hasMany");
+        throw new Error(
+          "Unknown Model association for " + modelName + " in hasMany"
+        );
       }
       sequelize.models[modelName].hasMany(target, options);
     });

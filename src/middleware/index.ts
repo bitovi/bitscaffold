@@ -13,7 +13,7 @@ export function scaffoldValidationMiddleware(): Middleware {
     const invalid: string[] = [];
     if (ctx.request.body) {
       const attributes = Object.keys(ctx.state.model.getAttributes());
-      const associations = Object.keys(ctx.state.model.associations)
+      const associations = Object.keys(ctx.state.model.associations);
       Object.keys(ctx.request.body).forEach((key) => {
         if (!attributes.includes(key)) {
           if (!associations.includes(key)) {
@@ -24,7 +24,13 @@ export function scaffoldValidationMiddleware(): Middleware {
     }
 
     if (invalid.length > 0) {
-      ctx.throw(400, "Invalid properties found for " + ctx.state.model.name + ": " + invalid.join(","));
+      ctx.throw(
+        400,
+        "Invalid properties found for " +
+          ctx.state.model.name +
+          ": " +
+          invalid.join(",")
+      );
     }
 
     if (!ctx.validation) {
@@ -40,7 +46,6 @@ export function scaffoldValidationMiddleware(): Middleware {
         ctx.state.model.name
       );
     }
-
 
     // Perform some lookups for the model
     // Perform some lookusp for the validation
@@ -173,12 +178,9 @@ export function scaffoldCreateMiddleware(): Middleware {
       if (ctx.request.body[name]) {
         // This needs to reference the Alias that we used to create the model.
         // This is probably discoverable via the model itself...
-        ctx.state.logger.info(
-          "Adding create association for ",
-          ctx.state.model.associations[name].target.name
-        );
+        ctx.state.logger.info("Adding create association for ", name);
         include.push({
-          association: ctx.state.model.associations[name].target,
+          association: ctx.state.model.associations[name],
           as: ctx.state.model.associations[name].as,
         });
       }
@@ -186,7 +188,7 @@ export function scaffoldCreateMiddleware(): Middleware {
 
     // Attempt to validate before create
     try {
-      const temp = ctx.state.model.build(ctx.request.body)
+      const temp = ctx.state.model.build(ctx.request.body);
       await temp.validate();
     } catch (err) {
       ctx.throw(400, err);
@@ -230,7 +232,8 @@ export function scaffoldDeleteMiddleware(): Middleware {
       });
 
       // Attach the results to the Koa context body
-      ctx.state.body = null;
+      ctx.state.body = result;
+      ctx.state.status = 200;
     } catch (err) {
       ctx.throw(500, err.message);
     }
@@ -251,9 +254,27 @@ export function scaffoldUpdateMiddleware(): Middleware {
       return ctx.throw(500, "No Model On Context");
     }
 
+    // Check that this is a valid update first
+    // @TODO: This might be really slow....?
+    try {
+      const record = await ctx.state.model.findByPk(ctx.params.id);
+      if (!record) {
+        ctx.state.logger.error("scaffoldUpdateMiddleware, Record Not Found");
+        return ctx.throw(404, "Record Not Found");
+      }
+
+      record.set(ctx.request.body);
+      await record.validate();
+    } catch (err) {
+      ctx.state.logger.error(
+        "scaffoldUpdateMiddleware, Record Validation Failed"
+      );
+      return ctx.throw(400, err);
+    }
+
     // Perform some update database query
     try {
-      const result = await ctx.state.model.update(ctx.request.body, {
+      const [result] = await ctx.state.model.update(ctx.request.body, {
         where: {
           id: ctx.params.id,
         },
@@ -263,7 +284,8 @@ export function scaffoldUpdateMiddleware(): Middleware {
       ctx.state.body = result;
       ctx.state.status = 200;
     } catch (err) {
-      ctx.throw(500, err.message);
+      ctx.state.logger.error("scaffoldUpdateMiddleware, Record Update Failed");
+      return ctx.throw(500, err.message);
     }
     ctx.state.logger.success("scaffoldUpdateMiddleware", ctx.state.model.name);
     await next();

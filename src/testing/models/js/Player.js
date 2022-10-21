@@ -14,11 +14,11 @@ class Player extends ScaffoldModelBase {
       lastName: DataTypes.STRING,
       startDate: DataTypes.DATE,
       endDate: DataTypes.DATE,
-    }
+    };
   }
 
   belongsTo(models) {
-    return [{ target: models.Team }]
+    return [{ target: models.Team }];
   }
 }
 
