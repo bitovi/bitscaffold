@@ -1,5 +1,5 @@
 import { DataTypes } from "sequelize";
-import { BelongsToResult, LoadedModels, ScaffoldModel } from "../../../types";
+import { ScaffoldModel } from "../../../types";
 
 export const Player: ScaffoldModel = {
   name: "Player",
@@ -16,18 +16,18 @@ export const Player: ScaffoldModel = {
     endDate: DataTypes.DATE,
   },
   validation: {
-    startDateBeforeEndDate() {
+    async startDateBeforeEndDate() {
       if (this.startDate && this.endDate && this.startDate >= this.endDate) {
         throw new Error("START_DATE_MUST_BE_BEFORE_END_DATE");
       }
     },
-    endDateAfterStartDate() {
+    async endDateAfterStartDate() {
       if (this.startDate && this.endDate && this.startDate >= this.endDate) {
         throw new Error("START_DATE_MUST_BE_BEFORE_END_DATE");
       }
     },
   },
-  belongsTo(models: LoadedModels): BelongsToResult[] {
+  belongsTo(models) {
     return [{ target: models.Team }];
   },
 };
