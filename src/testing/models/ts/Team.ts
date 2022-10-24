@@ -12,8 +12,5 @@ export const Team: ScaffoldModel = {
     },
     name: DataTypes.STRING,
   },
-
-  hasMany(models: LoadedModels): HasManyResult[] {
-    return [{ target: models.Player, options: { as: "players" } }];
-  },
+  hasMany: [{ target: "Player", options: { as: "players" } }],
 };

@@ -42,17 +42,26 @@ export async function prepareModels(
 
     const relationships = ["belongsTo", "belongsToMany", "hasOne", "hasMany"];
     relationships.forEach((relationship) => {
+      // For each relationship type, check if we have definitions for it:
       if (model[relationship]) {
-        model[relationship](sequelize.models).forEach(({ target, options }) => {
-          if (!target) {
+
+        // Grab the array of targets and options
+        model[relationship].forEach(({ target, options }) => {
+          if (!target || !sequelize.models[target]) {
             throw new Error(
               "Unknown Model association for " +
-                model.name +
-                " in " +
-                relationship
+              model.name +
+              " in " +
+              relationship
             );
           }
-          sequelize.models[model.name][relationship](target, options);
+
+          // Pull the models off sequelize.models
+          const current = sequelize.models[model.name];
+          const associated = sequelize.models[target];
+
+          // Create the relationship
+          current[relationship](associated, options);
         });
       }
     });

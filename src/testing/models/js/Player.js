@@ -14,10 +14,7 @@ const Player = {
     startDate: DataTypes.DATE,
     endDate: DataTypes.DATE,
   },
-
-  belongsTo(models) {
-    return [{ target: models.Team }];
-  },
+  belongsTo: [{ target: "Team" }],
 };
 
 module.exports = Player;

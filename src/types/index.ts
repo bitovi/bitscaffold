@@ -13,10 +13,10 @@ import {
 import signale from "signale";
 
 export interface ScaffoldAttributes
-  extends ModelAttributes<Model<any, any>, any> {}
+  extends ModelAttributes<Model<any, any>, any> { }
 
 export interface ScaffoldApplication
-  extends Koa<DefaultState, DefaultContext> {}
+  extends Koa<DefaultState, DefaultContext> { }
 
 export interface ScaffoldModelContext extends ScaffoldContext {
   state: ScaffoldContext["state"] & {
@@ -29,22 +29,22 @@ export interface LoadedModels {
 }
 
 export interface BelongsToManyResult {
-  target: ModelStatic<Model<any, any>>;
+  target: string;
   options: BelongsToManyOptions;
 }
 
 export interface BelongsToResult {
-  target: ModelStatic<Model<any, any>>;
+  target: string;
   options?: BelongsToOptions;
 }
 
 export interface HasOneResult {
-  target: ModelStatic<Model<any, any>>;
+  target: string;
   options?: HasOneOptions;
 }
 
 export interface HasManyResult {
-  target: ModelStatic<Model<any, any>>;
+  target: string;
   options?: HasManyOptions;
 }
 
@@ -67,8 +67,8 @@ export interface ScaffoldModel {
 
   validation?: ModelValidateOptions;
 
-  belongsTo?(models: LoadedModels): BelongsToResult[];
-  belongsToMany?(models: LoadedModels): BelongsToManyResult[];
-  hasOne?(models: LoadedModels): HasOneResult[];
-  hasMany?(models: LoadedModels): HasManyResult[];
+  belongsTo?: BelongsToResult[];
+  belongsToMany?: BelongsToManyResult[];
+  hasOne?: HasOneResult[];
+  hasMany?: HasManyResult[];
 }

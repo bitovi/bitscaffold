@@ -16,37 +16,48 @@ describe("Relationship Tests", () => {
   });
 
   it("should show an example of async model validators", async () => {
-    const ValidatorModel = sequelize.define("ValidatorModel", {
-      startDate: DataTypes.DATE,
-      endDate: DataTypes.DATE
-    }, {
-      validate: {
-        async startDateBeforeEndDate() {
-          if (this.startDate && this.endDate && this.startDate >= this.endDate) {
-            throw new Error("START_DATE_MUST_BE_BEFORE_END_DATE");
-          }
-        },
-        async endDateAfterStartDate() {
-          if (this.startDate && this.endDate && this.startDate >= this.endDate) {
-            throw new Error("START_DATE_MUST_BE_BEFORE_END_DATE");
-          }
+    const ValidatorModel = sequelize.define(
+      "ValidatorModel",
+      {
+        startDate: DataTypes.DATE,
+        endDate: DataTypes.DATE,
+      },
+      {
+        validate: {
+          async startDateBeforeEndDate() {
+            if (
+              this.startDate &&
+              this.endDate &&
+              this.startDate >= this.endDate
+            ) {
+              throw new Error("START_DATE_MUST_BE_BEFORE_END_DATE");
+            }
+          },
+          async endDateAfterStartDate() {
+            if (
+              this.startDate &&
+              this.endDate &&
+              this.startDate >= this.endDate
+            ) {
+              throw new Error("START_DATE_MUST_BE_BEFORE_END_DATE");
+            }
+          },
         },
       }
-    });
+    );
 
     const temp = ValidatorModel.build({
       startDate: new Date("2021-05-22"),
-      endDate: new Date("2020-05-22")
-    })
+      endDate: new Date("2020-05-22"),
+    });
 
     try {
-      await temp.validate()
+      await temp.validate();
       expect(false).toBe(true);
     } catch (err) {
       expect(err.message).toContain("START_DATE_MUST_BE_BEFORE_END_DATE");
     }
   });
-
 
   it("should show an example of One-To-One", async () => {
     const Foo = sequelize.define("Foo", {});

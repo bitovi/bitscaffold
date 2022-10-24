@@ -6,7 +6,5 @@ export const Bar: ScaffoldModel = {
   attributes: {
     name: DataTypes.STRING,
   },
-  belongsTo(models) {
-    return [{ target: models.Foo }];
-  },
+  belongsTo: [{ target: "Foo" }],
 };

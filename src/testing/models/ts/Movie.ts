@@ -12,8 +12,5 @@ export const Movie: ScaffoldModel = {
     },
     name: DataTypes.STRING,
   },
-
-  belongsToMany(models) {
-    return [{ target: models.Actor, options: { through: "ActorMovies" } }];
-  },
+  belongsToMany: [{ target: "Actor", options: { through: "ActorMovies" } }],
 };

@@ -12,9 +12,7 @@ const Team = {
     name: DataTypes.STRING,
   },
 
-  hasMany(models) {
-    return [{ target: models.Player }];
-  },
+  hasMany: [{ target: "Player" }],
 };
 
 module.exports = Team;

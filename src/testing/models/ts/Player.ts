@@ -27,7 +27,5 @@ export const Player: ScaffoldModel = {
       }
     },
   },
-  belongsTo(models) {
-    return [{ target: models.Team }];
-  },
+  belongsTo: [{ target: "Team" }],
 };
