@@ -15,16 +15,30 @@ export const Player: ScaffoldModel = {
     endDate: DataTypes.DATE,
   },
   validation: {
-    async startDateBeforeEndDate() {
+    startDateBeforeEndDate() {
       if (this.startDate && this.endDate && this.startDate >= this.endDate) {
         throw new Error("START_DATE_MUST_BE_BEFORE_END_DATE");
       }
     },
-    async endDateAfterStartDate() {
+    endDateAfterStartDate() {
       if (this.startDate && this.endDate && this.startDate >= this.endDate) {
         throw new Error("START_DATE_MUST_BE_BEFORE_END_DATE");
       }
     },
   },
   belongsTo: [{ target: "Team" }],
+};
+
+export const Team: ScaffoldModel = {
+  name: "Team",
+  attributes: {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+      allowNull: false,
+    },
+    name: DataTypes.STRING,
+  },
+  hasMany: [{ target: "Player", options: { as: "players" } }],
 };

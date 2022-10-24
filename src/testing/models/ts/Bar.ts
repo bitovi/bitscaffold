@@ -1,5 +1,4 @@
-import { DataTypes } from "sequelize";
-import { ScaffoldModel } from "../../../types";
+import { ScaffoldModel, DataTypes } from "../../../types";
 
 export const Bar: ScaffoldModel = {
   name: "Bar",

@@ -44,15 +44,14 @@ export async function prepareModels(
     relationships.forEach((relationship) => {
       // For each relationship type, check if we have definitions for it:
       if (model[relationship]) {
-
         // Grab the array of targets and options
         model[relationship].forEach(({ target, options }) => {
           if (!target || !sequelize.models[target]) {
             throw new Error(
               "Unknown Model association for " +
-              model.name +
-              " in " +
-              relationship
+                model.name +
+                " in " +
+                relationship
             );
           }
 

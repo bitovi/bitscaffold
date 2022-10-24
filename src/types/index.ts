@@ -12,11 +12,13 @@ import {
 } from "sequelize";
 import signale from "signale";
 
+export { DataTypes } from "sequelize";
+
 export interface ScaffoldAttributes
-  extends ModelAttributes<Model<any, any>, any> { }
+  extends ModelAttributes<Model<any, any>, any> {}
 
 export interface ScaffoldApplication
-  extends Koa<DefaultState, DefaultContext> { }
+  extends Koa<DefaultState, DefaultContext> {}
 
 export interface ScaffoldModelContext extends ScaffoldContext {
   state: ScaffoldContext["state"] & {

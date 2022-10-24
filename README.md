@@ -1,28 +1,31 @@
-<i>The following is an example of what a GitHub Readme or Homepage for BitScaffold might include. It attempts to describe the project workflow, the reasons to use the project, and the technology stack in a way that helps define the project direction. See [Confluence for more information](https://bitovi.atlassian.net/wiki/spaces/SCAFFOLD/overview)!</i>
+<i>The following is an example of what a GitHub Readme or Homepage for Scaffold might include. It attempts to describe the project workflow, the reasons to use the project, and the technology stack in a way that helps define the project direction. See [Confluence for more information](https://bitovi.atlassian.net/wiki/spaces/SCAFFOLD/overview)!</i>
 
-<h1 style="text-align: center;">BitScaffold</h1>
-<p style="text-align: center;">Created by Bitovi</p>
+<h1 style="text-align: center;">@bitovi/scaffold</h1>
 
-## About BitScaffold
+## About Scaffold
 
-BitScaffold is a full-stack, TypeScript powered, web application framework designed to accelerate the development of CRUD applications, allowing you to quickly and easily spin up new projects in a cost-effective way.
+Scaffold is a full-stack, TypeScript powered, web application framework designed to accelerate the development of CRUD applications. In short, Scaffold is a 'medium code' solution to take you straight from your database schema to fully functioning CRUD application.
 
-At the highest level, BitScaffold is a ‘medium code’ solution to take you from database schema straight to fully functioning CRUD application. Your project schema is evaluated at run time removing the need for build scripts or generator commands.
+If all you need is a simple CRUD application, you can finish right there with a fully functioning app.
+If you need more features or side effects you can provide as much customization as you need. Scaffold makes it easy to override the default behavior so you can concentrate on what makes your application special and not just more boilerplate.
 
-By handling the basics for you, BitScaffold lets you focus on what makes your application special, instead of spending time building boilerplate and tweaking configurations. Plus, because BitScaffold processes your schema at run-time you can quickly and easily modify your application without worrying about complicated generators or build steps.
+Scaffold should make it quick and easy to create, test, and validate your application and data model right from the start
 
-## BitScaffold Quick Start (New Project)
+## Scaffold Quick Start (New Project)
 
-- Run `npx bitscaffold my-project-name`
+- Run `npx @bitovi/scaffold my-project-name`
 - Answer the prompts to configure your project
-- Change into the `my-project-name` directory
-- Create your `schema.bitscaffold` file (check this file into git!)
-- Run: `npm run start`
+- Run `cd my-project-name`
+- Take a look at the example `Foo.ts` schema inside `./src/schema/`
+  - Optional: Customize this file to see how the behavior can change!
+- Run `npm run start`
 - View your brand new CRUD app at http://localhost:3000/
+  - Optional: See the backend routes listed at http://localhost:3000/api/\_routes/
+- Check out the documentation to further customize your application
 
 ## Technologies
 
-BitScaffold attempts to simplify the developer experience by letting you focus on your data and provides you existing libraries to solve the common problems developers have:
+Scaffold attempts to simplify the developer experience by letting you focus on your data and provides you existing libraries to solve the common problems developers have:
 
 - React
 - Angular
@@ -31,90 +34,125 @@ BitScaffold attempts to simplify the developer experience by letting you focus o
 
 ## How It Works
 
-A BitScaffold project is split into three parts, a frontend, a backend, and your data schema. The BitScaffold repository contains everything you need to get going with sane defaults for your frontend and backend, you just provide the schema.
+A Scaffold project is split into three parts, a frontend, a backend, and your data schema. The Scaffold repository contains everything you need to get going with sane defaults for your frontend and backend, you just provide the schema.
 
-When the application starts up, the Scaffold will create REST endpoints based on your database tables, with data validation and authentication for free. When a user hits the frontend URL your schema will be used again to create frontend forms and components to read, create, update, and delete records with all of the same data validation applied to the frontend forms.
+When the application starts up, Scaffold will create REST endpoints based on your database tables, with basic data validation and authentication straight out of the box. When a user hits the frontend URL your schema will be used again to create frontend forms and components to read, create, update, and delete records with all of the same data validation applied to the frontend forms.
 
 ## Getting Started Tutorial
 
-Create a BitScaffold project with `npx bitscaffold my-bitscaffold-project`:
+Create a new Scaffold project
 
 > ```
-> npx bitscaffold my-bitscaffold-project
+> npx @bitovi/scaffold my-project-name
 > ```
 
-Then change into that directory and create your project definition file:
+Change in to the project directory and start creating your schema files:
 
 > ```
-> cd my-bitscaffold-project
+> cd my-project-name
 > ```
 
-## Project Schema
-
-BitScaffold wouldn't be a full-stack framework without a database layer. Everything is based on your project definition. Open the `schema.bitscaffold` file and take a look at the `User` model definition example. Your schema file is defined in simple JSON so it can be easily shared between the frontend and backend of your application.
-
-```json
-{
-  "models": {
-    "User": {
-      "id": {
-        "type": "UUID",
-        "primary": true,
-        "autoIncrement": true
-      },
-      "firstName": {
-        "type": "STRING"
-      },
-      "lastName": {
-        "type": "STRING"
-      }
-    }
-  },
-  "config": {}
-}
-```
+You can find an example Schema file inside the `src/schema/` folder. Open up `Example.ts` and you should see the following:
 
 ```typescript
-export class User {
-  static get tableName() {
-    return "user";
-  }
+import { ScaffoldModel, DataTypes } from "@bitovi/scaffold/types";
 
-  static get fields() {
-    return {
-      id: {
-        type: "uuid",
-        primary: true,
-        required: true,
-      },
-      firstName: {
-        type: "string",
-        required: true,
-      },
-      lastName: {
-        type: "date",
-        required: false,
-      },
-    };
-  }
-}
+export const Player: ScaffoldModel = {
+  name: "Player",
+  attributes: {
+    firstName: DataTypes.STRING,
+    lastName: DataTypes.STRING,
+    startDate: DataTypes.DATE,
+    endDate: DataTypes.DATE,
+  },
+};
 ```
 
-BitScaffold uses Sequelize, a Node.js and TypeScript compatible ORM, under the hood to talk to your database. BitScaffold will do all the work for you to convert your `schema.bitscaffold` file into ORM Models and validation middleware at runtime.
+This is pretty simple! The only things you are required to provide are a `name` for your model and the `attributes` that will be held within your database. If you have written ORM models before, specifically Sequelize, this should look pretty familiar to you. Scaffold uses Sequelize, a Node.js and TypeScript compatible ORM, under the hood to talk to your database.
 
-Now let's start up the service to see our CRUD app in action. Thats it!
+If you created any additional schema files you will need to tell Scaffold to load them at start up.
+
+Open up the `src/index.ts` file and take a look at how your schema files are passed in to the main Scaffold application.
+
+`src/index.ts`
+
+```typescript
+import {
+  createScaffoldApplication,
+  startScaffoldApplication,
+} from "@bitovi/scaffold";
+import { Player, Team } from "./schema/Example";
+
+async function init() {
+  console.log("Creating Scaffold Application");
+  const app = await createScaffoldApplication([Player, Team]);
+
+  console.log("Starting Scaffold Application");
+  await startScaffoldApplication(app, 3000);
+
+  console.log("Started on port 3000");
+}
+
+init();
+```
+
+To add additional schema files, simply import them at the top and pass them into the `createScaffoldApplication` call. `createScaffoldApplication` will take care of validating your schemas, their relationships, and creating a test database when the application starts.
+
+Next we can start up the Scaffold to see everything in action. By default the application will start up on port 3000, but you can change this in the `src/index.ts` if you want.
+
+Run the Scaffold Service
 
 > `npm run start`
 
-Navigate to [http://localhost:3000/user/new](http://localhost:3000/user/new), fill in the first name and last name fields, and click "Save":
+You should see some helpful output printed to your console showing what is happening with your different schemas, relationships, and validations. See the following example output: 
+```
+Creating Scaffold Application
+ℹ  info      Creating Scaffold Application
+ℹ  info      Creating Koa Application Defaults
+ℹ  info      Creating Sequelize instance
+ℹ  info      Attaching Sequelize instance to Context
+ℹ  info      Attaching Models to Sequelize instance
+ℹ  info      Creating Model Player
+ℹ  info      Creating Model Team
+ℹ  info      Creating Model associations Player
+ℹ  info      Creating Model associations Team
+ℹ  info      Running Sequelize Model Sync
+ℹ  info        SQL: Executing (default): DROP TABLE IF EXISTS `Players`;
+ℹ  info        SQL: Executing (default): DROP TABLE IF EXISTS `Teams`;
+ℹ  info        SQL: Executing (default): PRAGMA foreign_keys = OFF
+ℹ  info        SQL: Executing (default): DROP TABLE IF EXISTS `Players`;
+ℹ  info        SQL: Executing (default): DROP TABLE IF EXISTS `Teams`;
+ℹ  info        SQL: Executing (default): PRAGMA foreign_keys = ON
+ℹ  info        SQL: Executing (default): DROP TABLE IF EXISTS `Teams`;
+ℹ  info        SQL: Executing (default): CREATE TABLE IF NOT EXISTS `Teams` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `name` VARCHAR(255));
+ℹ  info        SQL: Executing (default): PRAGMA INDEX_LIST(`Teams`)
+ℹ  info        SQL: Executing (default): DROP TABLE IF EXISTS `Players`;
+ℹ  info        SQL: Executing (default): CREATE TABLE IF NOT EXISTS `Players` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `firstName` VARCHAR(255), `lastName` VARCHAR(255), `startDate` DATETIME, `endDate` DATETIME, `TeamId` INTEGER REFERENCES `Teams` (`id`) ON DELETE SET NULL ON UPDATE CASCADE);
+ℹ  info        SQL: Executing (default): PRAGMA INDEX_LIST(`Players`)
+ℹ  info      Attaching default Routes
+Starting Scaffold Application
+ℹ  info      Starting Scaffold Application listening
+Started on port 3000
+```
+Once you see `Started on port 3000` you can open your browser to http://localhost:3000/ to see things in action.
 
-<img src="" alt="Create a new user" /> [no frontend exists yet to show this]
+Navigate to [http://localhost:3000/Player/new](http://localhost:3000/Player/new), fill in the first name and last name fields, and click "Save":
 
-Navigate to [http://localhost:3000/users](http://localhost:3000/users), and you will see the user that you just created has been fetched from the database and displayed for you!
+<img src="https://via.placeholder.com/800x600" alt="Create a new player" />
 
-<img src="" alt="Display user list" /> [no frontend exists yet to show this]
+Navigate to [http://localhost:3000/Players](http://localhost:3000/Players), and you will see the user that you just created has been fetched from the database and displayed for you!
 
-Just like that we created an example User within the database. When you ran `npm run start` Scaffold did all the work to connect to your database, create all the pages, routes, forms and services necessary to perform all CRUD operations against the User table.
+<img src="https://via.placeholder.com/800x600" alt="Display player list" />
+
+Just like that we created an example Player within the database. When you ran `npm run start` Scaffold did all the work to connect to your database, create all the pages, routes, forms and services necessary to perform all CRUD operations against the Player table.
+
+Navigate to [http://localhost:3000/Team/new](http://localhost:3000/Team/new), fill out the 'Name' field. Because a Team can have many players assigned to it, you can select your existing users from the dropdown, and click "Save" to create the new team:
+
+<img src="https://via.placeholder.com/800x600" alt="Create a new team" />
+
+Just like the player list, if you navigate to Navigate to [http://localhost:3000/Teams](http://localhost:3000/Teams), you can see the Team you just created. 
+
+<img src="https://via.placeholder.com/800x600" alt="Display team list" />
 
 ## Project Customization
 
@@ -185,122 +223,68 @@ router.post(
 
 Scaffold allows you to define validation rules within your models to make sure that the data that ends up in your database takes the form you expect. You can define these rules in one place and they will be automatically used in both the frontend and backend, stopping most invalid requests from ever reaching your backend in the first place.
 
-Inside your schema file, you can optionally define a validation function. Within this function you can specify field names, mongodb-style operators, and which other field they might rely on. In the example below we can validate that an employee start date must be before their end date, and the end date must be after the start date.
+Inside your schema file, you can optionally define a set of validation functions. Within this function you can specify custom rules for your fields, and which other field they might rely on. In the example below we can validate that an player start date must be before their end date, and the end date must be after the start date.
+
+If our check for start and end date fails our validation rules, we can throw an error letting the system know that the requested state was invalid.
 
 ```typescript
-    static get validation() {
-        return {
-            start_date: {
-                lt: "end_date"
-            },
-            end_date: {
-                gt: "start_date"
-            }
-        }
-    }
-```
-
-For more open ended examples, you can use the `regex` operator to do some basic validation for string length, emails, or other more specific types.
-
-```typescript
-    static get validation() {
-        return {
-            name: {
-                regex: "^[a-zA-Z]{7}$"
-            },
-            end_date: {
-                gt: "start_date"
-            }
-        }
-    }
-```
-
-## Model Relationships
-
-Scaffold can help you define and build relationships between different models within your application. For example, if you had a system that delt with scheduling employees on certain projects, you might have a User as well as a Project. However, a Project should have a manager (who is a user) as well as N number of people working on that project. Similarly, we should be able to check a user to find out what project they are on.
-
-If we expand our config example from before, we have added additional fields that define the relationships between different models within the system.
-
-the `type` is defined here as a relationship type followed by the Model that it relates to. The sourceKey for the relationship is provided as the name of the property and the foreignKey can be set if needed (the default is id).
-
-```json
-{
-  "models": {
-    "User": {
-      "id": {
-        "type": "UUID",
-        "primary": true,
-        "autoIncrement": true
-      },
-      "firstName": {
-        "type": "STRING",
-        "required": true
-      },
-      "lastName": {
-        "type": "STRING",
-        "required": true
-      },
-      "projects": {
-        "required": false,
-        "type": "hasMany:Projects",
-        "foreignKey": "id"
+export const Player: ScaffoldModel = {
+  name: "Player",
+  attributes: {
+    // sic
+  },
+  validation: {
+    async startDateBeforeEndDate() {
+      if (this.startDate && this.endDate && this.startDate >= this.endDate) {
+        throw new Error("START_DATE_MUST_BE_BEFORE_END_DATE");
       }
     },
-    "Project": {
-      "id": {
-        "type": "UUID",
-        "primary": true,
-        "autoIncrement": true
-      },
-      "name": {
-        "type": "STRING"
-      },
-      "manager": {
-        "type": "hasOne:User",
-        "foreignKey": "id"
-      },
-      "users": {
-        "type": "hasMany:User",
-        "foreignKey": "id"
+    async endDateAfterStartDate() {
+      if (this.startDate && this.endDate && this.startDate >= this.endDate) {
+        throw new Error("START_DATE_MUST_BE_BEFORE_END_DATE");
       }
-    }
+    },
   },
-  "config": {}
-}
-```
+  belongsTo: [{ target: "Team" }],
+};
 
-Inside your typescript config file you can add an optional `relationships` function that provides that mapping between different models.
+```
+## Model Relationships
+
+Scaffold can help you define and build relationships between different models within your application. In our examples above we have used the Player and Teams schemas, where a Player belongs to a Team and a Team can have many different Players assigned to it.
+
+Taking a look at the example schema again, we can see that the `Player` has a `belongsTo` property that names `Team` as the target. Similarially, the `Team` contains a `hasMany` property that names `Player` as the target. The `Team` also has some options provided to name the relationship as `players`
+
+Given this relationship, we could query the `Team` and would get back an array of players on its `players` property. 
 
 ```typescript
-    static get relationships() {
-        return {
-            skills: {
-                relation: 'ManyToManyRelation',
-                modelClass: Skill,
-                join: {
-                    from: 'employee.id',
-                    through: {
-                        from: 'employee__skill.employee_id',
-                        to: 'employee__skill.skill_id'
-                    },
-                    to: 'skill.id'
-                }
-            }
-        }
-    }
+import { ScaffoldModel, DataTypes } from "../../../types";
+
+export const Player: ScaffoldModel = {
+  name: "Player",
+  attributes: {
+    // sic 
+  },
+  validation: {
+    // sic
+  },
+  belongsTo: [{ target: "Team" }],
+};
+
+export const Team: ScaffoldModel = {
+  name: "Team",
+  attributes: {
+   // sic
+  },
+  hasMany: [{ target: "Player", options: { as: "players" } }],
+};
 ```
-
-Given this definition file, Scaffold can provide this additional joined information if requested. Same on the frontend, if you want to create a new project, you will see a drop down with a list of users to assign. The relationship type can also hint to the frontend what type of form you should see displayed.
-
-<img src="" alt="Create a new user with project dropdown" /> [no frontend exists yet to show this]
 
 ## Integrating With Your Existing App
 
 If you already have an existing Koa or Express application you can still take advantage of Scaffold! Because Scaffold is enabled through Koa Middleware, you can simply use the `ScaffoldWrapperMiddleware` and add it to the top `app.use` section of your project. Then simply provide a Scaffold schema file as usual and you're good to go.
 
 At runtime, just like normal, the middleware will parse your Scaffold schema to create models and will update your REST server to add the normal scaffold routes.
-
-@TODO: Some way to deal with route collision.
 
 ## Local Development
 
@@ -312,19 +296,6 @@ Assuming you keep your repositories somewhere like `~/GitHub/`...
 2. `cd bitscaffold`
 3. Run `npm run build` to create the JavaScript needed for external projects
 4. Run `npm link`. This will create a link from the global node_modules folder to your bitscaffold directory
-5. Switch over to your existing BitScaffold project directory, `cd my-scaffold-project`
+5. Switch over to your existing Scaffold project directory, `cd my-scaffold-project`
 6. Create the link to this project with `npm link bitscaffold`
 7. You may need to re-run `npm link bitscaffold` if you run other `npm install` like commands in this repository
-
-## Key Features
-
-1. Ability to overwrite the logic that the system produces 'by default')\*
-2. Getting started simplicity, CRUD page for a single table, Demoability.
-3. Ability to leverage benefits of the system even after overwriting the default logic
-4. Natural interfaces to manipulate and explore the joins and relationships, both backend and frontend
-5. Validations defined in one place, work for both the frontend and backend
-6. Ability to integrate with existing Koa or Express projects
-
-7. Support of 'business logic' side effects
-8. Can be used as a no-code solution for the lifetime of the project/application
-9. Works with the users chosen tech stack [Angular, Vie, Python, etc]
