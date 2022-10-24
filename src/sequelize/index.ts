@@ -1,7 +1,7 @@
 import Koa from "koa";
 import { Sequelize } from "sequelize";
 import signale from "signale";
-import { ScaffoldModelBase } from "../types";
+import { ScaffoldModel } from "../types";
 
 export async function prepareSequelize(app: Koa, sync?: boolean): Promise<any> {
   if (!app.context.database) {
@@ -20,7 +20,7 @@ export async function prepareSequelize(app: Koa, sync?: boolean): Promise<any> {
 
 export async function prepareModels(
   app: Koa,
-  models: ScaffoldModelBase[]
+  models: ScaffoldModel[]
 ): Promise<any> {
   if (!app.context.database) {
     await prepareSequelize(app);
@@ -31,8 +31,8 @@ export async function prepareModels(
   models.forEach((model) => {
     const modelName = model.constructor.name;
     signale.info("Creating Model", modelName);
-    sequelize.define(modelName, model.attributes(), {
-      validate: model.validation(),
+    sequelize.define(modelName, model.attributes, {
+      validate: model.validation,
       createdAt: model.useCreatedAt || false,
       updatedAt: model.useUpdatedAt || false,
     });
@@ -41,40 +41,22 @@ export async function prepareModels(
   models.forEach((model) => {
     const modelName = model.constructor.name;
     signale.info("Creating Model associations", modelName);
-    model.belongsTo(sequelize.models).forEach(({ target, options }) => {
-      if (!target) {
-        throw new Error(
-          "Unknown Model association for " + modelName + " in belongsTo"
-        );
-      }
-      sequelize.models[modelName].belongsTo(target, options);
-    });
 
-    model.belongsToMany(sequelize.models).forEach(({ target, options }) => {
-      if (!target) {
-        throw new Error(
-          "Unknown Model association for " + modelName + " in belongsToMany"
-        );
+    const relationships = ["belongsTo", "belongsToMany", "hasOne", "hasMany"];
+    relationships.forEach((relationship) => {
+      if (model[relationship]) {
+        model[relationship](sequelize.models).forEach(({ target, options }) => {
+          if (!target) {
+            throw new Error(
+              "Unknown Model association for " +
+                modelName +
+                " in " +
+                relationship
+            );
+          }
+          sequelize.models[modelName][relationship](target, options);
+        });
       }
-      sequelize.models[modelName].belongsToMany(target, options);
-    });
-
-    model.hasOne(sequelize.models).forEach(({ target, options }) => {
-      if (!target) {
-        throw new Error(
-          "Unknown Model association for " + modelName + " in hasOne"
-        );
-      }
-      sequelize.models[modelName].hasOne(target, options);
-    });
-
-    model.hasMany(sequelize.models).forEach(({ target, options }) => {
-      if (!target) {
-        throw new Error(
-          "Unknown Model association for " + modelName + " in hasMany"
-        );
-      }
-      sequelize.models[modelName].hasMany(target, options);
     });
   });
 

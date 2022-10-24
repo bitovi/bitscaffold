@@ -1,22 +1,15 @@
-import { DataTypes, Model, ModelAttributes } from "sequelize";
-import {
-  HasOneResult,
-  LoadedModels,
-  ScaffoldModelBase,
-  ScaffoldAttributes,
-} from "../../../types";
+import { DataTypes } from "sequelize";
+import { ScaffoldModel } from "../../../types";
 
-export default class Foo extends ScaffoldModelBase {
-  attributes(): ScaffoldAttributes {
-    return {
-      name: DataTypes.STRING,
-    };
-  }
+export const Foo: ScaffoldModel = {
+  attributes: {
+    name: DataTypes.STRING,
+  },
 
-  hasOne(models: LoadedModels): HasOneResult[] {
+  hasOne(models) {
     return [
       { target: models.Bar, options: { as: "Bar" } },
       { target: models.Bar, options: { as: "Baz" } },
     ];
-  }
-}
+  },
+};

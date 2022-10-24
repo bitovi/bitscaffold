@@ -7,14 +7,14 @@ import KoaCors from "@koa/cors";
 import { v4 } from "uuid";
 import os from "os";
 import { prepareDefaultRoutes } from "./routes";
-import { ScaffoldApplication, ScaffoldModelBase } from "./types";
+import { ScaffoldApplication, ScaffoldModel } from "./types";
 import { prepareModels, prepareSequelize } from "./sequelize";
 
 /**
  * Entrypoint
  */
 export async function createScaffoldApplication(
-  models: ScaffoldModelBase[],
+  models: ScaffoldModel[],
   routes?: Router
 ): Promise<ScaffoldApplication> {
   signale.info("Creating Scaffold Application");
@@ -38,7 +38,7 @@ export async function createScaffoldApplication(
 }
 
 export async function __mockApplication(
-  models: ScaffoldModelBase[]
+  models: ScaffoldModel[]
 ): Promise<Server> {
   const app = await createScaffoldApplication(models);
   return http.createServer(app.callback());
@@ -53,7 +53,7 @@ export async function startScaffoldApplication(
 }
 
 export function attachScaffoldDefaultMiddleware(
-  models: ScaffoldModelBase[],
+  models: ScaffoldModel[],
   app: Koa
 ): Middleware {
   const setup = async () => {

@@ -1,19 +1,11 @@
 import { DataTypes } from "sequelize";
-import {
-  BelongsToResult,
-  LoadedModels,
-  ScaffoldAttributes,
-  ScaffoldModelBase,
-} from "../../../types";
+import { ScaffoldModel } from "../../../types";
 
-export default class Bar extends ScaffoldModelBase {
-  attributes(): ScaffoldAttributes {
-    return {
-      name: DataTypes.STRING,
-    };
-  }
-
-  belongsTo(models: LoadedModels): BelongsToResult[] {
+export const Bar: ScaffoldModel = {
+  attributes: {
+    name: DataTypes.STRING,
+  },
+  belongsTo(models) {
     return [{ target: models.Foo }];
-  }
-}
+  },
+};

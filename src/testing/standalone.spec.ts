@@ -1,19 +1,19 @@
 import { createScaffoldApplication } from "../index";
 
-import PlayerTS from "./models/ts/Player";
-import TeamTS from "./models/ts/Team";
+import { Player } from "./models/ts/Player";
+import { Team } from "./models/ts/Team";
 
 import PlayerJS from "./models/js/Player";
 import TeamJS from "./models/js/Team";
 
 describe("Standalone Scaffold", () => {
   it("should handle creating a Scaffold app with typescript models", async () => {
-    const app = await createScaffoldApplication([new PlayerTS(), new TeamTS()]);
+    const app = await createScaffoldApplication([Player, Team]);
     expect(app).toBeTruthy();
   });
 
   it("should handle creating a Scaffold app with javascript models", async () => {
-    const app = await createScaffoldApplication([new PlayerJS(), new TeamJS()]);
+    const app = await createScaffoldApplication([PlayerJS, TeamJS]);
     expect(app).toBeTruthy();
   });
 });

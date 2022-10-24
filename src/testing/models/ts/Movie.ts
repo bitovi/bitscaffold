@@ -1,25 +1,18 @@
-import { Model, DataTypes, ModelAttributes } from "sequelize";
-import {
-  BelongsToManyResult,
-  LoadedModels,
-  ScaffoldModelBase,
-  ScaffoldAttributes,
-} from "../../../types";
+import { DataTypes } from "sequelize";
+import { ScaffoldModel } from "../../../types";
 
-export default class Movie extends ScaffoldModelBase {
-  attributes(): ScaffoldAttributes {
-    return {
-      id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
-        allowNull: false,
-      },
-      name: DataTypes.STRING,
-    };
-  }
+export const Movie: ScaffoldModel = {
+  attributes: {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+      allowNull: false,
+    },
+    name: DataTypes.STRING,
+  },
 
-  belongsToMany(models: LoadedModels): BelongsToManyResult[] {
+  belongsToMany(models) {
     return [{ target: models.Actor, options: { through: "ActorMovies" } }];
-  }
-}
+  },
+};

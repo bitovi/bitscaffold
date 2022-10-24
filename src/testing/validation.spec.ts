@@ -2,8 +2,8 @@ import { __mockApplication } from "../index";
 import { POST, PUT } from "./utils";
 import http from "node:http";
 
-import PlayerTS from "./models/ts/Player";
-import TeamTS from "./models/ts/Team";
+import { Player } from "./models/ts/Player";
+import { Team } from "./models/ts/Team";
 
 describe("Validation Tests", () => {
   beforeAll(() => {
@@ -11,7 +11,7 @@ describe("Validation Tests", () => {
   });
 
   it("should fail validtion if there are extra properties", async () => {
-    const server = await __mockApplication([new PlayerTS(), new TeamTS()]);
+    const server = await __mockApplication([Player, Team]);
 
     console.log("Creating a new Player");
     const result2 = await POST(server, "/api/Player", {
@@ -27,7 +27,7 @@ describe("Validation Tests", () => {
   });
 
   it("should fail validtion if startDate > endDate", async () => {
-    const server = await __mockApplication([new PlayerTS(), new TeamTS()]);
+    const server = await __mockApplication([Player, Team]);
 
     console.log("Creating a new Player");
     const result2 = await POST(server, "/api/Player", {
@@ -42,7 +42,7 @@ describe("Validation Tests", () => {
   });
 
   it("should fail validtion create and then update invalid", async () => {
-    const server = await __mockApplication([new PlayerTS(), new TeamTS()]);
+    const server = await __mockApplication([Player, Team]);
 
     console.log("Creating a new Player");
     const result1 = await POST(server, "/api/Player", {
@@ -64,7 +64,7 @@ describe("Validation Tests", () => {
   });
 
   it("should pass validtion create and then update valid", async () => {
-    const server = await __mockApplication([new PlayerTS(), new TeamTS()]);
+    const server = await __mockApplication([Player, Team]);
 
     console.log("Creating a new Player");
     const result1 = await POST(server, "/api/Player", {

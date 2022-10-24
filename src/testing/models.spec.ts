@@ -2,12 +2,12 @@ import { __mockApplication } from "../index";
 import { DELETE, GET, POST } from "./utils";
 import http from "node:http";
 
-import PlayerTS from "./models/ts/Player";
-import TeamTS from "./models/ts/Team";
-import MovieTS from "./models/ts/Movie";
-import ActorTS from "./models/ts/Actor";
-import BarTS from "./models/ts/Bar";
-import FooTS from "./models/ts/Foo";
+import { Player } from "./models/ts/Player";
+import { Team } from "./models/ts/Team";
+import { Movie } from "./models/ts/Movie";
+import { Actor } from "./models/ts/Actor";
+import { Bar } from "./models/ts/Bar";
+import { Foo } from "./models/ts/Foo";
 
 describe("Model Tests", () => {
   beforeAll(() => {
@@ -15,7 +15,7 @@ describe("Model Tests", () => {
   });
 
   it("One-To-One Testing", async () => {
-    const server = await __mockApplication([new BarTS(), new FooTS()]);
+    const server = await __mockApplication([Bar, Foo]);
 
     console.log("Creating a new Foo");
     const result1 = await POST(server, "/api/Foo", {
@@ -45,7 +45,7 @@ describe("Model Tests", () => {
   });
 
   it("One-To-Many Testing", async () => {
-    const server = await __mockApplication([new PlayerTS(), new TeamTS()]);
+    const server = await __mockApplication([Player, Team]);
 
     console.log("Creating a new Team");
     const result1 = await POST(server, "/api/Team", {
@@ -87,7 +87,7 @@ describe("Model Tests", () => {
   });
 
   it.skip("Many-To-Many Testing", async () => {
-    const server = await __mockApplication([new MovieTS(), new ActorTS()]);
+    const server = await __mockApplication([Movie, Actor]);
 
     console.log("Creating a new Movie");
     const result1 = await POST(server, "/api/Movie", {
@@ -137,7 +137,7 @@ describe("Model Tests", () => {
   });
 
   it("Create and Delete a Record", async () => {
-    const server = await __mockApplication([new PlayerTS(), new TeamTS()]);
+    const server = await __mockApplication([Player, Team]);
 
     console.log("Creating a new Team");
     const result1 = await POST(server, "/api/Team", {

@@ -56,31 +56,19 @@ export interface ScaffoldContext extends Context {
   models: { [ModelName: string]: ModelStatic<Model> };
 }
 
-export abstract class ScaffoldModelBase {
+export interface ScaffoldModel {
+  attributes: ScaffoldAttributes;
+
   tableName?: string;
   tablePluralName?: string;
 
-  useCreatedAt: boolean;
-  useUpdatedAt: boolean;
+  useCreatedAt?: boolean;
+  useUpdatedAt?: boolean;
 
-  abstract attributes(): ScaffoldAttributes;
-  validation(): ModelValidateOptions {
-    return {};
-  }
+  validation?: ModelValidateOptions;
 
-  belongsTo(models: LoadedModels): BelongsToResult[] {
-    return [];
-  }
-
-  belongsToMany(models: LoadedModels): BelongsToManyResult[] {
-    return [];
-  }
-
-  hasOne(models: LoadedModels): HasOneResult[] {
-    return [];
-  }
-
-  hasMany(models: LoadedModels): HasManyResult[] {
-    return [];
-  }
+  belongsTo?(models: LoadedModels): BelongsToResult[];
+  belongsToMany?(models: LoadedModels): BelongsToManyResult[];
+  hasOne?(models: LoadedModels): HasOneResult[];
+  hasMany?(models: LoadedModels): HasManyResult[];
 }
