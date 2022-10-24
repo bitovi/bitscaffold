@@ -1,6 +1,7 @@
 const { DataTypes } = require("sequelize");
 
 const Team = {
+  name: "Team",
   attributes: {
     id: {
       type: DataTypes.INTEGER,

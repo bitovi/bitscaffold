@@ -29,18 +29,16 @@ export async function prepareModels(
   signale.info("Attaching Models to Sequelize instance");
   const sequelize: Sequelize = app.context.database;
   models.forEach((model) => {
-    const modelName = model.constructor.name;
-    signale.info("Creating Model", modelName);
-    sequelize.define(modelName, model.attributes, {
-      validate: model.validation,
+    signale.info("Creating Model", model.name);
+    sequelize.define(model.name, model.attributes, {
+      validate: model.validation || {},
       createdAt: model.useCreatedAt || false,
       updatedAt: model.useUpdatedAt || false,
     });
   });
 
   models.forEach((model) => {
-    const modelName = model.constructor.name;
-    signale.info("Creating Model associations", modelName);
+    signale.info("Creating Model associations", model.name);
 
     const relationships = ["belongsTo", "belongsToMany", "hasOne", "hasMany"];
     relationships.forEach((relationship) => {
@@ -49,12 +47,12 @@ export async function prepareModels(
           if (!target) {
             throw new Error(
               "Unknown Model association for " +
-                modelName +
+                model.name +
                 " in " +
                 relationship
             );
           }
-          sequelize.models[modelName][relationship](target, options);
+          sequelize.models[model.name][relationship](target, options);
         });
       }
     });

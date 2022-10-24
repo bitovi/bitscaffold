@@ -2,6 +2,7 @@ import { DataTypes } from "sequelize";
 import { HasManyResult, LoadedModels, ScaffoldModel } from "../../../types";
 
 export const Team: ScaffoldModel = {
+  name: "Team",
   attributes: {
     id: {
       type: DataTypes.INTEGER,

@@ -59,8 +59,8 @@ export interface ScaffoldContext extends Context {
 export interface ScaffoldModel {
   attributes: ScaffoldAttributes;
 
-  tableName?: string;
-  tablePluralName?: string;
+  name: string;
+  namePlural?: string;
 
   useCreatedAt?: boolean;
   useUpdatedAt?: boolean;
