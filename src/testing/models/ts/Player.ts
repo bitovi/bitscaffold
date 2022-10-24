@@ -5,7 +5,7 @@ export const Player: ScaffoldModel = {
   name: "Player",
   attributes: {
     id: {
-      type: "INTEGER",
+      type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
       allowNull: false,

@@ -1,10 +1,9 @@
-import { DataTypes } from "sequelize";
 import { ScaffoldModel } from "../../../types";
 
 export const Foo: ScaffoldModel = {
   name: "Foo",
   attributes: {
-    name: DataTypes.STRING,
+    name: "string",
   },
   hasOne: [
     { target: "Bar", options: { as: "Bar" } },

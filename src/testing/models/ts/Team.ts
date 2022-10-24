@@ -1,5 +1,5 @@
 import { DataTypes } from "sequelize";
-import { HasManyResult, LoadedModels, ScaffoldModel } from "../../../types";
+import { ScaffoldModel } from "../../../types";
 
 export const Team: ScaffoldModel = {
   name: "Team",
