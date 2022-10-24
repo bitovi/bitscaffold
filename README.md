@@ -2,6 +2,8 @@
 
 <h1 style="text-align: center;">@bitovi/scaffold</h1>
 
+[![Join our Slack](https://img.shields.io/badge/slack-join%20chat-611f69.svg)](https://www.bitovi.com/community/slack?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 ## About Scaffold
 
 Scaffold is a full-stack, TypeScript powered, web application framework designed to accelerate the development of CRUD applications. In short, Scaffold is a 'medium code' solution to take you straight from your database schema to fully functioning CRUD application.
@@ -22,6 +24,16 @@ Scaffold should make it quick and easy to create, test, and validate your applic
 - View your brand new CRUD app at http://localhost:3000/
   - Optional: See the backend routes listed at http://localhost:3000/api/\_routes/
 - Check out the documentation to further customize your application
+
+
+## Need help or have questions?
+
+This project is supported by [Bitovi, a Nodejs consultancy](https://www.bitovi.com/backend-consulting/nodejs-consulting). You can get help or ask questions on our:
+
+- [Slack Community](https://www.bitovi.com/community/slack)
+- [Twitter](https://twitter.com/bitovi)
+
+Or, you can hire us for training, consulting, or development. [Set up a free consultation.](https://www.bitovi.com/backend-consulting/nodejs-consulting)
 
 ## Technologies
 
