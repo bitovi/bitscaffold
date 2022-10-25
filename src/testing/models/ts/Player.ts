@@ -19,6 +19,14 @@ export const Player: ScaffoldModel = {
       allowNull: false, // Make this a required field
       unique: 'fullName' // Together with firstName, become a composite unique key
     },
+    createdAt: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW
+    },
     startDate: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW // Set the default date to the current time, if not specified

@@ -32,15 +32,16 @@ export async function prepareModels(
     signale.info("Creating Model", model.name);
     sequelize.define(model.name, model.attributes, {
       validate: model.validation || {},
-      createdAt: model.useCreatedAt || false,
-      updatedAt: model.useUpdatedAt || false,
+      createdAt: false,
+      updatedAt: false,
+      freezeTableName: true
     });
   });
 
   models.forEach((model) => {
     signale.info("Creating Model associations", model.name);
 
-    const relationships = ["belongsTo", "belongsToMany", "hasOne", "hasMany"];
+    const relationships = ["belongsTo", "belongsToMany", "hasOne", "hasMany", "manyToMany"];
     relationships.forEach((relationship) => {
       // For each relationship type, check if we have definitions for it:
       if (model[relationship]) {
@@ -49,9 +50,9 @@ export async function prepareModels(
           if (!target || !sequelize.models[target]) {
             throw new Error(
               "Unknown Model association for " +
-                model.name +
-                " in " +
-                relationship
+              model.name +
+              " in " +
+              relationship
             );
           }
 

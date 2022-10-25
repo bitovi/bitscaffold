@@ -1,7 +1,7 @@
 import { Sequelize, DataTypes } from "sequelize";
 import signale from "signale";
 
-describe("Relationship Tests", () => {
+describe("Sequelize Tests", () => {
   let sequelize: Sequelize;
   beforeAll(async () => {
     sequelize = new Sequelize("sqlite::memory:", {
