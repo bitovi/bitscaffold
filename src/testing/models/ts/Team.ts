@@ -9,7 +9,11 @@ export const Team: ScaffoldModel = {
       autoIncrement: true,
       allowNull: false,
     },
-    name: DataTypes.STRING,
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true
+    }
   },
   hasMany: [{ target: "Player", options: { as: "players" } }],
 };
