@@ -15,9 +15,13 @@ describe("Validation Tests", () => {
 
     console.log("Creating a new Player");
     const result2 = await POST(server, "/api/Player", {
-      firstName: "First Name" + new Date(),
-      lastName: "Last Name" + new Date(),
-      middleName: "Middle Name Does Not Exist",
+      firstName: "First Name",
+      lastName: "Last Name",
+      middleName: "Unknown Extra Field",
+      startDate: new Date("2021-06-22"),
+      endDate: new Date("2025-06-22"),
+      email: "email@email.com",
+      age: 25
     });
 
     // Expect us to get a proper created result back
@@ -31,10 +35,12 @@ describe("Validation Tests", () => {
 
     console.log("Creating a new Player");
     const result2 = await POST(server, "/api/Player", {
-      firstName: "First Name" + new Date(),
-      lastName: "Last Name" + new Date(),
-      startDate: new Date("2022-05-22"),
-      endDate: new Date("2021-05-22"),
+      firstName: "First Name",
+      lastName: "Last Name",
+      startDate: new Date("2022-06-22"),
+      endDate: new Date("2021-06-22"),
+      email: "email@email.com",
+      age: 25
     });
 
     expect(result2.status).toBe(400);
@@ -46,9 +52,11 @@ describe("Validation Tests", () => {
 
     console.log("Creating a new Player");
     const result1 = await POST(server, "/api/Player", {
-      firstName: "First Name" + new Date(),
-      lastName: "Last Name" + new Date(),
-      startDate: new Date("2022-05-22"),
+      firstName: "First Name",
+      lastName: "Last Name",
+      startDate: new Date("2021-06-22"),
+      email: "email@email.com",
+      age: 25
     });
 
     expect(result1.status).toBe(201);
@@ -56,7 +64,7 @@ describe("Validation Tests", () => {
     console.log("Updating an existing Player");
 
     const result2 = await PUT(server, "/api/Player/" + result1.json.data.id, {
-      endDate: new Date("2021-05-22"),
+      endDate: new Date("2020-05-22"),
     });
 
     expect(result2.status).toBe(400);
@@ -68,9 +76,11 @@ describe("Validation Tests", () => {
 
     console.log("Creating a new Player");
     const result1 = await POST(server, "/api/Player", {
-      firstName: "First Name" + new Date(),
-      lastName: "Last Name" + new Date(),
-      startDate: new Date("2022-05-22"),
+      firstName: "First Name",
+      lastName: "Last Name",
+      startDate: new Date("2021-06-22"),
+      email: "email@email.com",
+      age: 25
     });
 
     expect(result1.status).toBe(201);
@@ -78,7 +88,7 @@ describe("Validation Tests", () => {
     console.log("Updating an existing Player");
 
     const result2 = await PUT(server, "/api/Player/" + result1.json.data.id, {
-      endDate: new Date("2022-10-22"),
+      endDate: new Date("2026-10-22"),
     });
 
     expect(result2.status).toBe(200);

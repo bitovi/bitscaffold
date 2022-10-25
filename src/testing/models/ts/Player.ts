@@ -9,18 +9,49 @@ export const Player: ScaffoldModel = {
       autoIncrement: true,
       allowNull: false,
     },
-    firstName: DataTypes.STRING,
-    lastName: DataTypes.STRING,
-    startDate: DataTypes.DATE,
+    firstName: {
+      type: DataTypes.STRING,
+      allowNull: false, // Make this a required field
+      unique: 'fullName' // Together with lastName, become a composite unique key
+    },
+    lastName: {
+      type: DataTypes.STRING,
+      allowNull: false, // Make this a required field
+      unique: 'fullName' // Together with firstName, become a composite unique key
+    },
+    startDate: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW // Set the default date to the current time, if not specified
+    },
     endDate: DataTypes.DATE,
+    email: {
+      type: DataTypes.STRING,
+      validate: {
+        isEmail: true
+      },
+      unique: true // Each user must have a different email address, sure
+    },
+    customRegex: {
+      type: DataTypes.STRING,
+      validate: {
+        is: /^[a-z]+$/i
+      }
+    },
+    age: {
+      type: DataTypes.INTEGER,
+      validate: { // Clamp the values to a range, throw ValidationError if outside this
+        min: 0,
+        max: 150
+      }
+    }
   },
   validation: {
-    async startDateBeforeEndDate() {
+    startDateBeforeEndDate() {
       if (this.startDate && this.endDate && this.startDate >= this.endDate) {
         throw new Error("START_DATE_MUST_BE_BEFORE_END_DATE");
       }
     },
-    async endDateAfterStartDate() {
+    endDateAfterStartDate() {
       if (this.startDate && this.endDate && this.startDate >= this.endDate) {
         throw new Error("START_DATE_MUST_BE_BEFORE_END_DATE");
       }

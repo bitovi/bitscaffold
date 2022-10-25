@@ -60,6 +60,10 @@ describe("Model Tests", () => {
       TeamId: 1,
       firstName: "First Name" + new Date(),
       lastName: "Last Name" + new Date(),
+      startDate: new Date("2021-05-22"),
+      endDate: new Date("2025-05-22"),
+      email: "email" + Date.now() + "@email.com",
+      age: 25
     });
 
     // Expect us to get a proper created result back
@@ -146,30 +150,54 @@ describe("Model Tests", () => {
 
     // Expect us to get a proper created result back
     expect(result1.status).toBe(201);
+    let userId = 0;
 
-    console.log("Creating a new Player");
+    userId = userId + 1;
+    console.log("Creating a new Player", userId);
     const result2 = await POST(server, "/api/Player", {
       TeamId: 1,
-      firstName: "First Name" + new Date(),
-      lastName: "Last Name" + new Date(),
+      firstName: "First Name" + userId,
+      lastName: "Last Name" + userId,
+      startDate: new Date("2021-06-22"),
+      endDate: new Date("2025-06-22"),
+      email: "email" + userId + "@email.com",
+      age: 25
     });
 
+    userId = userId + 1;
+    console.log("Creating a new Player", userId);
     await POST(server, "/api/Player", {
       TeamId: 1,
-      firstName: "First Name" + new Date(),
-      lastName: "Last Name" + new Date(),
+      firstName: "First Name" + userId,
+      lastName: "Last Name" + userId,
+      startDate: new Date("2021-06-22"),
+      endDate: new Date("2025-06-22"),
+      email: "email" + userId + "@email.com",
+      age: 25
     });
 
+    userId = userId + 1;
+    console.log("Creating a new Player", userId);
     await POST(server, "/api/Player", {
       TeamId: 1,
-      firstName: "First Name" + new Date(),
-      lastName: "Last Name" + new Date(),
+      firstName: "First Name" + userId,
+      lastName: "Last Name" + userId,
+      startDate: new Date("2021-06-22"),
+      endDate: new Date("2025-06-22"),
+      email: "email" + userId + "@email.com",
+      age: 25
     });
 
+    userId = userId + 1;
+    console.log("Creating a new Player", userId);
     await POST(server, "/api/Player", {
       TeamId: 1,
-      firstName: "First Name" + new Date(),
-      lastName: "Last Name" + new Date(),
+      firstName: "First Name" + userId,
+      lastName: "Last Name" + userId,
+      startDate: new Date("2021-06-22"),
+      endDate: new Date("2025-06-22"),
+      email: "email" + userId + "@email.com",
+      age: 25
     });
 
     // Expect us to get a proper created result back
