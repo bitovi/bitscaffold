@@ -16,7 +16,7 @@ import { prepareModels, prepareSequelize } from "./sequelize";
 export async function createScaffoldApplication(
   models: ScaffoldModel[],
   routes?: Router
-): Promise<ScaffoldApplication> {
+): Promise<any> {
   signale.info("Creating Scaffold Application");
   const app = new Koa();
   await prepareKoaApplication(app);
@@ -34,7 +34,13 @@ export async function createScaffoldApplication(
   app.use(router.routes());
   app.use(router.allowedMethods());
 
-  return app;
+  return {
+    defaultCRUD: () => {
+      
+    },
+    __ScaffoldRouter: router,
+    __ScaffoldApplication: app
+  };
 }
 
 export async function __mockApplication(
