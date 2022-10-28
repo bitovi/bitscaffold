@@ -1,113 +1,310 @@
 // Library Functions
 import Koa, { Middleware } from "koa";
 import Router from "@koa/router";
-import { Model, ModelStatic, Sequelize } from "sequelize";
-import signale from "signale";
+import { FindOptions, Model, ModelStatic, Sequelize } from "sequelize";
 import { ScaffoldModel } from "../types";
+import KoaBodyParser from "koa-body";
+import signale, { Signale } from "signale";
+import KoaCors from "@koa/cors";
+import { v4 } from "uuid";
+import os from "os";
 import { prepareModels, prepareSequelize } from "../sequelize";
 
-function buildKoa(options) {
-    const koa = new Koa();
-    // This could do more to set some defaults or read options
-    return koa;
+interface ScaffoldOptions {
+    port: number
 }
 
-export async function Scaffold(models: ScaffoldModel[], options: any) {
-    const app = buildKoa(options);
-    await prepareSequelize(app);
-    await prepareModels(app, models);
+export class Scaffold {
+    private initialized: Promise<void>;
+    private options: ScaffoldOptions;
+    private models: ScaffoldModel[];
+    private sequelize: Sequelize;
+    private server: Koa;
+    private router: Router;
+    private routes: { [routeKey: string]: boolean };
+    private finalized: boolean;
 
-    app.context.routes = {};
-    app.context.router = new Router();
+    constructor(models: ScaffoldModel[], options: ScaffoldOptions) {
+        this.options = options;
+        this.models = models;
+        this.server = this.buildKoaApplication();
+        this.router = new Router();
+        this.routes = {};
+        this.finalized = false;
+        this.sequelize = prepareSequelize(this.server, true)
 
-    return {
-        makeScaffoldDefaults: makeScaffoldDefaults(app, models),
-        makeScaffoldCRUD: makeScaffoldCRUD(app, models),
-        makeScaffoldFindAll: makeScaffoldFindAll(app, models),
-        makeScaffoldFindOne: makeScaffoldFindOne(app, models),
-        makeScaffoldDeleteOne: makeScaffoldDeleteOne(app, models),
-        makeScaffoldUpdateOne: makeScaffoldUpdateOne(app, models),
-        listen: listen(app, options)
+        this.server.context.database = this.sequelize;
+
+        this.initialized = new Promise<void>((resolve) => {
+            prepareModels(this.server, models).then(() => {
+                resolve();
+            })
+        });
     }
-}
 
-function listen(app: Koa, options: any) {
-    return async function handler() {
-        await app.listen(options.port || 3000);
-        console.log("Scaffold is listening on port ", options.port || 3000)
-    }
-}
+    async makeScaffoldDefaults() {
+        await this.initialized;
 
-function makeScaffoldDefaults(app: Koa, models: ScaffoldModel[]) {
-    const makeScaffoldCRUDInstance = makeScaffoldCRUD(app, models);
-    return async function handler() {
-        for (const model of models) {
-            await makeScaffoldCRUDInstance(model, {});
+        for (const model of this.models) {
+            await this.makeDefaultRoutes(model);
         }
     }
-}
 
-interface ScaffoldCRUDOverride {
-    findAll?: Middleware
-    findOne?: Middleware
+    async finalize(): Promise<void> {
+        await this.initialized;
 
-}
-
-
-function makeScaffoldCRUD(app: Koa, models: ScaffoldModel[]) {
-    return async function handler(model: ScaffoldModel, overrides: ScaffoldCRUDOverride) {
-
-        if (overrides.findAll) {
-
-        } else {
-            await (makeScaffoldFindAll(app, models))(model);
-        }
-
-
-        await (makeScaffoldFindOne(app, models))(model);
-        await (makeScaffoldDeleteOne(app, models))(model);
-        await (makeScaffoldUpdateOne(app, models))(model);
+        signale.pending("finalize");
+        this.server.use(this.router.routes());
+        this.server.use(this.router.allowedMethods());
+        signale.success("finalize");
     }
-}
 
-function makeScaffoldFindAll(app: Koa, models: ScaffoldModel[]) {
-    return async function FindAllHandler(_: ScaffoldModel, middleware?: Middleware) {
-        // Come up with some way to handle route 'collision' if the user defines a route
-        // and then calls the default handler after.... 
-        const router: Router = app.context.router;
-        const model: ModelStatic<Model> = app.context.database.models[_.name];
+    async listen(): Promise<void> {
+        await this.initialized;
+        await this.server.listen(this.options.port || 3000);
+        signale.info("Server Started, Listening on Port", this.options.port || 3000)
+    }
+
+    async makeDefaultRoutes(model: ScaffoldModel) {
+        await this.initialized;
+        await this.routeFindAll(model);
+        await this.routeFindOne(model);
+        await this.routeUpdate(model);
+        await this.routeCreate(model);
+        await this.routeDelete(model);
+    }
+
+    async routeFindAll(sm: ScaffoldModel, middleware?: Middleware) {
+        await this.initialized;
+        const model = this.resolveSequelizeModel(sm);
 
         if (middleware) {
-            console.log("Created a FindAllHandler using provided middleware for", model.name);
+            signale.info("Creating override 'findAll' route for", model.name);
         }
 
         if (!middleware) {
-            console.log("Created a FindAllHandler for", model.name);
+            signale.info("Creating default 'findAll' route for", model.name);
             middleware = async (ctx, next) => {
-                ctx.body = await model.findAll()
+                ctx.body = await this.ormFindAll(sm, ctx.state.findOptions);
                 ctx.status = 200;
                 await next();
             }
         }
 
-        router.get('/api/' + model.name, middleware);
+        this.registerRoute('get', '/api/' + model.name, middleware);
     }
-}
 
-function makeScaffoldFindOne(app: Koa, models: ScaffoldModel[]) {
-    return async function FindOneHandler(model: ScaffoldModel) {
-        console.log("Created a FindOneHandler for", model.name);
-    }
-}
+    async ormFindAll(sm: ScaffoldModel, options: FindOptions): Promise<Model<any, any>[]> {
+        await this.initialized;
+        const model = this.resolveSequelizeModel(sm);
 
-function makeScaffoldDeleteOne(app: Koa, models: ScaffoldModel[]) {
-    return async function DeleteOneHandler(model: ScaffoldModel,) {
-        console.log("Created a DeleteOneHandler for", model.name);
+        const result = await model.findAll(options);
+        return result;
     }
-}
 
-function makeScaffoldUpdateOne(app: Koa, models: ScaffoldModel[]) {
-    return async function UpdateOneHandler(model: ScaffoldModel) {
-        console.log("Created a UpdateOneHandler for", model.name);
+    async routeFindOne(sm: ScaffoldModel, middleware?: Middleware | Middleware[]) {
+        await this.initialized;
+        const model = this.resolveSequelizeModel(sm);
+
+        if (middleware) {
+            signale.info("Creating override 'findOne' route for", model.name);
+        }
+
+        if (!middleware) {
+            signale.info("Creating default 'findOne' route for", model.name);
+            middleware = async (ctx, next) => {
+                ctx.body = await this.ormFindOne(sm, ctx.params.id, ctx.params);
+                ctx.status = 200;
+                await next();
+            }
+        }
+        this.registerRoute('get', '/api/' + model.name + "/:id", middleware);
     }
+
+    async ormFindOne(sm: ScaffoldModel, id: any, options: FindOptions): Promise<Model<any, any> | null> {
+        await this.initialized;
+        const model = this.resolveSequelizeModel(sm);
+
+        if (id) {
+            return await model.findByPk(id, options);
+        }
+
+        return await model.findOne(options);
+    }
+
+
+    async routeCreate(sm: ScaffoldModel, middleware?: Middleware) {
+        await this.initialized;
+        const model = this.resolveSequelizeModel(sm);
+
+        if (middleware) {
+            signale.info("Creating override 'create' route for", model.name);
+        }
+
+        if (!middleware) {
+            signale.info("Creating default 'create' route for", model.name);
+            middleware = async (ctx, next) => {
+                ctx.body = await this.ormCreate(sm, ctx.request.body);
+                ctx.status = 201;
+                await next();
+            }
+        }
+
+        this.registerRoute('post', '/api/' + model.name, middleware);
+    }
+
+    async ormCreate(sm: ScaffoldModel, body: any): Promise<Model<any, any>> {
+        await this.initialized;
+        const model = this.resolveSequelizeModel(sm);
+        return await model.create(body);
+    }
+
+    async routeUpdate(sm: ScaffoldModel, middleware?: Middleware) {
+        await this.initialized;
+        const model = this.resolveSequelizeModel(sm);
+
+        if (middleware) {
+            signale.info("Creating override 'update' route for", model.name);
+        }
+
+        if (!middleware) {
+            signale.info("Creating default 'update' route for", model.name);
+            middleware = async (ctx, next) => {
+                ctx.body = await this.ormUpdate(sm, ctx.request.body, ctx.params);
+                ctx.status = 201;
+                await next();
+            }
+        }
+
+        this.registerRoute('put', '/api/' + model.name + "/:id", middleware);
+    }
+
+    async ormUpdate(sm: ScaffoldModel, clause: any, body: any): Promise<[affectedCount: number, affectedRows: Model<any, any>[]]> {
+        await this.initialized;
+        const model = this.resolveSequelizeModel(sm);
+        return await model.update(body, clause);
+    }
+
+    async routeDelete(sm: ScaffoldModel, middleware?: Middleware) {
+        await this.initialized;
+        const model = this.resolveSequelizeModel(sm);
+
+        if (middleware) {
+            signale.info("Creating override 'delete' route for", model.name);
+        }
+
+        if (!middleware) {
+            signale.info("Creating default 'delete' route for", model.name);
+            middleware = async (ctx, next) => {
+                ctx.body = await this.ormDelete(sm, ctx.body);
+                ctx.status = 200;
+                await next();
+            }
+        }
+
+        this.registerRoute('delete', '/api/' + model.name + "/:id", middleware);
+    }
+
+    async ormDelete(sm: ScaffoldModel, clause: any): Promise<number> {
+        await this.initialized;
+        const model = this.resolveSequelizeModel(sm);
+        return await model.destroy(clause);
+    }
+
+    resolveSequelizeModel(sm: ScaffoldModel): ModelStatic<Model> {
+        if (!sm) {
+            throw new Error("No Model Specified");
+        }
+
+        if (!sm.name) {
+            throw new Error("No Model Name Specified");
+        }
+
+        if (!this.server.context.database) {
+            throw new Error("No Sequelize Instance Available");
+        }
+
+        const sequelize = this.server.context.database;
+        return sequelize.models[sm.name];
+    }
+
+    async get(path: string, handler: Middleware): Promise<void> {
+        await this.initialized;
+        this.registerRoute('get', path, handler);
+    }
+
+    async put(path: string, handler: Middleware): Promise<void> {
+        await this.initialized;
+        this.registerRoute('put', path, handler);
+    }
+
+    async delete(path: string, handler: Middleware): Promise<void> {
+        await this.initialized;
+        this.registerRoute('delete', path, handler);
+    }
+
+    async post(path: string, handler: Middleware): Promise<void> {
+        await this.initialized;
+        this.registerRoute('post', path, handler);
+    }
+
+    async patch(path: string, handler: Middleware): Promise<void> {
+        await this.initialized;
+        this.registerRoute('patch', path, handler);
+    }
+
+    private buildKoaApplication(): Koa {
+        const app = new Koa();
+        signale.info("Creating Koa Application Defaults");
+        // Check if this koa app has already been processed
+        app.context.bitscaffold = true;
+
+        // Catch top level errors and format them correctly
+        // app.use(ErrorHandler());
+
+        // Hook up cors
+        app.use(KoaCors({ origin: "*" }));
+
+        // Enable the body parser for relevant methods
+        app.use(
+            KoaBodyParser({
+                parsedMethods: ["POST", "PUT", "PATCH", "DELETE"],
+                multipart: true,
+                includeUnparsed: true,
+                formidable: { multiples: true, uploadDir: os.tmpdir() },
+            })
+        );
+
+        // Attach some debugging uuid information to
+        // state, logging, and response headers
+        app.use(async (ctx: Koa.Context, next: Koa.Next) => {
+            ctx.state.uuid = v4();
+            ctx.state.logger = new Signale({ scope: ctx.state.uuid });
+
+            ctx.set("x-koa-uuid", ctx.state.uuid);
+            await next();
+        });
+
+        return app;
+    }
+
+    private registerRoute(type: string, path: string, handler: Middleware | Middleware[]) {
+        if (!this.router[type]) {
+            throw new Error("Unknown route type requested" + type);
+        }
+
+        if (this.finalized) {
+            throw new Error("Cannot add additional routes after Router is finalized");
+        }
+
+        if (this.routes[type + ":" + path]) {
+            signale.warn("Found a second route registration attempt for", type, path);
+        }
+
+        if (!this.routes[type + ":" + path]) {
+            this.routes[type + ":" + path] = true;
+            this.router[type](path, handler);
+        }
+    }
+
 }

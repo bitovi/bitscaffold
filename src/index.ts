@@ -20,7 +20,7 @@ export async function createScaffoldApplication(
   signale.info("Creating Scaffold Application");
   const app = new Koa();
   await prepareKoaApplication(app);
-  await prepareSequelize(app);
+  prepareSequelize(app, true);
   await prepareModels(app, models);
 
   if (routes) {
@@ -65,7 +65,7 @@ export function attachScaffoldDefaultMiddleware(
   const setup = async () => {
     signale.info("Running Middleware Setup Function");
     await prepareKoaApplication(app);
-    await prepareSequelize(app);
+    prepareSequelize(app, true);
     await prepareModels(app, models);
   };
   setup();

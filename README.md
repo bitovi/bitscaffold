@@ -90,19 +90,23 @@ Open up the `src/index.ts` file and take a look at how your schema files are pas
 
 ```typescript
 import {
-  createScaffoldApplication,
-  startScaffoldApplication,
+    Scaffold,
 } from "@bitovi/scaffold";
-import { Player, Team } from "./schema/Example";
+
+import { Player } from "./models/Player";
+import { Team } from "./models/Player";
+
 
 async function init() {
-  console.log("Creating Scaffold Application");
-  const app = await createScaffoldApplication([Player, Team]);
+    // Provide Scaffold with a list of models and other options if required
+    const scaffold = new Scaffold([Player, Team], { port: 3000 })
+    
+    // Start off with the defaults, Scaffold will build all of the CRUD routes, datbase
+    // access, and other handlers for you. No other work needed!
+    await scaffold.makeScaffoldDefaults();
 
-  console.log("Starting Scaffold Application");
-  await startScaffoldApplication(app, 3000);
-
-  console.log("Started on port 3000");
+  // Start the service listening, in this case on port 3000 from our options above
+    await scaffold.listen();
 }
 
 init();
@@ -168,67 +172,138 @@ Just like the player list, if you navigate to Navigate to [http://localhost:3000
 
 ## Project Customization
 
-While Scaffold gives you a lot of power out of the box, if you do require custom logic outside of the defaults, it is easy to start creating your own override routes. For example, if you had a `User` table that needed special authorization rules you can quickly add this functionality yourself while still retaining all the other benefits of the Scaffold system.
+While Scaffold gives you a lot of power out of the box, if you do require custom logic outside of the defaults, it is easy to start creating your own routes. For example, if you had a `User` table that needed special authorization rules you can quickly add this functionality yourself while still retaining all the other benefits of the Scaffold system.
 
-Inside the `Routes.ts` file you can see the main `/api/:model` routes that, by default, call into the Scaffold Default Middleware functions. These functions are really a collection of other middleware functions that provide the default behavior.
+Taking a look back at the example we had before:
 
-To create custom route behavior, first create a new override route:
-
-```typescript
-router.get(
-  "/api/User"
-  // No behavior defined yet
-);
-```
-
-This route tells the Scaffold that if it sees `GET /api/User` it should now use this route instead of the default. You can, optionally, import more granular middleware functions and use them as needed or handle everything yourself and write your own.
+`src/index.ts`
 
 ```typescript
 import {
-  scaffoldFindAllMiddleware,
-  scaffoldFindModelMiddleware,
-} from "./middleware";
+    Scaffold,
+} from "@bitovi/scaffold";
+
+import { Player } from "./models/Player";
+import { Team } from "./models/Player";
+
+
+async function init() {
+    // Provide Scaffold with a list of models and other options if required
+    const scaffold = new Scaffold([Player, Team], { port: 3000 })
+    
+    // Start off with the defaults, Scaffold will build all of the CRUD routes, datbase
+    // access, and other handlers for you. No other work needed!
+    await scaffold.makeScaffoldDefaults();
+
+  // Start the service listening, in this case on port 3000 from our options above
+    await scaffold.listen();
+}
+
+init();
 ```
 
-Taking a look at these functions as examples, the `scaffoldFindModelMiddleware` is used to tell Scaffold which database table is relevant for this request. By default Scaffold will use the URL to determine this, but you can also pass an override directly to the middleware function.
+If we wanted to add a new model called User but with different behavior, we could do the following: 
 
-This will tell the function that it should use the User table, even if the URL was defined as something different.
+`src/index.ts`
 
 ```typescript
-scaffoldFindModelMiddleware("User");
+import {
+    Scaffold,
+} from "@bitovi/scaffold";
+
+import { Player } from "./models/Player";
+import { Team } from "./models/Player";
+import { User } from "./models/User";
+
+
+async function init() {
+    // Provide Scaffold with a list of models and other options if required
+    const scaffold = new Scaffold([Player, Team, User], { port: 3000 })
+    
+    // Start off by defining your special behavior for Users. 
+    await scaffold.custom.create(User, async (ctx, next) => {
+        ctx.body = "Instead of the Default, do this!";
+        ctx.status = 201;
+        await next();
+    });
+
+    // Finish off with the defaults, Scaffold will build all of the CRUD routes, database
+    // access, and other handlers for you. No other work needed!
+    await scaffold.makeScaffoldDefaults();
+
+  // Start the service listening, in this case on port 3000 from our options above
+    await scaffold.listen();
+}
+
+init();
 ```
 
-The `scaffoldFindAllMiddleware` can be used next to tell Scaffold to perform a 'find all' against the User table
-
-These built in functions are, under the hood, Koa Middleware. More documentation of how exactly this works can be found with the [Koa project](). You can also define your own Middleware functions to provide any custom logic that you see fit.
-
-In short, you will create an `async` function that takes two parameters, a `ctx` or Context and a `next` function. The Context will contain information about the incoming request, the request body, headers, and more. The `next` function should be called when your middleware is complete.
-
-The most basic middleware we could create
-
+In this case we provided a custom creation override for the User model. In this case we simply return a string instead of creating the record. 
 ```typescript
-async (ctx, next) => {
-  // do something special for test auth here!
-  console.log("You hit the custom function! Cool!");
-  await next();
-};
+    // Start off by defining your special behavior for Users. 
+    await scaffold.custom.create(User, async (ctx, next) => {
+        ctx.body = "Instead of the Default, do this!";
+        ctx.status = 201;
+        await next();
+    });
 ```
 
-Putting it all together, we can create a custom route, with custom logic, while still letting Scaffold do most of the heavy lifting for you. Here is a more complete example:
+The other basic custom override functions that are provided out of the box are `create`, `update`, `delete`, `findOne` and `findAll`. Each of these CRUD operations can be overridden for a specific model using this same pattern.
 
+However, what if we want to perform our own data fetching as part of the CRUD operations, or even access other schemas from our system? This is also easily done. Scaffold provides some helper functions to let you get under the hood access directly to the ORM where you are then free to do anything you want! 
+
+Lets take a look at a more complete example:
 ```typescript
-router.post(
-  "/api/User",
-  scaffoldAuthorizationMiddleware(),
-  async (ctx, next) => {
-    // do something special for test auth here!
-    signale.info("Special User Override Auth Middleware");
-    await next();
-  },
-  scaffoldFindModelMiddleware("User"),
-  scaffoldValidationMiddleware(), // built in, used by the default handlers
-  scaffoldCreateMiddleware() // built in, used by the default handler
-);
+    // Create a custom Create handler for the User model so we can provide some
+    // additional information, such as a createdAt property
+    await scaffold.custom.create(User, async (ctx, next) => {
+        const model = scaffold.resolveORMModel(Skill);
+        const result = await model.create({ ...ctx.body, createdAt: new Date() })
+
+        ctx.body = result;
+        ctx.status = 201;
+        await next();
+    });
+
+    // Create a custom Update handler for the User model so we can provide some
+    // additional information, such as a modifiedAt property
+    await scaffold.custom.update(User, async (ctx, next) => {
+        const model = scaffold.resolveSequelizeModel(Skill);
+        const result = await model.update({ ...ctx.body, modifiedAt: new Date() }, {
+            where: {
+                id: ctx.params.id
+            }
+        })
+
+        ctx.body = result;
+        ctx.status = 200;
+        await next();
+    });
+```
+
+Creating custom route overrides is great, but what if we want to get a little more granular. We can also create overrides for the ORM data fetching itself, while keeping the remainder of the default behavior in place.
+```typescript
+    await scaffold.orm.create(User, async (model, body) => {
+        body.createdAt = new Date():
+        const result = await model.create(body)
+        return result;
+    });
+
+    await scaffold.orm.update(User, async (model, clause, body) => {
+        body.modifiedAt = new Date():
+        const result = await model.update(body, clause)
+        return result;
+    });
+```
+
+
+If you want to create additional endpoints that are completely unrelated to your schema and CRUD operations, you can also easily do so
+```typescript
+  await scaffold.custom.get('/api/totally-custom-route', async (ctx, next) => {
+      ctx.body = "Something Totally Custom"
+      ctx.status = 200;
+      await next();
+  });
 ```
 
 ## Application Data Validation

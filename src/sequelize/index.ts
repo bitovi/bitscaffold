@@ -3,7 +3,7 @@ import { Sequelize } from "sequelize";
 import signale from "signale";
 import { ScaffoldModel } from "../types";
 
-export async function prepareSequelize(app: Koa, sync?: boolean): Promise<any> {
+export function prepareSequelize(app: Koa, sync?: boolean): Sequelize {
   if (!app.context.database) {
     signale.info("Creating Sequelize instance");
     const sequelize = new Sequelize("sqlite::memory:", {
@@ -14,8 +14,10 @@ export async function prepareSequelize(app: Koa, sync?: boolean): Promise<any> {
 
     signale.info("Attaching Sequelize instance to Context");
     app.context.database = sequelize;
+    app.context.sync = sync;
     return sequelize;
   }
+  return app.context.database;
 }
 
 export async function prepareModels(
@@ -23,7 +25,7 @@ export async function prepareModels(
   models: ScaffoldModel[]
 ): Promise<any> {
   if (!app.context.database) {
-    await prepareSequelize(app);
+    prepareSequelize(app, true);
   }
 
   signale.info("Attaching Models to Sequelize instance");
@@ -68,6 +70,8 @@ export async function prepareModels(
   });
 
   signale.info("Running Sequelize Model Sync");
-  await sequelize.sync({ force: true });
+  if (app.context.sync) {
+    await sequelize.sync({ force: true });
+  }
   app.context.models = sequelize.models;
 }
