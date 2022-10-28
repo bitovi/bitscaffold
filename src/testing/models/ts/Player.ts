@@ -65,5 +65,5 @@ export const Player: ScaffoldModel = {
       }
     },
   },
-  belongsTo: [{ target: "Team" }],
+  belongsTo: [{ target: "Team", options: {}}],
 };

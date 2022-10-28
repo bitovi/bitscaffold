@@ -1,35 +1,22 @@
-import Koa from "koa";
-import { Sequelize } from "sequelize";
+import { Sequelize, Options } from "sequelize";
 import signale from "signale";
 import { ScaffoldModel } from "../types";
 
-export function prepareSequelize(app: Koa, sync?: boolean): Sequelize {
-  if (!app.context.database) {
-    signale.info("Creating Sequelize instance");
-    const sequelize = new Sequelize("sqlite::memory:", {
-      logging: (message) => {
-        signale.info("  SQL:", message);
-      },
-    });
-
-    signale.info("Attaching Sequelize instance to Context");
-    app.context.database = sequelize;
-    app.context.sync = sync;
-    return sequelize;
-  }
-  return app.context.database;
+export function prepareSequelize(options?: Options ): Sequelize {
+  signale.info("Creating Sequelize instance");
+  const sequelize = new Sequelize("sqlite::memory:", {
+    logging: (message) => {
+      signale.info("  SQL:", message);
+    },
+  });
+  return sequelize;
 }
 
 export async function prepareModels(
-  app: Koa,
+  sequelize: Sequelize,
   models: ScaffoldModel[]
 ): Promise<any> {
-  if (!app.context.database) {
-    prepareSequelize(app, true);
-  }
-
   signale.info("Attaching Models to Sequelize instance");
-  const sequelize: Sequelize = app.context.database;
   models.forEach((model) => {
     signale.info("Creating Model", model.name);
     sequelize.define(model.name, model.attributes, {
@@ -70,8 +57,5 @@ export async function prepareModels(
   });
 
   signale.info("Running Sequelize Model Sync");
-  if (app.context.sync) {
-    await sequelize.sync({ force: true });
-  }
-  app.context.models = sequelize.models;
+  await sequelize.sync({ force: true });
 }
