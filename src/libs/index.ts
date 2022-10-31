@@ -1,5 +1,5 @@
 // Library Functions
-import Koa from "koa";
+import Koa, { DefaultState } from "koa";
 import os from "node:os";
 import http, { Server } from "node:http";
 import { v4 } from "uuid";
@@ -9,12 +9,13 @@ import KoaMount from "koa-mount";
 import { Middleware } from "koa";
 import { Model, ModelStatic, Sequelize } from "sequelize";
 
-import { ScaffoldModel } from "../types";
+import { ScaffoldModel, ScaffoldModelContext } from "../types";
 import { prepareModels, prepareSequelize } from "../sequelize";
 import KoaBodyParser from "koa-body";
 import { prepareDefaultRoutes } from "../routes";
 import { ErrorHandler } from "..";
 import compose from "koa-compose";
+import { stateDefaultsMiddleware } from "../middleware";
 
 export class Scaffold {
   private isInitialized: () => Promise<void>;
@@ -81,35 +82,126 @@ export class Scaffold {
       throw new Error("Already Finalized!");
     }
     return {
+      /**
+       * Creates an override for the URL `GET /:model`, will replace the default handler
+       * with whatever Middleware functions are supplied in `middlewares`
+       *
+       * The Model name will be used to generate the internal route, replacing :model.
+       * The Model name will be attached to `ctx.params.model` in Koa Context
+       *
+       * @param Model
+       * @param middlewares
+       */
       findAll: (Model: ScaffoldModel, middlewares: Middleware[]): void => {
         signale.pending("Custom findAll: ", Model.name);
-        this.router.get("/" + Model.name + "", compose(middlewares));
+        this.router.get(
+          "/" + Model.name + "",
+          compose([
+            stateDefaultsMiddleware({ params: { model: Model.name } }),
+            ...middlewares,
+          ])
+        );
         signale.success("Custom findAll: ", Model.name);
       },
+      /**
+       * Creates an override for the URL `GET /:model/:id`, will replace the default handler
+       * with whatever Middleware functions are supplied in `middlewares`
+       *
+       * The Model name will be used to generate the internal route, replacing :model.
+       * The Model name will be attached to `ctx.params.model` in Koa Context
+       *
+       * @param Model
+       * @param middlewares
+       */
       findOne: (Model: ScaffoldModel, middlewares: Middleware[]): void => {
         signale.pending("Custom findOne: ", Model.name);
-        this.router.get("/" + Model.name + "/:id", compose(middlewares));
+        this.router.get(
+          "/" + Model.name + "/:id",
+          compose([
+            stateDefaultsMiddleware({ params: { model: Model.name } }),
+            ...middlewares,
+          ])
+        );
         signale.success("Custom findOne: ", Model.name);
       },
+      /**
+       * Creates an override for the URL `POST /:model`, will replace the default handler
+       * with whatever Middleware functions are supplied in `middlewares`
+       *
+       * The Model name will be used to generate the internal route, replacing :model.
+       * The Model name will be attached to `ctx.params.model` in Koa Context
+       *
+       * @param Model
+       * @param middlewares
+       */
       post: (Model: ScaffoldModel, middlewares: Middleware[]): void => {
         signale.pending("Custom post: ", Model.name);
-        this.router.post("/" + Model.name + "", compose(middlewares));
+        this.router.post(
+          "/" + Model.name + "",
+          compose([
+            stateDefaultsMiddleware({ params: { model: Model.name } }),
+            ...middlewares,
+          ])
+        );
         signale.success("Custom post: ", Model.name);
       },
+      /**
+       * Creates an override for the URL `PUT /:model/:id`, will replace the default handler
+       * with whatever Middleware functions are supplied in `middlewares`
+       *
+       * The Model name will be used to generate the internal route, replacing :model.
+       * The Model name will be attached to `ctx.params.model` in Koa Context
+       *
+       * @param Model
+       * @param middlewares
+       */
       put: (Model: ScaffoldModel, middlewares: Middleware[]): void => {
         signale.pending("Custom put: ", Model.name);
-        this.router.put("/" + Model.name + "/:id", compose(middlewares));
+        this.router.put(
+          "/" + Model.name + "/:id",
+          compose([
+            stateDefaultsMiddleware({ params: { model: Model.name } }),
+            ...middlewares,
+          ])
+        );
         signale.success("Custom put: ", Model.name);
       },
+      /**
+       * Creates an override for the URL `DELETE /:model/:id`, will replace the default handler
+       * with whatever Middleware functions are supplied in `middlewares`
+       *
+       * The Model name will be used to generate the internal route, replacing :model.
+       * The Model name will be attached to `ctx.params.model` in Koa Context
+       *
+       * @param Model
+       * @param middlewares
+       */
       delete: (Model: ScaffoldModel, middlewares: Middleware[]): void => {
         signale.pending("Custom delete: ", Model.name);
-        this.router.delete("/" + Model.name + "/:id", compose(middlewares));
+        this.router.delete(
+          "/" + Model.name + "/:id",
+          compose([
+            stateDefaultsMiddleware({ params: { model: Model.name } }),
+            ...middlewares,
+          ])
+        );
         signale.success("Custom delete: ", Model.name);
       },
-      route: (type: string, path: string, middleware: Middleware): void => {
-        signale.pending("Custom route: ", type.toUpperCase(), path);
-        this.router[type](path, middleware);
-        signale.success("Custom route: ", type.toUpperCase(), path);
+      /**
+       * Creates a completely custom route with custom middleware
+       *
+       * @param type The type of HTTP request to handle
+       * @param path The URL to bind for the route handler
+       * @param middleware A Koa Middleware route handler
+       */
+      route: (
+        type: "GET" | "PUT" | "POST" | "DELETE" | "HEAD",
+        path: string,
+        middleware: Middleware<DefaultState, ScaffoldModelContext>
+      ): void => {
+        signale.pending("Custom route: ", type, path);
+        this.router[type.toLowerCase()](path, middleware);
+        signale.success("Custom route: ", type, path);
       },
     };
   }

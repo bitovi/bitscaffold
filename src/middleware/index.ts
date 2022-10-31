@@ -3,6 +3,15 @@ import compose from "koa-compose";
 import { FindOptions } from "sequelize";
 import { ScaffoldModelContext, ScaffoldContext } from "../types";
 
+export function stateDefaultsMiddleware(state = {}) {
+  return async function stateDefaults(ctx, next) {
+    ctx.state.logger.info("stateDefaults", state);
+    ctx.state = Object.assign(ctx.state, state);
+    ctx.state.logger.info("stateDefaults", ctx.state);
+    await next();
+  };
+}
+
 export function scaffoldValidationMiddleware(): Middleware {
   return async function scaffoldValidation(
     ctx: ScaffoldModelContext,

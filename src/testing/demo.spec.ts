@@ -68,7 +68,7 @@ describe("Demo", () => {
   it("should allow overwrite functionality", async () => {
     const scaffold = new Scaffold([Player, Team], { prefix: "/api" });
 
-    scaffold.custom.route("get", "/custom-test-route", async (ctx) => {
+    scaffold.custom.route("GET", "/custom-test-route", async (ctx) => {
       signale.pending("Custom Test Route");
       ctx.body = { result: true };
       ctx.status = 201;

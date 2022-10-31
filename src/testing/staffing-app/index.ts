@@ -25,16 +25,20 @@ const scaffold = new Scaffold([Assignment, Employee, Project, Role, Skill], {
 });
 
 scaffold.custom.findAll(Skill, [
+  // Put in a custom Auth middleware
   customAuthMiddleware(),
-  async (ctx, next) => {
-    ctx.params.model = "Skill";
-    await next();
-  },
+  // Hand control back off to the default Scaffold middlewares
   scaffoldFindAllDefaultMiddleware(),
 ]);
 
-scaffold.custom.route("get", "/custom/route", async (ctx, next) => {
+scaffold.custom.route("GET", "/custom/route", async (ctx, next) => {
   ctx.body = { response: "Hello Custom Route" };
+});
+
+scaffold.custom.route("GET", "/custom/route2", async (ctx, next) => {
+  const SkillQuery = scaffold.resolveSequelizeModel(Skill);
+  ctx.body = await SkillQuery.findAndCountAll();
+  ctx.status = 200;
 });
 
 app.use(scaffold.defaults());
@@ -49,17 +53,17 @@ app.listen(3000, () => {
 
 function customAuthMiddleware() {
   return async function customAuth(ctx, next) {
-    signale.pending("customAuthMiddleware");
+    ctx.state.logger.pending("customAuthMiddleware");
     if (!ctx.headers.authorization) {
-      signale.error("customAuthMiddleware");
+      ctx.state.logger.error("customAuthMiddleware");
       throw new Error("Bad Custom Auth");
     }
 
     if (ctx.headers.authorization !== "custom") {
-      signale.error("customAuthMiddleware");
+      ctx.state.logger.error("customAuthMiddleware");
       throw new Error("Bad Custom Auth");
     }
-    signale.success("customAuthMiddleware");
+    ctx.state.logger.success("customAuthMiddleware");
     await next();
   };
 }
