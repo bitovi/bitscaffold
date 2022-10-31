@@ -360,7 +360,6 @@ export function scaffoldAPIResponseMiddleware(): Middleware {
     }
 
     ctx.state.logger.success("scaffoldAPIResponseMiddleware");
-    await next();
   };
 }
 

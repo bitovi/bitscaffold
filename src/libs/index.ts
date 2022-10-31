@@ -70,7 +70,7 @@ export class Scaffold {
     this.isInitialized = () => this._initialized;
   }
 
-  defaults(): Middleware {
+  middleware(): Middleware {
     return KoaMount(this.prefix, this.koa);
   }
 

@@ -15,31 +15,31 @@ export function prepareDefaultRoutes(): Router {
    * A wildcard route for any passed in model, the middleware function here
    * could provide sane defaults for authorization, validation, findOne behavior
    */
-  router.get("/api/:model/:id", scaffoldFindOneDefaultMiddleware());
+  router.get("/:model/:id", scaffoldFindOneDefaultMiddleware());
 
   /**
    * A wildcard route for any passed in model, the middleware function here
    * could provide sane defaults for authorization, validation, update behavior
    */
-  router.put("/api/:model/:id", scaffoldUpdateDefaultMiddleware());
+  router.put("/:model/:id", scaffoldUpdateDefaultMiddleware());
 
   /**
    * A wildcard route for any passed in model, the middleware function here
    * could provide sane defaults for authorization, validation, delete behavior
    */
-  router.del("/api/:model/:id", scaffoldDeleteDefaultMiddleware());
+  router.del("/:model/:id", scaffoldDeleteDefaultMiddleware());
 
   /**
    * A wildcard route for any passed in model, the middleware function here
    * could provide sane defaults for authorization, validation, findAll behavior
    */
-  router.get("/api/:model", scaffoldFindAllDefaultMiddleware());
+  router.get("/:model", scaffoldFindAllDefaultMiddleware());
 
   /**
    * A wildcard route for any passed in model, the middleware function here
    * could provide sane defaults for authorization, validation, create behavior
    */
-  router.post("/api/:model", scaffoldCreateDefaultMiddleware());
+  router.post("/:model", scaffoldCreateDefaultMiddleware());
   signale.success("prepareDefaultRoutes");
   return router;
 }

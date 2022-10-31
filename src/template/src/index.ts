@@ -1,10 +1,16 @@
 import { Scaffold } from "../../exports";
 import { Player, Team } from "./schema/Example";
+import Koa from "koa";
 
-async function init() {
-  console.log("Creating Scaffold Application");
-  const scaffold = new Scaffold([Player, Team], {});
+const app = new Koa();
+const scaffold = new Scaffold([Player, Team], { prefix: "/scaffold/" });
+
+app.use(scaffold.middleware());
+
+app.use(async (ctx) => {
+  ctx.body = "Hello World";
+});
+
+app.listen(3000, () => {
   console.log("Started on port 3000");
-}
-
-init();
+});

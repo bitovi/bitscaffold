@@ -15,12 +15,14 @@ Scaffold should make it quick and easy to create, test, and validate your applic
 
 ## Scaffold Quick Start (New Project)
 
-- Run `npx @bitovi/scaffold my-project-name`
-- Answer the prompts to configure your project
-- Run `cd my-project-name`
-- Take a look at the example `Foo.ts` schema inside `./src/schema/`
-  - Optional: Customize this file to see how the behavior can change!
-- Run `npm run start`
+- Install Scaffold
+  - `npm i @bitovi/scaffold`
+- Create a Scaffold Instance
+  - `const scaffold = new Scaffold([], {})`
+- Pass the Scaffold Middleware to your Koa/Express application
+  - `app.use(scaffold.middleware( ))`
+- Start your application
+  - `npm run start`
 - View your brand new CRUD app at http://localhost:3000/
   - Optional: See the backend routes listed at http://localhost:3000/api/\_routes/
 - Check out the documentation to further customize your application
@@ -51,68 +53,83 @@ When the application starts up, Scaffold will create REST endpoints based on you
 
 ## Getting Started Tutorial
 
-Create a new Scaffold project
+Create a new Koa + Scaffold project. Start by installing Koa and Scaffold
 
-> ```
-> npx @bitovi/scaffold my-project-name
-> ```
-
-Change in to the project directory and start creating your schema files:
-
-> ```
-> cd my-project-name
+> ```bash
+> npm i koa @bitovi/scaffold
 > ```
 
-You can find an example Schema file inside the `src/schema/` folder. Open up `Example.ts` and you should see the following:
+If you do not already have a Koa project, you can use the following Hello World example to try things out
 
-```typescript
-import { ScaffoldModel, DataTypes } from "@bitovi/scaffold/types";
+> ```typescript
+> import Koa from "koa";
+> import { Scaffold } from "@bitovi/scaffold";
+>
+> const app = new Koa();
+> const scaffold = new Scaffold([], {});
+>
+> app.use(scaffold.middleware());
+>
+> app.use(async (ctx) => {
+>   ctx.body = "Hello World";
+> });
+> ```
 
-export const Player: ScaffoldModel = {
-  name: "Player",
-  attributes: {
-    firstName: DataTypes.STRING,
-    lastName: DataTypes.STRING,
-    startDate: DataTypes.DATE,
-    endDate: DataTypes.DATE,
-  },
-};
-```
+At this point you have created a Koa application with Scaffold connected as a middleware. However, for Scaffold to create a useful CRUD application it needs to know more about your database and application setup.
+
+Create Scaffold Models that define the data within your application. Lets take a look at this example `Player.ts` Model file:
+
+> ```typescript
+> import { ScaffoldModel, DataTypes } from "@bitovi/scaffold/types";
+>
+> export const Player: ScaffoldModel = {
+>   name: "Player",
+>   attributes: {
+>     firstName: DataTypes.STRING,
+>     lastName: DataTypes.STRING,
+>     startDate: DataTypes.DATE,
+>     endDate: DataTypes.DATE,
+>   },
+> };
+> ```
 
 This is pretty simple! The only things you are required to provide are a `name` for your model and the `attributes` that will be held within your database. If you have written ORM models before, specifically Sequelize, this should look pretty familiar to you. Scaffold uses Sequelize, a Node.js and TypeScript compatible ORM, under the hood to talk to your database.
 
-If you created any additional schema files you will need to tell Scaffold to load them at start up.
+Now that we have a Schema defined, we can update our application code accordingly:
 
-Open up the `src/index.ts` file and take a look at how your schema files are passed in to the main Scaffold application.
+> ```typescript
+> import Koa from "koa";
+> import { Scaffold } from "@bitovi/scaffold";
+> import { ScaffoldModel, DataTypes } from "@bitovi/scaffold/types";
+>
+> export const Player: ScaffoldModel = {
+>   name: "Player",
+>   attributes: {
+>     firstName: DataTypes.STRING,
+>     lastName: DataTypes.STRING,
+>     startDate: DataTypes.DATE,
+>     endDate: DataTypes.DATE,
+>   },
+> };
+>
+> const app = new Koa();
+> const scaffold = new Scaffold([Player], {});
+>
+> app.use(scaffold.middleware());
+>
+> app.use(async (ctx) => {
+>   ctx.body = "Hello World";
+> });
+>
+> await app.listen(3000);
+> console.log("Started on port 3000");
+> ```
 
-`src/index.ts`
+In the above example, if we run our application, Scaffold will create CRUD application endpoints for the Player model automatically. If you try any other URLs you will get back the default `Hello World` response.
 
-```typescript
-import { Scaffold } from "@bitovi/scaffold";
+If you create additional schema files you can simply import them the same way, passing them into the array in the Scaffold constructor. This step will take care of not only adding your schema files, but also validating them against eachother, setting up relationships, and configuring the behavior of the frontend components for you.
 
-import { Player } from "./models/Player";
-import { Team } from "./models/Player";
-
-async function init() {
-  // Provide Scaffold with a list of models and other options if required
-  const scaffold = new Scaffold([Player, Team], { port: 3000 });
-
-  // Start off with the defaults, Scaffold will build all of the CRUD routes, datbase
-  // access, and other handlers for you. No other work needed!
-  await scaffold.makeScaffoldDefaults();
-
-  // Start the service listening, in this case on port 3000 from our options above
-  await scaffold.listen();
-}
-
-init();
-```
-
-To add additional schema files, simply import them at the top and pass them into the `createScaffoldApplication` call. `createScaffoldApplication` will take care of validating your schemas, their relationships, and creating a test database when the application starts.
-
-Next we can start up the Scaffold to see everything in action. By default the application will start up on port 3000, but you can change this in the `src/index.ts` if you want.
-
-Run the Scaffold Service
+Next we can start up the Scaffold to see everything in action.
 
 > `npm run start`
 
@@ -172,29 +189,25 @@ Just like the player list, if you navigate to Navigate to [http://localhost:3000
 
 While Scaffold gives you a lot of power out of the box, if you do require custom logic outside of the defaults, it is easy to start creating your own routes. For example, if you had a `User` table that needed special authorization rules you can quickly add this functionality yourself while still retaining all the other benefits of the Scaffold system.
 
-Taking a look back at the example we had before:
-
+Lets take a look at another example application. This time we have two models, Player and Team
 `src/index.ts`
 
 ```typescript
+import Koa from "koa";
 import { Scaffold } from "@bitovi/scaffold";
-
 import { Player } from "./models/Player";
-import { Team } from "./models/Player";
+import { Team } from "./models/Team";
 
-async function init() {
-  // Provide Scaffold with a list of models and other options if required
-  const scaffold = new Scaffold([Player, Team], { port: 3000 });
+const app = new Koa();
+const scaffold = new Scaffold([Player, Team], { prefix: "/scaffold/" });
 
-  // Start off with the defaults, Scaffold will build all of the CRUD routes, datbase
-  // access, and other handlers for you. No other work needed!
-  await scaffold.makeScaffoldDefaults();
+app.use(scaffold.middleware({}));
 
-  // Start the service listening, in this case on port 3000 from our options above
-  await scaffold.listen();
-}
-
-init();
+app.use(async (ctx) => {
+  ctx.body = "Hello World";
+});
+await app.listen(3000);
+console.log("Started on port 3000");
 ```
 
 If we wanted to add a new model called User but with different behavior, we could do the following:
