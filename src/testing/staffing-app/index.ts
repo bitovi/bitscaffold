@@ -1,8 +1,4 @@
-import {
-  Scaffold,
-  scaffoldCreateDefaultMiddleware,
-  scaffoldFindAllDefaultMiddleware,
-} from "../../exports";
+import { Scaffold, scaffoldFindAllDefaultMiddleware } from "../../exports";
 import Koa from "koa";
 import signale from "signale";
 
