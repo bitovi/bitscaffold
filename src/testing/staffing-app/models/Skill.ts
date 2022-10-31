@@ -1,25 +1,24 @@
 import { ScaffoldModel, DataTypes } from "../../../types";
 
 export const Skill: ScaffoldModel = {
-    name: "Skill",
-    attributes: {
-        id: {
-            type: DataTypes.UUID,
-            primaryKey: true,
-            defaultValue: DataTypes.UUIDV4,
-            allowNull: false,
-        },
-        name: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            unique: true
-        }
+  name: "Skill",
+  attributes: {
+    id: {
+      type: DataTypes.UUID,
+      primaryKey: true,
+      defaultValue: DataTypes.UUIDV4,
+      allowNull: false,
     },
-    belongsToMany: [
-        { target: "Role", options: { through: "role__skill", as: "roles" } }
-    ]
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+  },
+  belongsToMany: [
+    { target: "Role", options: { through: "role__skill", as: "roles" } },
+  ],
 };
-
 
 /*
 -- public.skill definition

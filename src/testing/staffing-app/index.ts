@@ -11,5 +11,5 @@ console.log("Creating Scaffold Staffing Application, defaults");
 const app = new Koa();
 const scaffold = new Scaffold([Assignment, Employee, Project, Role, Skill], {});
 
-app.use(scaffold.defaults())
+app.use(scaffold.defaults());
 app.listen(3000);

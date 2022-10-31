@@ -1,6 +1,5 @@
-import { __mockApplication } from "../index";
+import { Scaffold } from "../libs";
 import { POST, PUT } from "./utils";
-import http from "node:http";
 
 import { Player } from "./models/ts/Player";
 import { Team } from "./models/ts/Team";
@@ -11,7 +10,8 @@ describe("Validation Tests", () => {
   });
 
   it("should fail validtion if there are extra properties", async () => {
-    const server = await __mockApplication([Player, Team]);
+    const scaffold = new Scaffold([Player, Team], {});
+    const server = await scaffold.createServer();
 
     console.log("Creating a new Player");
     const result2 = await POST(server, "/api/Player", {
@@ -21,7 +21,7 @@ describe("Validation Tests", () => {
       startDate: new Date("2021-06-22"),
       endDate: new Date("2025-06-22"),
       email: "email@email.com",
-      age: 25
+      age: 25,
     });
 
     // Expect us to get a proper created result back
@@ -31,7 +31,8 @@ describe("Validation Tests", () => {
   });
 
   it("should fail validtion if startDate > endDate", async () => {
-    const server = await __mockApplication([Player, Team]);
+    const scaffold = new Scaffold([Player, Team], {});
+    const server = await scaffold.createServer();
 
     console.log("Creating a new Player");
     const result2 = await POST(server, "/api/Player", {
@@ -40,7 +41,7 @@ describe("Validation Tests", () => {
       startDate: new Date("2022-06-22"),
       endDate: new Date("2021-06-22"),
       email: "email@email.com",
-      age: 25
+      age: 25,
     });
 
     expect(result2.status).toBe(400);
@@ -48,7 +49,8 @@ describe("Validation Tests", () => {
   });
 
   it("should fail validtion create and then update invalid", async () => {
-    const server = await __mockApplication([Player, Team]);
+    const scaffold = new Scaffold([Player, Team], {});
+    const server = await scaffold.createServer();
 
     console.log("Creating a new Player");
     const result1 = await POST(server, "/api/Player", {
@@ -56,7 +58,7 @@ describe("Validation Tests", () => {
       lastName: "Last Name",
       startDate: new Date("2021-06-22"),
       email: "email@email.com",
-      age: 25
+      age: 25,
     });
 
     expect(result1.status).toBe(201);
@@ -72,7 +74,8 @@ describe("Validation Tests", () => {
   });
 
   it("should pass validtion create and then update valid", async () => {
-    const server = await __mockApplication([Player, Team]);
+    const scaffold = new Scaffold([Player, Team], {});
+    const server = await scaffold.createServer();
 
     console.log("Creating a new Player");
     const result1 = await POST(server, "/api/Player", {
@@ -80,7 +83,7 @@ describe("Validation Tests", () => {
       lastName: "Last Name",
       startDate: new Date("2021-06-22"),
       email: "email@email.com",
-      age: 25
+      age: 25,
     });
 
     expect(result1.status).toBe(201);

@@ -12,46 +12,47 @@ export const Player: ScaffoldModel = {
     firstName: {
       type: DataTypes.STRING,
       allowNull: false, // Make this a required field
-      unique: 'fullName' // Together with lastName, become a composite unique key
+      unique: "fullName", // Together with lastName, become a composite unique key
     },
     lastName: {
       type: DataTypes.STRING,
       allowNull: false, // Make this a required field
-      unique: 'fullName' // Together with firstName, become a composite unique key
+      unique: "fullName", // Together with firstName, become a composite unique key
     },
     createdAt: {
       type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW
+      defaultValue: DataTypes.NOW,
     },
     updatedAt: {
       type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW
+      defaultValue: DataTypes.NOW,
     },
     startDate: {
       type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW // Set the default date to the current time, if not specified
+      defaultValue: DataTypes.NOW, // Set the default date to the current time, if not specified
     },
     endDate: DataTypes.DATE,
     email: {
       type: DataTypes.STRING,
       validate: {
-        isEmail: true
+        isEmail: true,
       },
-      unique: true // Each user must have a different email address, sure
+      unique: true, // Each user must have a different email address, sure
     },
     customRegex: {
       type: DataTypes.STRING,
       validate: {
-        is: /^[a-z]+$/i
-      }
+        is: /^[a-z]+$/i,
+      },
     },
     age: {
       type: DataTypes.INTEGER,
-      validate: { // Clamp the values to a range, throw ValidationError if outside this
+      validate: {
+        // Clamp the values to a range, throw ValidationError if outside this
         min: 0,
-        max: 150
-      }
-    }
+        max: 150,
+      },
+    },
   },
   validation: {
     startDateBeforeEndDate() {
@@ -65,5 +66,5 @@ export const Player: ScaffoldModel = {
       }
     },
   },
-  belongsTo: [{ target: "Team", options: {}}],
+  belongsTo: [{ target: "Team", options: {} }],
 };

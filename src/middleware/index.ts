@@ -127,7 +127,7 @@ export function scaffoldFindOneMiddleware(): Middleware {
         return ctx.throw(500, "Cannot (currently) include multiple models!");
       }
 
-      if (!ctx.models[ctx.query.include]) {
+      if (!ctx.state.models[ctx.query.include]) {
         return ctx.throw(500, "No Model To Include");
       }
 
@@ -324,7 +324,7 @@ export function scaffoldFindModelMiddleware(override?: string): Middleware {
       modelName = override;
     }
 
-    if (!ctx.models[modelName]) {
+    if (!ctx.state.models[modelName]) {
       ctx.state.logger.error("scaffoldFindModelMiddleware", modelName);
 
       ctx.throw(404, "Unknown Model Name '" + modelName + "'");
@@ -332,7 +332,7 @@ export function scaffoldFindModelMiddleware(override?: string): Middleware {
 
     ctx.state.logger.info("Attached Model:", modelName);
     // Look at the available models, the route, and attach the model to the state
-    ctx.state.model = ctx.models[modelName];
+    ctx.state.model = ctx.state.models[modelName];
     ctx.state.logger.success("scaffoldFindModelMiddleware", modelName);
     await next();
   };

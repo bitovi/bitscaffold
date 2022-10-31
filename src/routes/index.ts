@@ -1,4 +1,5 @@
 import Router from "@koa/router";
+import signale from "signale";
 import {
   scaffoldFindAllDefaultMiddleware,
   scaffoldFindOneDefaultMiddleware,
@@ -7,7 +8,8 @@ import {
   scaffoldUpdateDefaultMiddleware,
 } from "../middleware";
 
-export async function prepareDefaultRoutes(): Promise<Router> {
+export function prepareDefaultRoutes(): Router {
+  signale.pending("prepareDefaultRoutes");
   const router: Router = new Router();
   /**
    * A wildcard route for any passed in model, the middleware function here
@@ -38,5 +40,6 @@ export async function prepareDefaultRoutes(): Promise<Router> {
    * could provide sane defaults for authorization, validation, create behavior
    */
   router.post("/api/:model", scaffoldCreateDefaultMiddleware());
+  signale.success("prepareDefaultRoutes");
   return router;
 }

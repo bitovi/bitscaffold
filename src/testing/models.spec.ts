@@ -1,6 +1,5 @@
-import { __mockApplication } from "../index";
 import { DELETE, GET, POST } from "./utils";
-import http from "node:http";
+import { Scaffold } from "../libs";
 
 import { Player } from "./models/ts/Player";
 import { Team } from "./models/ts/Team";
@@ -15,7 +14,8 @@ describe("Model Tests", () => {
   });
 
   it("One-To-One Testing", async () => {
-    const server = await __mockApplication([Bar, Foo]);
+    const scaffold = new Scaffold([Bar, Foo], {});
+    const server = await scaffold.createServer();
 
     console.log("Creating a new Foo");
     const result1 = await POST(server, "/api/Foo", {
@@ -45,7 +45,8 @@ describe("Model Tests", () => {
   });
 
   it("One-To-Many Testing", async () => {
-    const server = await __mockApplication([Player, Team]);
+    const scaffold = new Scaffold([Player, Team], {});
+    const server = await scaffold.createServer();
 
     console.log("Creating a new Team");
     const result1 = await POST(server, "/api/Team", {
@@ -63,7 +64,7 @@ describe("Model Tests", () => {
       startDate: new Date("2021-05-22"),
       endDate: new Date("2025-05-22"),
       email: "email" + Date.now() + "@email.com",
-      age: 25
+      age: 25,
     });
 
     // Expect us to get a proper created result back
@@ -91,7 +92,8 @@ describe("Model Tests", () => {
   });
 
   it.skip("Many-To-Many Testing", async () => {
-    const server = await __mockApplication([Movie, Actor]);
+    const scaffold = new Scaffold([Movie, Actor], {});
+    const server = await scaffold.createServer();
 
     console.log("Creating a new Movie");
     const result1 = await POST(server, "/api/Movie", {
@@ -141,7 +143,8 @@ describe("Model Tests", () => {
   });
 
   it("Create and Delete a Record", async () => {
-    const server = await __mockApplication([Player, Team]);
+    const scaffold = new Scaffold([Player, Team], {});
+    const server = await scaffold.createServer();
 
     console.log("Creating a new Team");
     const result1 = await POST(server, "/api/Team", {
@@ -161,7 +164,7 @@ describe("Model Tests", () => {
       startDate: new Date("2021-06-22"),
       endDate: new Date("2025-06-22"),
       email: "email" + userId + "@email.com",
-      age: 25
+      age: 25,
     });
 
     userId = userId + 1;
@@ -173,7 +176,7 @@ describe("Model Tests", () => {
       startDate: new Date("2021-06-22"),
       endDate: new Date("2025-06-22"),
       email: "email" + userId + "@email.com",
-      age: 25
+      age: 25,
     });
 
     userId = userId + 1;
@@ -185,7 +188,7 @@ describe("Model Tests", () => {
       startDate: new Date("2021-06-22"),
       endDate: new Date("2025-06-22"),
       email: "email" + userId + "@email.com",
-      age: 25
+      age: 25,
     });
 
     userId = userId + 1;
@@ -197,7 +200,7 @@ describe("Model Tests", () => {
       startDate: new Date("2021-06-22"),
       endDate: new Date("2025-06-22"),
       email: "email" + userId + "@email.com",
-      age: 25
+      age: 25,
     });
 
     // Expect us to get a proper created result back

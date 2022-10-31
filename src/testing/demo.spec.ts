@@ -1,4 +1,4 @@
-import { __mockApplication } from "../index";
+import { Scaffold } from "../libs";
 import request from "supertest";
 import http from "node:http";
 
@@ -14,7 +14,8 @@ describe("Demo", () => {
     // If this was an external application that uses Scaffold, this would
     // be what we import from the module. We pass in our models, and it gives us back
     // a Koa app ready to go.
-    const server = await __mockApplication([Player, Team]);
+    const scaffold = new Scaffold([Player, Team], {});
+    const server = await scaffold.createServer();
 
     console.log("Creating a new Team");
     const result1 = await request(server)

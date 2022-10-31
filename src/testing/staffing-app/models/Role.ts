@@ -1,42 +1,51 @@
 import { ScaffoldModel, DataTypes } from "../../../types";
 
 export const Role: ScaffoldModel = {
-    name: "Role",
-    attributes: {
-        id: {
-            type: DataTypes.UUID,
-            primaryKey: true,
-            defaultValue: DataTypes.UUIDV4,
-            allowNull: false,
-        },
-        start_date: {
-            type: DataTypes.DATE,
-            allowNull: false,
-        },
-        end_date: {
-            type: DataTypes.DATE,
-        },
-        start_confidence: {
-            type: DataTypes.FLOAT,
-            allowNull: false,
-        },
-        end_confidence: {
-            type: DataTypes.FLOAT,
-        },
-        name: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            unique: true
-        }
+  name: "Role",
+  attributes: {
+    id: {
+      type: DataTypes.UUID,
+      primaryKey: true,
+      defaultValue: DataTypes.UUIDV4,
+      allowNull: false,
     },
-    hasMany: [{ target: "Assignment", options: { as: 'assignments', foreignKey: "id", keyType: DataTypes.UUID } }],
-    belongsTo: [{ target: "Project", options: { as: 'project', foreignKey: "project_id" } }],
-    belongsToMany: [
-        { target: "Employee", options: { through: "role__employee", as: "employees" } },
-        { target: "Skill", options: { through: "role__skill", as: "skills" } }
-    ]
+    start_date: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    end_date: {
+      type: DataTypes.DATE,
+    },
+    start_confidence: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+    },
+    end_confidence: {
+      type: DataTypes.FLOAT,
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+  },
+  hasMany: [
+    {
+      target: "Assignment",
+      options: { as: "assignments", foreignKey: "id", keyType: DataTypes.UUID },
+    },
+  ],
+  belongsTo: [
+    { target: "Project", options: { as: "project", foreignKey: "project_id" } },
+  ],
+  belongsToMany: [
+    {
+      target: "Employee",
+      options: { through: "role__employee", as: "employees" },
+    },
+    { target: "Skill", options: { through: "role__skill", as: "skills" } },
+  ],
 };
-
 
 /*
 

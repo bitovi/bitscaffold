@@ -62,12 +62,11 @@ export interface ScaffoldModel {
   attributes: ScaffoldAttributes;
 
   name: string;
-  
+
   validation?: ModelValidateOptions;
 
   belongsTo?: BelongsToResult[];
   belongsToMany?: BelongsToManyResult[];
   hasOne?: HasOneResult[];
   hasMany?: HasManyResult[];
-
 }

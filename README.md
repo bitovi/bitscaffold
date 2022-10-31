@@ -25,7 +25,6 @@ Scaffold should make it quick and easy to create, test, and validate your applic
   - Optional: See the backend routes listed at http://localhost:3000/api/\_routes/
 - Check out the documentation to further customize your application
 
-
 ## Need help or have questions?
 
 This project is supported by [Bitovi, a Nodejs consultancy](https://www.bitovi.com/backend-consulting/nodejs-consulting). You can get help or ask questions on our:
@@ -89,24 +88,21 @@ Open up the `src/index.ts` file and take a look at how your schema files are pas
 `src/index.ts`
 
 ```typescript
-import {
-    Scaffold,
-} from "@bitovi/scaffold";
+import { Scaffold } from "@bitovi/scaffold";
 
 import { Player } from "./models/Player";
 import { Team } from "./models/Player";
 
-
 async function init() {
-    // Provide Scaffold with a list of models and other options if required
-    const scaffold = new Scaffold([Player, Team], { port: 3000 })
-    
-    // Start off with the defaults, Scaffold will build all of the CRUD routes, datbase
-    // access, and other handlers for you. No other work needed!
-    await scaffold.makeScaffoldDefaults();
+  // Provide Scaffold with a list of models and other options if required
+  const scaffold = new Scaffold([Player, Team], { port: 3000 });
+
+  // Start off with the defaults, Scaffold will build all of the CRUD routes, datbase
+  // access, and other handlers for you. No other work needed!
+  await scaffold.makeScaffoldDefaults();
 
   // Start the service listening, in this case on port 3000 from our options above
-    await scaffold.listen();
+  await scaffold.listen();
 }
 
 init();
@@ -120,7 +116,8 @@ Run the Scaffold Service
 
 > `npm run start`
 
-You should see some helpful output printed to your console showing what is happening with your different schemas, relationships, and validations. See the following example output: 
+You should see some helpful output printed to your console showing what is happening with your different schemas, relationships, and validations. See the following example output:
+
 ```
 Creating Scaffold Application
 ℹ  info      Creating Scaffold Application
@@ -150,6 +147,7 @@ Starting Scaffold Application
 ℹ  info      Starting Scaffold Application listening
 Started on port 3000
 ```
+
 Once you see `Started on port 3000` you can open your browser to http://localhost:3000/ to see things in action.
 
 Navigate to [http://localhost:3000/Player/new](http://localhost:3000/Player/new), fill in the first name and last name fields, and click "Save":
@@ -166,7 +164,7 @@ Navigate to [http://localhost:3000/Team/new](http://localhost:3000/Team/new), fi
 
 <img src="https://via.placeholder.com/800x600" alt="Create a new team" />
 
-Just like the player list, if you navigate to Navigate to [http://localhost:3000/Teams](http://localhost:3000/Teams), you can see the Team you just created. 
+Just like the player list, if you navigate to Navigate to [http://localhost:3000/Teams](http://localhost:3000/Teams), you can see the Team you just created.
 
 <img src="https://via.placeholder.com/800x600" alt="Display team list" />
 
@@ -179,109 +177,109 @@ Taking a look back at the example we had before:
 `src/index.ts`
 
 ```typescript
-import {
-    Scaffold,
-} from "@bitovi/scaffold";
+import { Scaffold } from "@bitovi/scaffold";
 
 import { Player } from "./models/Player";
 import { Team } from "./models/Player";
 
-
 async function init() {
-    // Provide Scaffold with a list of models and other options if required
-    const scaffold = new Scaffold([Player, Team], { port: 3000 })
-    
-    // Start off with the defaults, Scaffold will build all of the CRUD routes, datbase
-    // access, and other handlers for you. No other work needed!
-    await scaffold.makeScaffoldDefaults();
+  // Provide Scaffold with a list of models and other options if required
+  const scaffold = new Scaffold([Player, Team], { port: 3000 });
+
+  // Start off with the defaults, Scaffold will build all of the CRUD routes, datbase
+  // access, and other handlers for you. No other work needed!
+  await scaffold.makeScaffoldDefaults();
 
   // Start the service listening, in this case on port 3000 from our options above
-    await scaffold.listen();
+  await scaffold.listen();
 }
 
 init();
 ```
 
-If we wanted to add a new model called User but with different behavior, we could do the following: 
+If we wanted to add a new model called User but with different behavior, we could do the following:
 
 `src/index.ts`
 
 ```typescript
-import {
-    Scaffold,
-} from "@bitovi/scaffold";
+import { Scaffold } from "@bitovi/scaffold";
 
 import { Player } from "./models/Player";
 import { Team } from "./models/Player";
 import { User } from "./models/User";
 
-
 async function init() {
-    // Provide Scaffold with a list of models and other options if required
-    const scaffold = new Scaffold([Player, Team, User], { port: 3000 })
-    
-    // Start off by defining your special behavior for Users. 
-    await scaffold.custom.create(User, async (ctx, next) => {
-        ctx.body = "Instead of the Default, do this!";
-        ctx.status = 201;
-        await next();
-    });
+  // Provide Scaffold with a list of models and other options if required
+  const scaffold = new Scaffold([Player, Team, User], { port: 3000 });
 
-    // Finish off with the defaults, Scaffold will build all of the CRUD routes, database
-    // access, and other handlers for you. No other work needed!
-    await scaffold.makeScaffoldDefaults();
+  // Start off by defining your special behavior for Users.
+  await scaffold.custom.create(User, async (ctx, next) => {
+    ctx.body = "Instead of the Default, do this!";
+    ctx.status = 201;
+    await next();
+  });
+
+  // Finish off with the defaults, Scaffold will build all of the CRUD routes, database
+  // access, and other handlers for you. No other work needed!
+  await scaffold.makeScaffoldDefaults();
 
   // Start the service listening, in this case on port 3000 from our options above
-    await scaffold.listen();
+  await scaffold.listen();
 }
 
 init();
 ```
 
-In this case we provided a custom creation override for the User model. In this case we simply return a string instead of creating the record. 
+In this case we provided a custom creation override for the User model. In this case we simply return a string instead of creating the record.
+
 ```typescript
-    // Start off by defining your special behavior for Users. 
-    await scaffold.custom.create(User, async (ctx, next) => {
-        ctx.body = "Instead of the Default, do this!";
-        ctx.status = 201;
-        await next();
-    });
+// Start off by defining your special behavior for Users.
+await scaffold.custom.create(User, async (ctx, next) => {
+  ctx.body = "Instead of the Default, do this!";
+  ctx.status = 201;
+  await next();
+});
 ```
 
 The other basic custom override functions that are provided out of the box are `create`, `update`, `delete`, `findOne` and `findAll`. Each of these CRUD operations can be overridden for a specific model using this same pattern.
 
-However, what if we want to perform our own data fetching as part of the CRUD operations, or even access other schemas from our system? This is also easily done. Scaffold provides some helper functions to let you get under the hood access directly to the ORM where you are then free to do anything you want! 
+However, what if we want to perform our own data fetching as part of the CRUD operations, or even access other schemas from our system? This is also easily done. Scaffold provides some helper functions to let you get under the hood access directly to the ORM where you are then free to do anything you want!
 
 Lets take a look at a more complete example:
+
 ```typescript
-    // Create a custom Create handler for the User model so we can provide some
-    // additional information, such as a createdAt property
-    await scaffold.custom.create(User, async (ctx, next) => {
-        const model = scaffold.resolveORMModel(Skill);
-        const result = await model.create({ ...ctx.body, createdAt: new Date() })
+// Create a custom Create handler for the User model so we can provide some
+// additional information, such as a createdAt property
+await scaffold.custom.create(User, async (ctx, next) => {
+  const model = scaffold.resolveORMModel(Skill);
+  const result = await model.create({ ...ctx.body, createdAt: new Date() });
 
-        ctx.body = result;
-        ctx.status = 201;
-        await next();
-    });
+  ctx.body = result;
+  ctx.status = 201;
+  await next();
+});
 
-    // Create a custom Update handler for the User model so we can provide some
-    // additional information, such as a modifiedAt property
-    await scaffold.custom.update(User, async (ctx, next) => {
-        const model = scaffold.resolveSequelizeModel(Skill);
-        const result = await model.update({ ...ctx.body, modifiedAt: new Date() }, {
-            where: {
-                id: ctx.params.id
-            }
-        })
+// Create a custom Update handler for the User model so we can provide some
+// additional information, such as a modifiedAt property
+await scaffold.custom.update(User, async (ctx, next) => {
+  const model = scaffold.resolveSequelizeModel(Skill);
+  const result = await model.update(
+    { ...ctx.body, modifiedAt: new Date() },
+    {
+      where: {
+        id: ctx.params.id,
+      },
+    }
+  );
 
-        ctx.body = result;
-        ctx.status = 200;
-        await next();
-    });
+  ctx.body = result;
+  ctx.status = 200;
+  await next();
+});
 ```
 
 Creating custom route overrides is great, but what if we want to get a little more granular. We can also create overrides for the ORM data fetching itself, while keeping the remainder of the default behavior in place.
+
 ```typescript
     await scaffold.orm.create(User, async (model, body) => {
         body.createdAt = new Date():
@@ -296,14 +294,14 @@ Creating custom route overrides is great, but what if we want to get a little mo
     });
 ```
 
-
 If you want to create additional endpoints that are completely unrelated to your schema and CRUD operations, you can also easily do so
+
 ```typescript
-  await scaffold.custom.get('/api/totally-custom-route', async (ctx, next) => {
-      ctx.body = "Something Totally Custom"
-      ctx.status = 200;
-      await next();
-  });
+await scaffold.custom.get("/api/totally-custom-route", async (ctx, next) => {
+  ctx.body = "Something Totally Custom";
+  ctx.status = 200;
+  await next();
+});
 ```
 
 ## Application Data Validation
@@ -334,15 +332,15 @@ export const Player: ScaffoldModel = {
   },
   belongsTo: [{ target: "Team" }],
 };
-
 ```
+
 ## Model Relationships
 
 Scaffold can help you define and build relationships between different models within your application. In our examples above we have used the Player and Teams schemas, where a Player belongs to a Team and a Team can have many different Players assigned to it.
 
 Taking a look at the example schema again, we can see that the `Player` has a `belongsTo` property that names `Team` as the target. Similarially, the `Team` contains a `hasMany` property that names `Player` as the target. The `Team` also has some options provided to name the relationship as `players`
 
-Given this relationship, we could query the `Team` and would get back an array of players on its `players` property. 
+Given this relationship, we could query the `Team` and would get back an array of players on its `players` property.
 
 ```typescript
 import { ScaffoldModel, DataTypes } from "../../../types";
@@ -350,7 +348,7 @@ import { ScaffoldModel, DataTypes } from "../../../types";
 export const Player: ScaffoldModel = {
   name: "Player",
   attributes: {
-    // sic 
+    // sic
   },
   validation: {
     // sic
@@ -361,7 +359,7 @@ export const Player: ScaffoldModel = {
 export const Team: ScaffoldModel = {
   name: "Team",
   attributes: {
-   // sic
+    // sic
   },
   hasMany: [{ target: "Player", options: { as: "players" } }],
 };

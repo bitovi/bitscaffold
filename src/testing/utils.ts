@@ -48,7 +48,7 @@ export async function POST(server, path, payload) {
   try {
     json = JSON.parse(result.text);
   } catch (err) {
-    console.error(result.text);
+    console.error("Parse Error:", result.text);
     throw err;
   }
 

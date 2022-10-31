@@ -1,38 +1,45 @@
 import { ScaffoldModel, DataTypes } from "../../../types";
 
 export const Employee: ScaffoldModel = {
-    name: "Employee",
-    attributes: {
-        id: {
-            type: DataTypes.UUID,
-            primaryKey: true,
-            defaultValue: DataTypes.UUIDV4,
-            allowNull: false,
-        },
-        name: {
-            type: DataTypes.STRING,
-            allowNull: false,
-        },
-        start_date: DataTypes.DATE,
-        end_date: DataTypes.DATE
+  name: "Employee",
+  attributes: {
+    id: {
+      type: DataTypes.UUID,
+      primaryKey: true,
+      defaultValue: DataTypes.UUIDV4,
+      allowNull: false,
     },
-    validation: {
-        startDateBeforeEndDate() {
-            if (this.start_date && this.end_date && this.start_date >= this.end_date) {
-                throw new Error("START_DATE_MUST_BE_BEFORE_END_DATE");
-            }
-        },
-        endDateAfterStartDate() {
-            if (this.start_date && this.end_date && this.start_date >= this.end_date) {
-                throw new Error("START_DATE_MUST_BE_BEFORE_END_DATE");
-            }
-        },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
-    belongsToMany: [
-        { target: "Role", options: { through: "role__employee", as: "roles" } }
-    ]
+    start_date: DataTypes.DATE,
+    end_date: DataTypes.DATE,
+  },
+  validation: {
+    startDateBeforeEndDate() {
+      if (
+        this.start_date &&
+        this.end_date &&
+        this.start_date >= this.end_date
+      ) {
+        throw new Error("START_DATE_MUST_BE_BEFORE_END_DATE");
+      }
+    },
+    endDateAfterStartDate() {
+      if (
+        this.start_date &&
+        this.end_date &&
+        this.start_date >= this.end_date
+      ) {
+        throw new Error("START_DATE_MUST_BE_BEFORE_END_DATE");
+      }
+    },
+  },
+  belongsToMany: [
+    { target: "Role", options: { through: "role__employee", as: "roles" } },
+  ],
 };
-
 
 /*
 -- public.employee definition

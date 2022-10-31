@@ -12,8 +12,8 @@ export const Team: ScaffoldModel = {
     name: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true
-    }
+      unique: true,
+    },
   },
   hasMany: [{ target: "Player", options: { as: "players" } }],
 };
