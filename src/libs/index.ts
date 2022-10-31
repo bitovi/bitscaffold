@@ -237,7 +237,7 @@ export class Scaffold {
     await this.isInitialized();
   }
 
-  resolveSequelizeModel(sm: ScaffoldModel): ModelStatic<Model> {
+  model(sm: ScaffoldModel): ModelStatic<Model> {
     if (!sm) {
       throw new Error("No Model Specified");
     }

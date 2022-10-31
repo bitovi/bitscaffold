@@ -32,7 +32,7 @@ scaffold.custom.route("GET", "/custom/route", async (ctx, next) => {
 });
 
 scaffold.custom.route("GET", "/custom/route2", async (ctx, next) => {
-  const SkillQuery = scaffold.resolveSequelizeModel(Skill);
+  const SkillQuery = scaffold.model(Skill);
   ctx.body = await SkillQuery.findAndCountAll();
   ctx.status = 200;
 });
