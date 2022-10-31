@@ -5,7 +5,7 @@ import Koa from "koa";
 const app = new Koa();
 const scaffold = new Scaffold([Player, Team], { prefix: "/scaffold/" });
 
-app.use(scaffold.middleware());
+app.use(scaffold.defaults());
 
 app.use(async (ctx) => {
   ctx.body = "Hello World";

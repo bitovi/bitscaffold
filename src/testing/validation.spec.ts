@@ -10,7 +10,7 @@ describe("Validation Tests", () => {
   });
 
   it("should fail validtion if there are extra properties", async () => {
-    const scaffold = new Scaffold([Player, Team], {});
+    const scaffold = new Scaffold([Player, Team], { prefix: "/api" });
     const server = await scaffold.createServer();
 
     console.log("Creating a new Player");
@@ -31,7 +31,7 @@ describe("Validation Tests", () => {
   });
 
   it("should fail validtion if startDate > endDate", async () => {
-    const scaffold = new Scaffold([Player, Team], {});
+    const scaffold = new Scaffold([Player, Team], { prefix: "/api" });
     const server = await scaffold.createServer();
 
     console.log("Creating a new Player");
@@ -49,7 +49,7 @@ describe("Validation Tests", () => {
   });
 
   it("should fail validtion create and then update invalid", async () => {
-    const scaffold = new Scaffold([Player, Team], {});
+    const scaffold = new Scaffold([Player, Team], { prefix: "/api" });
     const server = await scaffold.createServer();
 
     console.log("Creating a new Player");
@@ -74,7 +74,7 @@ describe("Validation Tests", () => {
   });
 
   it("should pass validtion create and then update valid", async () => {
-    const scaffold = new Scaffold([Player, Team], {});
+    const scaffold = new Scaffold([Player, Team], { prefix: "/api" });
     const server = await scaffold.createServer();
 
     console.log("Creating a new Player");

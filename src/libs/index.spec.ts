@@ -28,10 +28,10 @@ describe("Library", () => {
 
   it("should act as middleware", async () => {
     const external = new Koa();
-    const scaffold = new Scaffold([Team], {});
+    const scaffold = new Scaffold([Team], { prefix: "/api" });
     await scaffold.isReady(); // Make sure that all the async stuff is done from the constructor...
 
-    external.use(scaffold.middleware());
+    external.use(scaffold.defaults());
     const server = http.createServer(external.callback());
 
     const result = await request(server)

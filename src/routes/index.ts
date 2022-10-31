@@ -8,9 +8,8 @@ import {
   scaffoldUpdateDefaultMiddleware,
 } from "../middleware";
 
-export function prepareDefaultRoutes(): Router {
+export function prepareDefaultRoutes(router: Router): Router {
   signale.pending("prepareDefaultRoutes");
-  const router: Router = new Router();
   /**
    * A wildcard route for any passed in model, the middleware function here
    * could provide sane defaults for authorization, validation, findOne behavior
@@ -41,5 +40,4 @@ export function prepareDefaultRoutes(): Router {
    */
   router.post("/:model", scaffoldCreateDefaultMiddleware());
   signale.success("prepareDefaultRoutes");
-  return router;
 }

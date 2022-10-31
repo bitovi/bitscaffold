@@ -14,7 +14,7 @@ describe("Model Tests", () => {
   });
 
   it("One-To-One Testing", async () => {
-    const scaffold = new Scaffold([Bar, Foo], {});
+    const scaffold = new Scaffold([Bar, Foo], { prefix: "/api" });
     const server = await scaffold.createServer();
 
     console.log("Creating a new Foo");
@@ -45,7 +45,7 @@ describe("Model Tests", () => {
   });
 
   it("One-To-Many Testing", async () => {
-    const scaffold = new Scaffold([Player, Team], {});
+    const scaffold = new Scaffold([Player, Team], { prefix: "/api" });
     const server = await scaffold.createServer();
 
     console.log("Creating a new Team");
@@ -92,7 +92,7 @@ describe("Model Tests", () => {
   });
 
   it.skip("Many-To-Many Testing", async () => {
-    const scaffold = new Scaffold([Movie, Actor], {});
+    const scaffold = new Scaffold([Movie, Actor], { prefix: "/api" });
     const server = await scaffold.createServer();
 
     console.log("Creating a new Movie");
@@ -143,7 +143,7 @@ describe("Model Tests", () => {
   });
 
   it("Create and Delete a Record", async () => {
-    const scaffold = new Scaffold([Player, Team], {});
+    const scaffold = new Scaffold([Player, Team], { prefix: "/api" });
     const server = await scaffold.createServer();
 
     console.log("Creating a new Team");

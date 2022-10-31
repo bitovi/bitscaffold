@@ -339,10 +339,7 @@ export function scaffoldFindModelMiddleware(override?: string): Middleware {
 }
 
 export function scaffoldAPIResponseMiddleware(): Middleware {
-  return async function scaffoldAPIResponse(
-    ctx: ScaffoldContext,
-    next: Koa.Next
-  ) {
+  return async function scaffoldAPIResponse(ctx: ScaffoldContext) {
     ctx.state.logger.pending("scaffoldAPIResponseMiddleware");
 
     if (!ctx.state.body) {
