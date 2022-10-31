@@ -55,75 +55,75 @@ When the application starts up, Scaffold will create REST endpoints based on you
 
 Create a new Koa + Scaffold project. Start by installing Koa and Scaffold
 
-> ```bash
-> npm i koa @bitovi/scaffold
-> ```
+```bash
+npm i koa @bitovi/scaffold
+```
 
 If you do not already have a Koa project, you can use the following Hello World example to try things out
 
-> ```typescript
-> import Koa from "koa";
-> import { Scaffold } from "@bitovi/scaffold";
->
-> const app = new Koa();
-> const scaffold = new Scaffold([], {});
->
-> app.use(scaffold.middleware());
->
-> app.use(async (ctx) => {
->   ctx.body = "Hello World";
-> });
-> ```
+ ```typescript
+ import Koa from "koa";
+ import { Scaffold } from "@bitovi/scaffold";
+
+ const app = new Koa();
+ const scaffold = new Scaffold([], {});
+
+ app.use(scaffold.middleware());
+
+ app.use(async (ctx) => {
+   ctx.body = "Hello World";
+ });
+ ```
 
 At this point you have created a Koa application with Scaffold connected as a middleware. However, for Scaffold to create a useful CRUD application it needs to know more about your database and application setup.
 
 Create Scaffold Models that define the data within your application. Lets take a look at this example `Player.ts` Model file:
 
-> ```typescript
-> import { ScaffoldModel, DataTypes } from "@bitovi/scaffold/types";
->
-> export const Player: ScaffoldModel = {
->   name: "Player",
->   attributes: {
->     firstName: DataTypes.STRING,
->     lastName: DataTypes.STRING,
->     startDate: DataTypes.DATE,
->     endDate: DataTypes.DATE,
->   },
-> };
-> ```
+```typescript
+import { ScaffoldModel, DataTypes } from "@bitovi/scaffold/types";
+
+export const Player: ScaffoldModel = {
+  name: "Player",
+  attributes: {
+    firstName: DataTypes.STRING,
+    lastName: DataTypes.STRING,
+    startDate: DataTypes.DATE,
+    endDate: DataTypes.DATE,
+  },
+};
+```
 
 This is pretty simple! The only things you are required to provide are a `name` for your model and the `attributes` that will be held within your database. If you have written ORM models before, specifically Sequelize, this should look pretty familiar to you. Scaffold uses Sequelize, a Node.js and TypeScript compatible ORM, under the hood to talk to your database.
 
 Now that we have a Schema defined, we can update our application code accordingly:
 
-> ```typescript
-> import Koa from "koa";
-> import { Scaffold } from "@bitovi/scaffold";
-> import { ScaffoldModel, DataTypes } from "@bitovi/scaffold/types";
->
-> export const Player: ScaffoldModel = {
->   name: "Player",
->   attributes: {
->     firstName: DataTypes.STRING,
->     lastName: DataTypes.STRING,
->     startDate: DataTypes.DATE,
->     endDate: DataTypes.DATE,
->   },
-> };
->
-> const app = new Koa();
-> const scaffold = new Scaffold([Player], {});
->
-> app.use(scaffold.middleware());
->
-> app.use(async (ctx) => {
->   ctx.body = "Hello World";
-> });
->
-> await app.listen(3000);
-> console.log("Started on port 3000");
-> ```
+```typescript
+import Koa from "koa";
+import { Scaffold } from "@bitovi/scaffold";
+import { ScaffoldModel, DataTypes } from "@bitovi/scaffold/types";
+
+export const Player: ScaffoldModel = {
+  name: "Player",
+  attributes: {
+    firstName: DataTypes.STRING,
+    lastName: DataTypes.STRING,
+    startDate: DataTypes.DATE,
+    endDate: DataTypes.DATE,
+  },
+};
+
+const app = new Koa();
+const scaffold = new Scaffold([Player], {});
+
+app.use(scaffold.middleware());
+
+app.use(async (ctx) => {
+  ctx.body = "Hello World";
+});
+
+await app.listen(3000);
+console.log("Started on port 3000");
+```
 
 In the above example, if we run our application, Scaffold will create CRUD application endpoints for the Player model automatically. If you try any other URLs you will get back the default `Hello World` response.
 
@@ -131,7 +131,7 @@ If you create additional schema files you can simply import them the same way, p
 
 Next we can start up the Scaffold to see everything in action.
 
-> `npm run start`
+`npm run start`
 
 You should see some helpful output printed to your console showing what is happening with your different schemas, relationships, and validations. See the following example output:
 
