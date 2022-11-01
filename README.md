@@ -61,19 +61,19 @@ npm i koa @bitovi/scaffold
 
 If you do not already have a Koa project, you can use the following Hello World example to try things out
 
- ```typescript
- import Koa from "koa";
- import { Scaffold } from "@bitovi/scaffold";
+```typescript
+import Koa from "koa";
+import { Scaffold } from "@bitovi/scaffold";
 
- const app = new Koa();
- const scaffold = new Scaffold([], {});
+const app = new Koa();
+const scaffold = new Scaffold([], {});
 
- app.use(scaffold.middleware());
+app.use(scaffold.middleware());
 
- app.use(async (ctx) => {
-   ctx.body = "Hello World";
- });
- ```
+app.use(async (ctx) => {
+  ctx.body = "Hello World";
+});
+```
 
 At this point you have created a Koa application with Scaffold connected as a middleware. However, for Scaffold to create a useful CRUD application it needs to know more about your database and application setup.
 

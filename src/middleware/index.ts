@@ -1,7 +1,41 @@
 import Koa, { Middleware } from "koa";
 import compose from "koa-compose";
-import { FindOptions } from "sequelize";
+import { FindOptions, IncludeOptions } from "sequelize";
+import { v4 } from "uuid";
+import { Signale } from "signale";
+
 import { ScaffoldModelContext, ScaffoldContext } from "../types";
+
+export function scaffoldLoggingMiddleware() {
+  return async function scaffoldLogging(ctx: Koa.Context, next: Koa.Next) {
+    ctx.state.uuid = v4();
+    ctx.state.logger = new Signale({ scope: ctx.state.uuid });
+
+    ctx.set("x-koa-uuid", ctx.state.uuid);
+    await next();
+  };
+}
+
+export function scaffoldErrorHandlerMiddleware() {
+  return async function scaffoldErrorHandler(ctx: Koa.Context, next: Koa.Next) {
+    return next().catch((err) => {
+      ctx.type = "json";
+
+      ctx.status = err.statusCode || 500;
+      ctx.body = {
+        errors: [err.message],
+        data: null,
+        meta: err,
+      };
+
+      if (ctx.state.logger) {
+        ctx.state.logger.error(err.message, err);
+      }
+
+      ctx.app.emit("error", err, ctx);
+    });
+  };
+}
 
 export function stateDefaultsMiddleware(state = {}) {
   return async function stateDefaults(ctx, next) {
@@ -77,17 +111,6 @@ export function scaffoldFindAllMiddleware(): Middleware {
 
     const options: FindOptions = { include: [] };
 
-    //if (ctx.query && ctx.query.include) {
-    // ctx.state.logger.info("Include:", ctx.query.include);
-
-    // if (Array.isArray(ctx.query.include)) {
-    //   return ctx.throw(500, "Cannot (currently) include multiple models!");
-    // }
-
-    // if (!ctx.state.model.associations[ctx.query.include]) {
-    //   return ctx.throw(500, "No Model To Include");
-    // }
-
     Object.keys(ctx.state.model.associations).forEach((name) => {
       const association = ctx.state.model.associations[name];
       if (Array.isArray(options.include)) {
@@ -127,7 +150,7 @@ export function scaffoldFindOneMiddleware(): Middleware {
       return ctx.throw(500, "No Model On Context");
     }
 
-    const options: Omit<FindOptions<any>, "where"> = {};
+    const options: Omit<FindOptions, "where"> = {};
 
     if (ctx.query && ctx.query.include) {
       ctx.state.logger.info("Include:", ctx.query.include);
@@ -172,15 +195,8 @@ export function scaffoldCreateMiddleware(): Middleware {
 
     // https://sequelize.org/docs/v6/advanced-association-concepts/creating-with-associations/
 
-    // {
-    //     include: [{
-    //         association: Product.User,
-    //         include: [User.Addresses]
-    //     }]
-    // }
-
     // Create the `create` options based on the incoming request and the model properties
-    const include: any[] = [];
+    const include: IncludeOptions[] = [];
     Object.keys(ctx.state.model.associations).forEach((name) => {
       // Check if this key is found on the request body. If it is, include that as an association
       // so that we can cascade the create call

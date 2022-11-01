@@ -1,5 +1,5 @@
-import { DELETE, GET, POST } from "./utils";
-import { Scaffold } from "../libs";
+import { createServer, DELETE, GET, POST } from "./utils";
+import { Scaffold } from "../index";
 
 import { Player } from "./models/ts/Player";
 import { Team } from "./models/ts/Team";
@@ -15,7 +15,8 @@ describe("Model Tests", () => {
 
   it("One-To-One Testing", async () => {
     const scaffold = new Scaffold([Bar, Foo], { prefix: "/api" });
-    const server = await scaffold.createServer();
+    await scaffold.createDatabase();
+    const server = createServer(scaffold);
 
     console.log("Creating a new Foo");
     const result1 = await POST(server, "/api/Foo", {
@@ -46,7 +47,8 @@ describe("Model Tests", () => {
 
   it("One-To-Many Testing", async () => {
     const scaffold = new Scaffold([Player, Team], { prefix: "/api" });
-    const server = await scaffold.createServer();
+    await scaffold.createDatabase();
+    const server = createServer(scaffold);
 
     console.log("Creating a new Team");
     const result1 = await POST(server, "/api/Team", {
@@ -91,9 +93,10 @@ describe("Model Tests", () => {
     expect(result4.json.data[0].players).toHaveLength(1);
   });
 
-  it.skip("Many-To-Many Testing", async () => {
+  it("Many-To-Many Testing", async () => {
     const scaffold = new Scaffold([Movie, Actor], { prefix: "/api" });
-    const server = await scaffold.createServer();
+    await scaffold.createDatabase();
+    const server = createServer(scaffold);
 
     console.log("Creating a new Movie");
     const result1 = await POST(server, "/api/Movie", {
@@ -144,7 +147,8 @@ describe("Model Tests", () => {
 
   it("Create and Delete a Record", async () => {
     const scaffold = new Scaffold([Player, Team], { prefix: "/api" });
-    const server = await scaffold.createServer();
+    await scaffold.createDatabase();
+    const server = createServer(scaffold);
 
     console.log("Creating a new Team");
     const result1 = await POST(server, "/api/Team", {

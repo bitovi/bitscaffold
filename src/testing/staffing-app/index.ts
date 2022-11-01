@@ -27,11 +27,11 @@ scaffold.custom.findAll(Skill, [
   scaffoldFindAllDefaultMiddleware(),
 ]);
 
-scaffold.custom.route("GET", "/custom/route", async (ctx, next) => {
+scaffold.custom.route("GET", "/custom/route", async (ctx) => {
   ctx.body = { response: "Hello Custom Route" };
 });
 
-scaffold.custom.route("GET", "/custom/route2", async (ctx, next) => {
+scaffold.custom.route("GET", "/custom/route2", async (ctx) => {
   const SkillQuery = scaffold.model(Skill);
   ctx.body = await SkillQuery.findAndCountAll();
   ctx.status = 200;

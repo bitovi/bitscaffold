@@ -1,5 +1,5 @@
-import { Scaffold } from "../libs";
-import { POST, PUT } from "./utils";
+import { Scaffold } from "../index";
+import { createServer, POST, PUT } from "./utils";
 
 import { Player } from "./models/ts/Player";
 import { Team } from "./models/ts/Team";
@@ -11,7 +11,8 @@ describe("Validation Tests", () => {
 
   it("should fail validtion if there are extra properties", async () => {
     const scaffold = new Scaffold([Player, Team], { prefix: "/api" });
-    const server = await scaffold.createServer();
+    await scaffold.createDatabase();
+    const server = createServer(scaffold);
 
     console.log("Creating a new Player");
     const result2 = await POST(server, "/api/Player", {
@@ -32,7 +33,8 @@ describe("Validation Tests", () => {
 
   it("should fail validtion if startDate > endDate", async () => {
     const scaffold = new Scaffold([Player, Team], { prefix: "/api" });
-    const server = await scaffold.createServer();
+    await scaffold.createDatabase();
+    const server = createServer(scaffold);
 
     console.log("Creating a new Player");
     const result2 = await POST(server, "/api/Player", {
@@ -50,7 +52,8 @@ describe("Validation Tests", () => {
 
   it("should fail validtion create and then update invalid", async () => {
     const scaffold = new Scaffold([Player, Team], { prefix: "/api" });
-    const server = await scaffold.createServer();
+    await scaffold.createDatabase();
+    const server = createServer(scaffold);
 
     console.log("Creating a new Player");
     const result1 = await POST(server, "/api/Player", {
@@ -75,7 +78,8 @@ describe("Validation Tests", () => {
 
   it("should pass validtion create and then update valid", async () => {
     const scaffold = new Scaffold([Player, Team], { prefix: "/api" });
-    const server = await scaffold.createServer();
+    await scaffold.createDatabase();
+    const server = createServer(scaffold);
 
     console.log("Creating a new Player");
     const result1 = await POST(server, "/api/Player", {

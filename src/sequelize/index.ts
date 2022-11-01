@@ -1,21 +1,11 @@
-import { Sequelize, Options } from "sequelize";
+import { Sequelize } from "sequelize";
 import signale from "signale";
 import { ScaffoldModel } from "../types";
 
-export function prepareSequelize(options?: Options): Sequelize {
-  signale.info("Creating Sequelize instance");
-  const sequelize = new Sequelize("sqlite::memory:", {
-    logging: (message) => {
-      signale.info("  SQL:", message);
-    },
-  });
-  return sequelize;
-}
-
-export async function prepareModels(
+export function convertScaffoldModels(
   sequelize: Sequelize,
   models: ScaffoldModel[]
-): Promise<any> {
+): void {
   signale.info("Attaching Models to Sequelize instance");
   models.forEach((model) => {
     signale.info("Creating Model", model.name);
@@ -61,7 +51,4 @@ export async function prepareModels(
       }
     });
   });
-
-  signale.info("Running Sequelize Model Sync");
-  await sequelize.sync({ force: true });
 }

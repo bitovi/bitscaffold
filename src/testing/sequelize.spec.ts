@@ -55,6 +55,7 @@ describe("Sequelize Tests", () => {
       await temp.validate();
       expect(false).toBe(true);
     } catch (err) {
+      // eslint-disable-next-line jest/no-conditional-expect
       expect(err.message).toContain("START_DATE_MUST_BE_BEFORE_END_DATE");
     }
   });

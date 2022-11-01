@@ -1,4 +1,4 @@
-import { Scaffold } from "../libs";
+import { Scaffold } from "../index";
 import request from "supertest";
 import signale from "signale";
 
@@ -9,6 +9,7 @@ import {
   scaffoldFindAllMiddleware,
   scaffoldFindModelMiddleware,
 } from "../middleware";
+import { createServer } from "./utils";
 
 describe("Demo", () => {
   beforeAll(() => {
@@ -20,7 +21,8 @@ describe("Demo", () => {
     // be what we import from the module. We pass in our models, and it gives us back
     // a Koa app ready to go.
     const scaffold = new Scaffold([Player, Team], { prefix: "/api" });
-    const server = await scaffold.createServer();
+    await scaffold.createDatabase();
+    const server = createServer(scaffold);
 
     console.log("Creating a new Team");
     const result1 = await request(server)
@@ -67,6 +69,7 @@ describe("Demo", () => {
 
   it("should allow overwrite functionality", async () => {
     const scaffold = new Scaffold([Player, Team], { prefix: "/api" });
+    await scaffold.createDatabase();
 
     scaffold.custom.route("GET", "/custom-test-route", async (ctx) => {
       signale.pending("Custom Test Route");
@@ -75,7 +78,7 @@ describe("Demo", () => {
       signale.success("Custom Test Route");
     });
 
-    const server = await scaffold.createServer();
+    const server = createServer(scaffold);
 
     console.log("Hitting the Custom Test Route endpoint");
     const result1 = await request(server)
@@ -88,6 +91,7 @@ describe("Demo", () => {
 
   it("should allow custom Model routes", async () => {
     const scaffold = new Scaffold([Player, Team], { prefix: "/api" });
+    await scaffold.createDatabase();
 
     scaffold.custom.findAll(Team, [
       async (ctx, next) => {
@@ -115,7 +119,7 @@ describe("Demo", () => {
       scaffoldAPIResponseMiddleware(),
     ]);
 
-    const server = await scaffold.createServer();
+    const server = createServer(scaffold);
 
     console.log("Hitting the Custom Test Route endpoint");
     const result1 = await request(server)

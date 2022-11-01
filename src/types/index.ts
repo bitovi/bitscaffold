@@ -14,11 +14,13 @@ import signale from "signale";
 
 export { DataTypes } from "sequelize";
 
-export interface ScaffoldAttributes
-  extends ModelAttributes<Model<any, any>, any> {}
+export interface ScaffoldOptions {
+  prefix?: string;
+}
 
-export interface ScaffoldApplication
-  extends Koa<DefaultState, DefaultContext> {}
+export type ScaffoldAttributes = ModelAttributes<Model>;
+
+export type ScaffoldApplication = Koa<DefaultState, DefaultContext>;
 
 export interface ScaffoldModelContext extends ScaffoldContext {
   state: ScaffoldContext["state"] & {
@@ -27,7 +29,7 @@ export interface ScaffoldModelContext extends ScaffoldContext {
 }
 
 export interface LoadedModels {
-  [key: string]: ModelStatic<Model<any, any>>;
+  [key: string]: ModelStatic<Model>;
 }
 
 export interface BelongsToManyResult {

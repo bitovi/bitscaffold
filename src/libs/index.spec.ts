@@ -1,6 +1,6 @@
 import request from "supertest";
 import http from "node:http";
-import { Scaffold } from ".";
+import { Scaffold } from "../index";
 import Koa from "koa";
 import { ScaffoldModel, DataTypes } from "../types";
 
@@ -29,7 +29,8 @@ describe("Library", () => {
   it("should act as middleware", async () => {
     const external = new Koa();
     const scaffold = new Scaffold([Team], { prefix: "/api" });
-    await scaffold.isReady(); // Make sure that all the async stuff is done from the constructor...
+
+    await scaffold.createDatabase();
 
     external.use(scaffold.defaults());
     const server = http.createServer(external.callback());

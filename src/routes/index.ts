@@ -1,5 +1,10 @@
 import Router from "@koa/router";
+import { ScaffoldModel, ScaffoldModelContext } from "../types";
+import compose from "koa-compose";
+import { Middleware, DefaultState } from "koa";
 import signale from "signale";
+import { stateDefaultsMiddleware } from "../middleware";
+
 import {
   scaffoldFindAllDefaultMiddleware,
   scaffoldFindOneDefaultMiddleware,
@@ -9,7 +14,6 @@ import {
 } from "../middleware";
 
 export function prepareDefaultRoutes(router: Router): Router {
-  signale.pending("prepareDefaultRoutes");
   /**
    * A wildcard route for any passed in model, the middleware function here
    * could provide sane defaults for authorization, validation, findOne behavior
@@ -39,5 +43,132 @@ export function prepareDefaultRoutes(router: Router): Router {
    * could provide sane defaults for authorization, validation, create behavior
    */
   router.post("/:model", scaffoldCreateDefaultMiddleware());
-  signale.success("prepareDefaultRoutes");
+}
+
+function composeMiddleware(Model, middlewares) {
+  return compose([
+    stateDefaultsMiddleware({ params: { model: Model.name } }),
+    ...middlewares,
+  ]);
+}
+
+/**
+ * Creates an override for the URL `GET /:model/:id`, will replace the default handler
+ * with whatever Middleware functions are supplied in `middlewares`
+ *
+ * The Model name will be used to generate the internal route, replacing :model.
+ * The Model name will be attached to `ctx.params.model` in Koa Context
+ *
+ * @param Model
+ * @param middlewares
+ */
+export function attachGetOne(model: ScaffoldModel, middlewares: Middleware[]) {
+  signale.pending("Custom findOne: ", model.name);
+  this.router.get(
+    "/" + model.name + "/:id",
+    composeMiddleware(model, middlewares)
+  );
+  signale.success("Custom findOne: ", model.name);
+}
+
+/**
+ * Creates an override for the URL `GET /:model`, will replace the default handler
+ * with whatever Middleware functions are supplied in `middlewares`
+ *
+ * The Model name will be used to generate the internal route, replacing :model.
+ * The Model name will be attached to `ctx.params.model` in Koa Context
+ *
+ * @param Model
+ * @param middlewares
+ */
+export function attachGetAll(
+  Model: ScaffoldModel,
+  middlewares: Middleware[]
+): void {
+  signale.pending("Custom findAll: ", Model.name);
+  this.router.get("/" + Model.name + "", composeMiddleware(Model, middlewares));
+  signale.success("Custom findAll: ", Model.name);
+}
+
+/**
+ * Creates an override for the URL `POST /:model`, will replace the default handler
+ * with whatever Middleware functions are supplied in `middlewares`
+ *
+ * The Model name will be used to generate the internal route, replacing :model.
+ * The Model name will be attached to `ctx.params.model` in Koa Context
+ *
+ * @param Model
+ * @param middlewares
+ */
+export function attachPost(
+  Model: ScaffoldModel,
+  middlewares: Middleware[]
+): void {
+  signale.pending("Custom post: ", Model.name);
+  this.router.post(
+    "/" + Model.name + "",
+    composeMiddleware(Model, middlewares)
+  );
+  signale.success("Custom post: ", Model.name);
+}
+
+/**
+ * Creates an override for the URL `PUT /:model/:id`, will replace the default handler
+ * with whatever Middleware functions are supplied in `middlewares`
+ *
+ * The Model name will be used to generate the internal route, replacing :model.
+ * The Model name will be attached to `ctx.params.model` in Koa Context
+ *
+ * @param Model
+ * @param middlewares
+ */
+export function attachPut(
+  Model: ScaffoldModel,
+  middlewares: Middleware[]
+): void {
+  signale.pending("Custom put: ", Model.name);
+  this.router.put(
+    "/" + Model.name + "/:id",
+    composeMiddleware(Model, middlewares)
+  );
+  signale.success("Custom put: ", Model.name);
+}
+
+/**
+ * Creates an override for the URL `DELETE /:model/:id`, will replace the default handler
+ * with whatever Middleware functions are supplied in `middlewares`
+ *
+ * The Model name will be used to generate the internal route, replacing :model.
+ * The Model name will be attached to `ctx.params.model` in Koa Context
+ *
+ * @param Model
+ * @param middlewares
+ */
+export function attachDelete(
+  Model: ScaffoldModel,
+  middlewares: Middleware[]
+): void {
+  signale.pending("Custom delete: ", Model.name);
+  this.router.delete(
+    "/" + Model.name + "/:id",
+    composeMiddleware(Model, middlewares)
+  );
+  signale.success("Custom delete: ", Model.name);
+}
+
+/**
+ * Creates a completely custom route with custom middleware
+ *
+ * @param type The type of HTTP request to handle
+ * @param path The URL to bind for the route handler
+ * @param middleware A Koa Middleware route handler
+ */
+export function attachCustom(
+  type: "GET" | "PUT" | "POST" | "DELETE" | "HEAD",
+  path: string,
+  middleware: Middleware<DefaultState, ScaffoldModelContext>
+): void {
+  signale.pending("Custom route: ", type, path);
+  this.router[type.toLowerCase()](path, middleware);
+  signale.success("Custom route: ", type, path);
 }

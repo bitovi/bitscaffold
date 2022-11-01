@@ -1,4 +1,4 @@
-import { Scaffold } from "../libs";
+import { Scaffold } from "../index";
 
 import { Player } from "./models/ts/Player";
 import { Team } from "./models/ts/Team";
