@@ -3,7 +3,7 @@ import os from "node:os";
 import { Sequelize } from "sequelize";
 import Koa from "koa";
 import signale from "signale";
-import KoaBodyParser from "koa-body";
+import KoaBodyParser, { HttpMethodEnum } from "koa-body";
 import {
   scaffoldErrorHandlerMiddleware,
   scaffoldLoggingMiddleware,
@@ -14,7 +14,12 @@ export function prepareKoaInstance(): Koa {
 
   koa.use(
     KoaBodyParser({
-      parsedMethods: ["POST", "PUT", "PATCH", "DELETE"],
+      parsedMethods: [
+        HttpMethodEnum.POST,
+        HttpMethodEnum.PUT,
+        HttpMethodEnum.PATCH,
+        HttpMethodEnum.DELETE,
+      ],
       multipart: true,
       includeUnparsed: true,
       formidable: { multiples: true, uploadDir: os.tmpdir() },

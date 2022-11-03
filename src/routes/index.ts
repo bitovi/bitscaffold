@@ -3,7 +3,7 @@ import { ScaffoldModel, ScaffoldModelContext } from "../types";
 import compose from "koa-compose";
 import { Middleware, DefaultState } from "koa";
 import signale from "signale";
-import { stateDefaultsMiddleware } from "../middleware";
+import { stateDefaultsMiddleware, paramsDefaultsMiddleware } from "../middleware";
 
 import {
   scaffoldFindAllDefaultMiddleware,
@@ -45,9 +45,10 @@ export function prepareDefaultRoutes(router: Router): Router {
   router.post("/:model", scaffoldCreateDefaultMiddleware());
 }
 
-function composeMiddleware(Model, middlewares) {
+function composeMiddleware(model, middlewares) {
   return compose([
-    stateDefaultsMiddleware({ params: { model: Model.name } }),
+    paramsDefaultsMiddleware({ model: model.name }),
+    stateDefaultsMiddleware({ params: { model: model.name } }),
     ...middlewares,
   ]);
 }
@@ -81,8 +82,8 @@ export function attachGetOne(model: ScaffoldModel, middlewares: Middleware[]) {
  * @param Model
  * @param middlewares
  */
-export function attachGetAll(
-  Model: ScaffoldModel,
+export function attachGetAll<T extends ScaffoldModel>(
+  Model: T,
   middlewares: Middleware[]
 ): void {
   signale.pending("Custom findAll: ", Model.name);

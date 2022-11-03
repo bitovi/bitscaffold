@@ -16,6 +16,7 @@ export { DataTypes } from "sequelize";
 
 export interface ScaffoldOptions {
   prefix?: string;
+  sync?: boolean
 }
 
 export type ScaffoldAttributes = ModelAttributes<Model>;
@@ -61,7 +62,7 @@ export interface ScaffoldContext extends Context {
 }
 
 export interface ScaffoldModel {
-  attributes: ScaffoldAttributes;
+  attributes: ModelAttributes;
 
   name: string;
 

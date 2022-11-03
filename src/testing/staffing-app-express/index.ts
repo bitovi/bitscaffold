@@ -1,5 +1,5 @@
 import { Scaffold, scaffoldAPIResponseMiddleware } from "../../exports";
-import Koa from "koa";
+import Express from "express";
 import signale from "signale";
 
 import { Assignment } from "./models/Assignment";
@@ -8,8 +8,8 @@ import { Project } from "./models/Project";
 import { Role } from "./models/Role";
 import { Skill } from "./models/Skill";
 
-// Create a basic Koa application
-const app = new Koa();
+// Create a basic express application
+const app = Express();
 
 // Create a Scaffold instance containing your Models
 const scaffold = new Scaffold([Assignment, Employee, Project, Role, Skill], {
@@ -17,24 +17,19 @@ const scaffold = new Scaffold([Assignment, Employee, Project, Role, Skill], {
   sync: true
 });
 
-// Set up your Koa app as normal, for example, a logging middleware
-app.use(async (ctx, next) => {
-  signale.info("Incoming Request: ", ctx.method, ctx.path);
-  await next();
+// Set up your Express app as normal, for example, a logging middleware
+app.use((req, res, next) => {
+  signale.info("Incoming Request: ", req.method, req.path);
+  next();
 });
 
 // Optionally, customize your Scaffold behavior for specific Models
 // Here we override the findAll for the Skill model to perform a findAndCountAll
 // along with a customized response containing additional data
-
 scaffold.custom.findAll(Skill, [
   async (ctx, next) => {
     const SkillQuery = scaffold.models(Skill);
-    const result = await SkillQuery.findAndCountAll({
-      where: {
-        badValue: true
-      }
-    });
+    const result = await SkillQuery.findAndCountAll();
 
     ctx.state.body = {
       customResponseFormat: true,
@@ -47,15 +42,24 @@ scaffold.custom.findAll(Skill, [
   scaffoldAPIResponseMiddleware()
 ]);
 
-// Attach the Scaffold default middleware to your Koa application
-app.use(scaffold.defaults());
+// Attach the Scaffold default middleware to your Express application
+app.use(async (req, res) => {
+  const SkillQuery = scaffold.models(Skill);
+  const result = await SkillQuery.findAndCountAll();
 
-// Set up any other Koa routes, middleware, etc, that you want.
-app.use(async (ctx) => {
-  ctx.body = { response: "Hello World" };
+  res.send(JSON.stringify({
+    customResponseFormat: true,
+    express: true,
+    result: result
+  }))
 });
 
-// Start the Koa app listening
+// Set up any other Express routes, middleware, etc, that you want.
+app.use((req, res) => {
+  res.send(JSON.stringify({ response: "Hello World" }))
+});
+
+// Start the Express app listening
 app.listen(3000, () => {
   console.log("Started on port 3000");
 });

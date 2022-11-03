@@ -199,7 +199,7 @@ import { Player } from "./models/Player";
 import { Team } from "./models/Team";
 
 const app = new Koa();
-const scaffold = new Scaffold([Player, Team], { prefix: "/api" });
+const scaffold = new Scaffold([Player, Team], { prefix: "/api", sequelizeOptions: {} });
 
 app.use(scaffold.middleware({}));
 

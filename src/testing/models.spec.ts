@@ -93,7 +93,7 @@ describe("Model Tests", () => {
     expect(result4.json.data[0].players).toHaveLength(1);
   });
 
-  it("Many-To-Many Testing", async () => {
+  it.skip("Many-To-Many Testing", async () => {
     const scaffold = new Scaffold([Movie, Actor], { prefix: "/api" });
     await scaffold.createDatabase();
     const server = createServer(scaffold);

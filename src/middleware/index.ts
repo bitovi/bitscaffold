@@ -39,9 +39,18 @@ export function scaffoldErrorHandlerMiddleware() {
 
 export function stateDefaultsMiddleware(state = {}) {
   return async function stateDefaults(ctx, next) {
-    ctx.state.logger.info("stateDefaults", state);
+    ctx.state.logger.info("stateDefaults input", state);
     ctx.state = Object.assign(ctx.state, state);
-    ctx.state.logger.info("stateDefaults", ctx.state);
+    ctx.state.logger.info("stateDefaults output", ctx.state);
+    await next();
+  };
+}
+
+export function paramsDefaultsMiddleware(params = {}) {
+  return async function paramsDefaults(ctx, next) {
+    ctx.state.logger.info("paramsDefaults input", params);
+    ctx.params = Object.assign(ctx.params, params);
+    ctx.state.logger.info("paramsDefaults output", ctx.params);
     await next();
   };
 }
@@ -70,9 +79,9 @@ export function scaffoldValidationMiddleware(): Middleware {
       ctx.throw(
         400,
         "Invalid properties found for " +
-          ctx.state.model.name +
-          ": " +
-          invalid.join(",")
+        ctx.state.model.name +
+        ": " +
+        invalid.join(",")
       );
     }
 

@@ -3,14 +3,13 @@ import Koa, { Middleware } from "koa";
 
 import KoaRouter from "@koa/router";
 import KoaMount from "koa-mount";
-import { Model, ModelStatic, Sequelize } from "sequelize";
+import { Sequelize } from "sequelize";
 
 import { ScaffoldModel, ScaffoldOptions } from "./types";
 import { convertScaffoldModels } from "./sequelize";
 import {
   attachCustom,
   attachDelete,
-  attachGetAll,
   attachGetOne,
   attachPost,
   attachPut,
@@ -18,22 +17,22 @@ import {
 } from "./routes";
 import { prepareKoaInstance, prepareSequelizeInstance } from "./libs";
 
-export class Scaffold {
+export class Scaffold<T extends ScaffoldModel> {
   private finalized: boolean;
-  private models: ScaffoldModel[];
+  private _models: T[];
   private sequelize: Sequelize;
   private prefix: string;
   private koa: Koa;
   private router: KoaRouter;
 
-  constructor(models: ScaffoldModel[], options: ScaffoldOptions) {
-    this.models = models;
+  constructor(models: T[], options: ScaffoldOptions) {
+    this._models = models;
     this.koa = prepareKoaInstance();
     this.sequelize = prepareSequelizeInstance();
     this.router = new KoaRouter();
     this.prefix = options.prefix || "/";
 
-    convertScaffoldModels(this.sequelize, this.models);
+    convertScaffoldModels<T>(this.sequelize, this._models);
 
     this.koa.use(async (ctx, next) => {
       ctx.state.database = this.sequelize;
@@ -43,6 +42,10 @@ export class Scaffold {
     });
 
     this.finalized = false;
+
+    if (options.sync) {
+      this.createDatabase();
+    }
   }
 
   public get custom() {
@@ -50,7 +53,9 @@ export class Scaffold {
       throw new Error("Already Finalized!");
     }
     return {
-      findAll: attachGetAll.bind(this),
+      findAll: function attachGetAll(Model: T, middlewares: Middleware[]) {
+        console.log(Model, middlewares);
+      },
       findOne: attachGetOne.bind(this),
       post: attachPost.bind(this),
       put: attachPut.bind(this),
@@ -59,6 +64,11 @@ export class Scaffold {
     };
   }
 
+  /**
+   * The `defaults` Middleware provides the primary hooks
+   * between your Koa application and the Scaffold library
+   * @returns 
+   */
   defaults(): Middleware {
     this.finalize();
     return KoaMount(this.prefix, this.koa);
@@ -83,7 +93,8 @@ export class Scaffold {
     return this.sequelize.sync({ force: true });
   }
 
-  model(sm: ScaffoldModel): ModelStatic<Model> {
+  models(sm: T) {
+
     if (!sm) {
       throw new Error("No Model Specified");
     }
@@ -96,6 +107,8 @@ export class Scaffold {
       throw new Error("Unknown Model Requested");
     }
 
-    return this.sequelize.models[sm.name];
+    const test = this.sequelize.models[sm.name]
+    return test;
   }
 }
+

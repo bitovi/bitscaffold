@@ -1,15 +1,15 @@
-import { Sequelize } from "sequelize";
+import { Model, Sequelize } from "sequelize";
 import signale from "signale";
 import { ScaffoldModel } from "../types";
 
-export function convertScaffoldModels(
+export function convertScaffoldModels<T extends ScaffoldModel>(
   sequelize: Sequelize,
-  models: ScaffoldModel[]
+  models: T[]
 ): void {
   signale.info("Attaching Models to Sequelize instance");
   models.forEach((model) => {
     signale.info("Creating Model", model.name);
-    sequelize.define(model.name, model.attributes, {
+    sequelize.define<Model<T['attributes']>>(model.name, model.attributes, {
       validate: model.validation || {},
       createdAt: false,
       updatedAt: false,
