@@ -23,13 +23,13 @@ export class Scaffold<T extends ScaffoldModel> {
   private sequelize: Sequelize;
   private prefix: string;
   private koa: Koa;
-  private router: KoaRouter;
+  private _router: KoaRouter;
 
-  constructor(models: T[], options: ScaffoldOptions) {
+  constructor(models: T[], options: ScaffoldOptions = {}) {
     this._models = models;
     this.koa = prepareKoaInstance();
-    this.sequelize = prepareSequelizeInstance();
-    this.router = new KoaRouter();
+    this.sequelize = prepareSequelizeInstance(options.database);
+    this._router = new KoaRouter();
     this.prefix = options.prefix || "/";
 
     convertScaffoldModels<T>(this.sequelize, this._models);
@@ -64,6 +64,10 @@ export class Scaffold<T extends ScaffoldModel> {
     };
   }
 
+  router(): KoaRouter {
+    return this.router;
+  }
+
   /**
    * The `defaults` Middleware provides the primary hooks
    * between your Koa application and the Scaffold library
@@ -81,8 +85,8 @@ export class Scaffold<T extends ScaffoldModel> {
 
     prepareDefaultRoutes(this.router);
 
-    this.koa.use(this.router.routes());
-    this.koa.use(this.router.allowedMethods());
+    this.koa.use(this._router.routes());
+    this.koa.use(this._router.allowedMethods());
     this.finalized = true;
   }
 

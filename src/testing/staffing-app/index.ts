@@ -14,7 +14,11 @@ const app = new Koa();
 // Create a Scaffold instance containing your Models
 const scaffold = new Scaffold([Assignment, Employee, Project, Role, Skill], {
   prefix: "/api",
-  sync: true
+  sync: true,
+  database: {
+    dialect: 'sqlite',
+    
+  }
 });
 
 // Set up your Koa app as normal, for example, a logging middleware

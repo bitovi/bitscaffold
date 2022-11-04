@@ -9,6 +9,7 @@ import {
   BelongsToOptions,
   HasOneOptions,
   HasManyOptions,
+  Options
 } from "sequelize";
 import signale from "signale";
 
@@ -17,6 +18,7 @@ export { DataTypes } from "sequelize";
 export interface ScaffoldOptions {
   prefix?: string;
   sync?: boolean
+  database?: Options
 }
 
 export type ScaffoldAttributes = ModelAttributes<Model>;
