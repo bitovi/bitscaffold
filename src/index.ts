@@ -1,93 +1,84 @@
 // Library Functions
-import Koa, { Middleware } from "koa";
-
-import KoaRouter from "@koa/router";
-import KoaMount from "koa-mount";
+import { Middleware } from "koa";
 import { Sequelize } from "sequelize";
 
 import { ScaffoldModel, ScaffoldOptions } from "./types";
 import { convertScaffoldModels } from "./sequelize";
-import {
-  attachCustom,
-  attachDelete,
-  attachGetOne,
-  attachPost,
-  attachPut,
-  prepareDefaultRoutes,
-} from "./routes";
-import { prepareKoaInstance, prepareSequelizeInstance } from "./libs";
+import { prepareSequelizeInstance } from "./libs";
 
 export class Scaffold<T extends ScaffoldModel> {
-  private finalized: boolean;
   private _models: T[];
   private sequelize: Sequelize;
   private prefix: string;
-  private koa: Koa;
-  private _router: KoaRouter;
 
   constructor(models: T[], options: ScaffoldOptions = {}) {
     this._models = models;
-    this.koa = prepareKoaInstance();
     this.sequelize = prepareSequelizeInstance(options.database);
-    this._router = new KoaRouter();
     this.prefix = options.prefix || "/";
 
     convertScaffoldModels<T>(this.sequelize, this._models);
-
-    this.koa.use(async (ctx, next) => {
-      ctx.state.database = this.sequelize;
-      ctx.state.models = this.sequelize.models;
-      ctx.state.validation = {};
-      await next();
-    });
-
-    this.finalized = false;
 
     if (options.sync) {
       this.createDatabase();
     }
   }
 
-  public get custom() {
-    if (this.finalized) {
-      throw new Error("Already Finalized!");
-    }
-    return {
-      findAll: function attachGetAll(Model: T, middlewares: Middleware[]) {
-        console.log(Model, middlewares);
-      },
-      findOne: attachGetOne.bind(this),
-      post: attachPost.bind(this),
-      put: attachPut.bind(this),
-      delete: attachDelete.bind(this),
-      route: attachCustom.bind(this),
-    };
-  }
-
-  router(): KoaRouter {
-    return this.router;
-  }
-
   /**
-   * The `defaults` Middleware provides the primary hooks
+   * The `handleEverythingKoaMiddleware` Middleware provides the primary hooks
    * between your Koa application and the Scaffold library
    * @returns 
    */
-  defaults(): Middleware {
-    this.finalize();
-    return KoaMount(this.prefix, this.koa);
+  handleEverythingKoaMiddleware(): Middleware {
+    return async function handleEverythingKoa(ctx, next) {
+      if (!this.isValidScaffoldRoute(ctx.method, ctx.path)) {
+        return await next();
+      }
+
+      // Get the Model from the URL
+      const modelForRoute = getModelNameForRoute(ctx.path);
+      const modelOperationForRoute = getModelOperationForRoute(ctx.method);
+      const query = this.parseDefaultKoaParams(modelForRoute, modelOperationForRoute)
+      const data = await this._models[modelForRoute][modelOperationForRoute](query)
+      const jsonApiResponse = this.serializeToJSONAPI(data);
+      
+      ctx.body = jsonApiResponse;
+      ctx.status = 200;
+    }
   }
 
-  finalize(): void {
-    if (this.finalized) {
-      throw new Error("Already Finalized!");
+  /**
+   * The `handleEverythingExpressMiddleware` Middleware provides the primary hooks
+   * between your Express application and the Scaffold library
+   * @returns 
+   */
+  handleEverythingExpressMiddleware(): any {
+    return function handleEverythingExpress(req, res, next) {
+      if (!this.isValidScaffoldRoute(req.method, req.path)) {
+        return next();
+      }
+
+      // Get the Model from the URL
+      const modelForRoute = getModelNameForRoute(req.path);
+      const modelOperationForRoute = getModelOperationForRoute(req.method);
+      const query = this.parseDefaultKoaParams(modelForRoute, modelOperationForRoute)
+      this._models[modelForRoute][modelOperationForRoute](query).then((data) => {
+        const jsonApiResponse = this.serializeToJSONAPI(data);
+        res.send(jsonApiResponse);
+      });
     }
+  }
 
-    prepareDefaultRoutes(this.router);
-
-    this.koa.use(this._router.routes());
-    this.koa.use(this._router.allowedMethods());
-    this.finalized = true;
+  /**
+   * This function takes the method, path, and the known list of models
+   * from the Scaffold instance and determines if the current requested path
+   * is one that matches a Scaffold operation.
+   * 
+   * @param method GET, PUT, POST, DELETE, PATCH
+   * @param path URL
+   * @returns boolean
+   */
+  isValidScaffoldRoute(method, path) {
+    return method + path;
   }
 
   // This should mostly be used for testing. It will Sync
@@ -113,6 +104,49 @@ export class Scaffold<T extends ScaffoldModel> {
 
     const test = this.sequelize.models[sm.name]
     return test;
+  }
+}
+
+
+/**
+ * This function should parse the model name from the URL path
+ * @param path URL
+ * @returns {string} Model Name
+ */
+function getModelNameForRoute(path): string {
+  throw new Error("Not Implemented", path)
+}
+
+/**
+ * This function should determine the model query
+ * operation to use based on Method
+ * @param path URL
+ * @returns {string} Model Name
+ */
+function getModelOperationForRoute(ctx): string {
+  switch (ctx.method) {
+    case "POST": {
+      return "create"
+    }
+
+    case "GET": {
+      if (ctx.params.id) {
+        return "findOne"
+      }
+      return "findAll"
+    }
+
+    case "PUT": {
+      return "update"
+    }
+
+    case "DELETE": {
+      return "delete"
+    }
+
+    default: {
+      throw new Error("Unhandled Method", ctx.method);
+    }
   }
 }
 

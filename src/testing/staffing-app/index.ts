@@ -1,4 +1,5 @@
 import { Scaffold, scaffoldAPIResponseMiddleware } from "../../exports";
+import path from "path"
 import Koa from "koa";
 import signale from "signale";
 
@@ -17,7 +18,7 @@ const scaffold = new Scaffold([Assignment, Employee, Project, Role, Skill], {
   sync: true,
   database: {
     dialect: 'sqlite',
-    
+    storage: path.join(__dirname, "..", "example.sqlite")
   }
 });
 
@@ -34,6 +35,7 @@ app.use(async (ctx, next) => {
 scaffold.custom.findAll(Skill, [
   async (ctx, next) => {
     const SkillQuery = scaffold.models(Skill);
+    SkillQuery.update()
     const result = await SkillQuery.findAndCountAll({
       where: {
         badValue: true

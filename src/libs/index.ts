@@ -41,7 +41,7 @@ export function prepareSequelizeInstance(options?: Options): Sequelize {
     });
   }
 
-  signale.info("Creating Sequelize instance");
+  signale.info("Creating Sequelize instance with options:", options);
   const sequelize = new Sequelize(options);
   return sequelize;
 }
