@@ -44,7 +44,7 @@ export class Scaffold {
     return this._sequelize;
   }
 
-  get parse(): ScaffoldModelParser {
+  get parse(): { [modelName: string]: ScaffoldModelParser; } {
     return buildParserForModels(this._sequelizeModelNames);
   }
 
@@ -52,7 +52,7 @@ export class Scaffold {
     return this._sequelizeModels;
   }
 
-  get serialize(): ScaffoldModelSerialize {
+  get serialize(): { [name: string]: ScaffoldModelSerialize; } {
     return buildSerializerForModels(this._sequelizeModelNames);
   }
 

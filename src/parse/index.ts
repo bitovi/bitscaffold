@@ -4,8 +4,9 @@ import {
   FindOptions,
   UpdateOptions,
 } from "sequelize";
+import { ScaffoldModelParser } from "../types";
 
-export function buildParserForModel(name: string) {
+export function buildParserForModel(name: string): ScaffoldModelParser {
   return {
     findAll: async (params): Promise<FindOptions> => {
       console.log("findAll", name, params);
@@ -36,7 +37,7 @@ export function buildParserForModel(name: string) {
   };
 }
 
-export function buildParserForModels(names: string[]) {
+export function buildParserForModels(names: string[]): { [modelName: string]: ScaffoldModelParser } {
   const result = {};
   names.forEach((name) => {
     result[name] = buildParserForModel(name);
