@@ -1,20 +1,39 @@
-import { Model, Sequelize } from "sequelize";
+import { Model, Sequelize, Options } from "sequelize";
 import signale from "signale";
-import { ScaffoldModel } from "../types";
+import { ScaffoldModel, SequelizeModelsCollection } from "../types";
 
-export function convertScaffoldModels<T extends ScaffoldModel>(
+export function createSequelizeInstance(options?: Options): Sequelize {
+  if (!options) {
+    signale.info("Using in-memory database, no persistance configured");
+    return new Sequelize("sqlite::memory:", {
+      logging: (message) => {
+        signale.info(" DB: ", message);
+      },
+    });
+  }
+
+  signale.info("Creating Sequelize instance with options:", options);
+  const sequelize = new Sequelize(options);
+  return sequelize;
+}
+
+export function convertScaffoldModels(
   sequelize: Sequelize,
-  models: T[]
-): void {
+  models: ScaffoldModel[]
+): SequelizeModelsCollection {
   signale.info("Attaching Models to Sequelize instance");
   models.forEach((model) => {
     signale.info("Creating Model", model.name);
-    sequelize.define<Model<T['attributes']>>(model.name, model.attributes, {
-      validate: model.validation || {},
-      createdAt: false,
-      updatedAt: false,
-      freezeTableName: true,
-    });
+    sequelize.define<Model<ScaffoldModel["attributes"]>>(
+      model.name,
+      model.attributes,
+      {
+        validate: model.validation || {},
+        createdAt: false,
+        updatedAt: false,
+        freezeTableName: true,
+      }
+    );
   });
 
   models.forEach((model) => {
@@ -51,4 +70,6 @@ export function convertScaffoldModels<T extends ScaffoldModel>(
       }
     });
   });
+
+  return sequelize.models;
 }

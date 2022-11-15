@@ -18,11 +18,7 @@ export const Employee: ScaffoldModel = {
   },
   validation: {
     startDateBeforeEndDate() {
-      if (
-        this.start_date &&
-        this.end_date &&
-        this.start_date < this.end_date
-      ) {
+      if (this.start_date && this.end_date && this.start_date < this.end_date) {
         throw new Error("START_DATE_MUST_BE_BEFORE_END_DATE");
       }
     },

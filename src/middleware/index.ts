@@ -79,9 +79,9 @@ export function scaffoldValidationMiddleware(): Middleware {
       ctx.throw(
         400,
         "Invalid properties found for " +
-        ctx.state.model.name +
-        ": " +
-        invalid.join(",")
+          ctx.state.model.name +
+          ": " +
+          invalid.join(",")
       );
     }
 

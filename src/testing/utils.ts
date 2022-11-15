@@ -5,7 +5,7 @@ import { Scaffold } from "../index";
 
 export function createServer(scaffold: Scaffold) {
   const app = new Koa();
-  app.use(scaffold.defaults());
+  app.use(scaffold.handleEverythingKoaMiddleware());
   const server = http.createServer(app.callback());
   return server;
 }

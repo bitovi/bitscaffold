@@ -1,7 +1,8 @@
-import { Scaffold, scaffoldAPIResponseMiddleware } from "../../exports";
-import path from "path"
-import Koa from "koa";
+import { Scaffold } from "../../exports";
+import path from "path";
+import Koa, { Context } from "koa";
 import signale from "signale";
+import KoaRouter from "@koa/router";
 
 import { Assignment } from "./models/Assignment";
 import { Employee } from "./models/Employee";
@@ -11,15 +12,16 @@ import { Skill } from "./models/Skill";
 
 // Create a basic Koa application
 const app = new Koa();
+const router = new KoaRouter();
 
 // Create a Scaffold instance containing your Models
 const scaffold = new Scaffold([Assignment, Employee, Project, Role, Skill], {
   prefix: "/api",
   sync: true,
   database: {
-    dialect: 'sqlite',
-    storage: path.join(__dirname, "..", "example.sqlite")
-  }
+    dialect: "sqlite",
+    storage: path.join(__dirname, "..", "example.sqlite"),
+  },
 });
 
 // Set up your Koa app as normal, for example, a logging middleware
@@ -28,37 +30,23 @@ app.use(async (ctx, next) => {
   await next();
 });
 
-// Optionally, customize your Scaffold behavior for specific Models
-// Here we override the findAll for the Skill model to perform a findAndCountAll
-// along with a customized response containing additional data
+router.get("/employee", async (ctx: Context) => {
+  const params = await scaffold.parse.Employee.findAll(ctx.params)
+  const result = await scaffold.model.Employee.findAll(params);
+  const response = await scaffold.serialize.Employee.findAll(result);
+  ctx.body = response;
+});
 
-scaffold.custom.findAll(Skill, [
-  async (ctx, next) => {
-    const SkillQuery = scaffold.models(Skill);
-    SkillQuery.update()
-    const result = await SkillQuery.findAndCountAll({
-      where: {
-        badValue: true
-      }
-    });
-
-    ctx.state.body = {
-      customResponseFormat: true,
-      result: result
-    }
-    ctx.state.status = 200;
-    await next()
-  },
-  // We can import and use the provided Scaffold Middlewares
-  scaffoldAPIResponseMiddleware()
-]);
+// Hook up the router
+app.use(router.routes());
+app.use(router.allowedMethods());
 
 // Attach the Scaffold default middleware to your Koa application
-app.use(scaffold.defaults());
+app.use(scaffold.handleEverythingKoaMiddleware());
 
 // Set up any other Koa routes, middleware, etc, that you want.
 app.use(async (ctx) => {
-  ctx.body = { response: "Hello World" };
+  ctx.body = { response: "Default Router Hit" };
 });
 
 // Start the Koa app listening

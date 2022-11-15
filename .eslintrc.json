@@ -15,9 +15,7 @@
     "ecmaVersion": "latest"
   },
   "parser": "@typescript-eslint/parser",
-  "plugins": [
-    "@typescript-eslint"
-  ],
+  "plugins": ["@typescript-eslint"],
   "rules": {
     "no-unused-vars": [
       "error",
@@ -26,7 +24,5 @@
       }
     ]
   },
-  "ignorePatterns": [
-    "dist/**/*"
-  ]
+  "ignorePatterns": ["dist/**/*"]
 }

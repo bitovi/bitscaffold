@@ -3,7 +3,10 @@ import { ScaffoldModel, ScaffoldModelContext } from "../types";
 import compose from "koa-compose";
 import { Middleware, DefaultState } from "koa";
 import signale from "signale";
-import { stateDefaultsMiddleware, paramsDefaultsMiddleware } from "../middleware";
+import {
+  stateDefaultsMiddleware,
+  paramsDefaultsMiddleware,
+} from "../middleware";
 
 import {
   scaffoldFindAllDefaultMiddleware,
