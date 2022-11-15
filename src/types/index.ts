@@ -42,17 +42,17 @@ export type ScaffoldModelCollection = {
 
 export interface ScaffoldModelParser {
   // eslint-disable-next-line no-unused-vars
-  findAll: (params: unknown) => Promise<FindOptions>;
+  findAll: (query: unknown) => Promise<FindOptions>;
   // eslint-disable-next-line no-unused-vars
-  findOne: (params: unknown) => Promise<FindOptions>;
+  findOne: (query: unknown, id: unknown) => Promise<FindOptions>;
   // eslint-disable-next-line no-unused-vars
-  findAndCountAll: (params: unknown) => Promise<FindOptions>;
+  findAndCountAll: (query: unknown) => Promise<FindOptions>;
   // eslint-disable-next-line no-unused-vars
-  create: (params: unknown) => Promise<CreateOptions>;
+  create: (body: unknown, query: unknown) => Promise<CreateOptions>;
   // eslint-disable-next-line no-unused-vars
-  destroy: (params: unknown) => Promise<DestroyOptions>;
+  destroy: (query: unknown) => Promise<DestroyOptions>;
   // eslint-disable-next-line no-unused-vars
-  update: (params: unknown) => Promise<UpdateOptions>;
+  update: (body: unknown, query: unknown) => Promise<UpdateOptions>;
 }
 
 export type ScaffoldSerializedResponse = Record<string, unknown>;

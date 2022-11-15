@@ -18,28 +18,28 @@ export function buildParserForModel(
   // eslint-disable-next-line no-unused-vars
   const scaffoldModel = seq[ScaffoldSymbolModel];
   return {
-    findAll: async (params): Promise<FindOptions> => {
-      console.log("findAll", name, params);
+    findAll: async (query): Promise<FindOptions> => {
+      console.log("findAll", name, query);
       return {};
     },
-    findOne: async (params): Promise<FindOptions> => {
-      console.log("findOne", name, params);
+    findOne: async (query): Promise<FindOptions> => {
+      console.log("findOne", name, query);
       return {};
     },
-    findAndCountAll: async (params): Promise<FindOptions> => {
-      console.log("findAndCountAll", params);
+    findAndCountAll: async (query): Promise<FindOptions> => {
+      console.log("findAndCountAll", query);
       return {};
     },
-    create: async (params): Promise<CreateOptions> => {
-      console.log("create", name, params);
+    create: async (query): Promise<CreateOptions> => {
+      console.log("create", name, query);
       return {};
     },
-    destroy: async (params): Promise<DestroyOptions> => {
-      console.log("destroy", name, params);
+    destroy: async (query): Promise<DestroyOptions> => {
+      console.log("destroy", name, query);
       return {};
     },
-    update: async (params): Promise<UpdateOptions> => {
-      console.log("update", name, params);
+    update: async (query): Promise<UpdateOptions> => {
+      console.log("update", name, query);
       return {
         where: {},
       };

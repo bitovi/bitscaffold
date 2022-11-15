@@ -80,7 +80,15 @@ export class Scaffold {
 
       switch (ctx.method) {
         case "GET": {
-          const params = await this.parse[name].findAll(ctx.params);
+          if (ctx.params && ctx.params.id) {
+            const params = await this.parse[name].findOne(ctx.query, ctx.params.id);
+            const result = await this.model[name].findByPk(ctx.params.id, params);
+            const response = await this.serialize[name].findOne(result);
+            ctx.body = response;
+            return;
+          }
+
+          const params = await this.parse[name].findAll(ctx.query);
           const result = await this.model[name].findAll(params);
           const response = await this.serialize[name].findAll(result);
           ctx.body = response;
@@ -90,7 +98,7 @@ export class Scaffold {
         case "POST": {
           const body = await bodyParser(ctx);
 
-          const params = await this.parse[name].create(ctx.params);
+          const params = await this.parse[name].create(body, ctx.query);
           const result = await this.model[name].create(body, params);
           const response = await this.serialize[name].create(result);
           ctx.body = response;
@@ -100,7 +108,7 @@ export class Scaffold {
         case "PUT": {
           const body = await bodyParser(ctx);
 
-          const params = await this.parse[name].update(ctx.params);
+          const params = await this.parse[name].update(body, ctx.params);
           const result = await this.model[name].update(body, params);
           const response = await this.serialize[name].update(result);
           ctx.body = response;
@@ -145,22 +153,7 @@ export class Scaffold {
   }
 
   getScaffoldModelNameForRoute(path: string): false | string {
-    const test1 = match<{ model: string }>(this._prefix + "/:model", {
-      decode: decodeURIComponent,
-      strict: false,
-      sensitive: false,
-      end: false,
-    });
-
-    const result1 = test1(path);
-    if (result1) {
-      if (this._sequelizeModelNames.includes(result1.params.model)) {
-        return result1.params.model;
-      }
-      return false;
-    }
-
-    const test2 = match<{ model: string; id: unknown }>(
+    const isPathWithModelId = match<{ model: string; id: unknown }>(
       this._prefix + "/:model/:id",
       {
         decode: decodeURIComponent,
@@ -170,13 +163,29 @@ export class Scaffold {
       }
     );
 
-    const result2 = test2(path);
-    if (result2) {
-      if (this._sequelizeModelNames.includes(result2.params.model)) {
-        return result2.params.model;
+    const isPathWithModelIdResult = isPathWithModelId(path);
+    if (isPathWithModelIdResult) {
+      if (this._sequelizeModelNames.includes(isPathWithModelIdResult.params.model)) {
+        return isPathWithModelIdResult.params.model;
       }
       return false;
     }
+
+    const isPathWithModel = match<{ model: string }>(this._prefix + "/:model", {
+      decode: decodeURIComponent,
+      strict: false,
+      sensitive: false,
+      end: false,
+    });
+
+    const isPathWithModelResult = isPathWithModel(path);
+    if (isPathWithModelResult) {
+      if (this._sequelizeModelNames.includes(isPathWithModelResult.params.model)) {
+        return isPathWithModelResult.params.model;
+      }
+      return false;
+    }
+
     return false;
   }
 

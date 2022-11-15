@@ -31,7 +31,7 @@ app.use(async (ctx, next) => {
 });
 
 router.get("/employee", async (ctx: Context) => {
-  const params = await scaffold.parse.Employee.findAll(ctx.params);
+  const params = await scaffold.parse.Employee.findAll(ctx.query);
   const result = await scaffold.model.Employee.findAll(params);
   const response = await scaffold.serialize.Employee.findAll(result);
   ctx.body = response;
