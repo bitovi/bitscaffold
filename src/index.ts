@@ -1,5 +1,5 @@
-import { Middleware } from "koa";
-import { CreateOptions, DestroyOptions, FindOptions, Sequelize, UpdateOptions } from "sequelize";
+import { Context, Middleware, Next } from "koa";
+import { Sequelize } from "sequelize";
 import { match } from "path-to-regexp";
 
 import {
@@ -10,12 +10,14 @@ import {
   SequelizeModelsCollection,
 } from "./types";
 import { convertScaffoldModels, createSequelizeInstance } from "./sequelize";
+import { buildParserForModels } from "./parse";
+import { buildSerializerForModels } from "./serialize";
 
 export class Scaffold {
   private _scaffoldModels: ScaffoldModel[];
   private _sequelizeModels: SequelizeModelsCollection;
   private _sequelize: Sequelize;
-  private _allowedMethods: ['GET', 'POST', "PUT", 'DELETE']
+  private _allowedMethods: ["GET", "POST", "PUT", "DELETE"];
   private _sequelizeModelNames: string[];
   private _prefix: string;
 
@@ -28,8 +30,8 @@ export class Scaffold {
       this._scaffoldModels
     );
 
-    this._allowedMethods = ['GET', 'POST', "PUT", 'DELETE']
-    this._sequelizeModelNames = Object.keys(this._sequelizeModels)
+    this._allowedMethods = ["GET", "POST", "PUT", "DELETE"];
+    this._sequelizeModelNames = Object.keys(this._sequelizeModels);
 
     this._prefix = options.prefix || "";
 
@@ -43,40 +45,7 @@ export class Scaffold {
   }
 
   get parse(): ScaffoldModelParser {
-    const result = {};
-    Object.keys(this._sequelizeModels).forEach((key) => {
-      result[key] = {
-        findAll: (params): FindOptions => {
-          console.log("findAll", params);
-          return {};
-        },
-        findOne: (params): FindOptions => {
-          console.log("findOne", params);
-          return {};
-        },
-        findAndCountAll: (params): FindOptions => {
-          console.log("findAndCountAll", params);
-          return {};
-        },
-        create: (params): CreateOptions => {
-          console.log("create", params);
-          return {};
-        },
-        destroy: (params): DestroyOptions => {
-          console.log("destroy", params);
-          return {};
-        },
-        update: (params): UpdateOptions => {
-          console.log("update", params);
-          return {
-            where: {
-
-            }
-          };
-        }
-      }
-    });
-    return result;
+    return buildParserForModels(this._sequelizeModelNames);
   }
 
   get model(): SequelizeModelsCollection {
@@ -84,36 +53,7 @@ export class Scaffold {
   }
 
   get serialize(): ScaffoldModelSerialize {
-    const result = {};
-    Object.keys(this._sequelizeModels).forEach((key) => {
-      result[key] = {
-        findAll: (data): FindOptions => {
-          console.log("findAll", data);
-          return data;
-        },
-        findOne: (data): FindOptions => {
-          console.log("findOne", data);
-          return data;
-        },
-        findAndCountAll: (data): FindOptions => {
-          console.log("findAndCountAll", data);
-          return data;
-        },
-        create: (data): CreateOptions => {
-          console.log("create", data);
-          return data;
-        },
-        destroy: (data): DestroyOptions => {
-          console.log("destroy", data);
-          return data;
-        },
-        update: (data): UpdateOptions => {
-          console.log("update", data);
-          return data;
-        }
-      }
-    });
-    return result;
+    return buildSerializerForModels(this._sequelizeModelNames);
   }
 
   /**
@@ -122,12 +62,59 @@ export class Scaffold {
    * @returns
    */
   handleEverythingKoaMiddleware(): Middleware {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const self = this;
-    return async function handleEverythingKoa(ctx, next) {
+    return async (ctx: Context, next: Next) => {
       // Check if this request takes the format of one that we expect
-      if (!self.isValidScaffoldRoute(ctx.method, ctx.path)) {
+      if (!this.isValidScaffoldRoute(ctx.method, ctx.path)) {
         return await next();
+      }
+
+      const name = this.getScaffoldModelNameForRoute(ctx.path);
+      if (!name) {
+        return await next();
+      }
+
+      switch (ctx.method) {
+        case "GET": {
+          const params = await this.parse[name].findAll(ctx.params);
+          const result = await this.model[name].findAll(params);
+          const response = await this.serialize[name].findAll(result);
+          ctx.body = response;
+          return;
+        }
+
+        case "POST": {
+          const params = await this.parse[name].create(ctx.params);
+          const result = await this.model[name].create(
+            ctx.request.body,
+            params
+          );
+          const response = await this.serialize[name].create(result);
+          ctx.body = response;
+          return;
+        }
+
+        case "PUT": {
+          const params = await this.parse[name].update(ctx.params);
+          const result = await this.model[name].update(
+            ctx.request.body,
+            params
+          );
+          const response = await this.serialize[name].update(result);
+          ctx.body = response;
+          return;
+        }
+
+        case "DELETE": {
+          const params = await this.parse[name].destroy(ctx.params);
+          const result = await this.model[name].destroy(params);
+          const response = await this.serialize[name].destroy(result);
+          ctx.body = response;
+          return;
+        }
+
+        default: {
+          return await next();
+        }
       }
     };
   }
@@ -146,41 +133,44 @@ export class Scaffold {
       return false;
     }
 
-    const model = this.getScaffoldModelForRoute(path);
+    const model = this.getScaffoldModelNameForRoute(path);
     if (model) {
-      return true
+      return true;
     } else {
       return false;
     }
   }
 
-  getScaffoldModelForRoute(path: string): boolean | string {
+  getScaffoldModelNameForRoute(path: string): false | string {
     const test1 = match<{ model: string }>(this._prefix + "/:model", {
       decode: decodeURIComponent,
       strict: false,
       sensitive: false,
-      end: false
+      end: false,
     });
 
     const result1 = test1(path);
     if (result1) {
       if (this._sequelizeModelNames.includes(result1.params.model)) {
-        return result1.params.model
+        return result1.params.model;
       }
       return false;
     }
 
-    const test2 = match<{ model: string, id: unknown }>(this._prefix + "/:model/:id", {
-      decode: decodeURIComponent,
-      strict: false,
-      sensitive: false,
-      end: false
-    });
+    const test2 = match<{ model: string; id: unknown }>(
+      this._prefix + "/:model/:id",
+      {
+        decode: decodeURIComponent,
+        strict: false,
+        sensitive: false,
+        end: false,
+      }
+    );
 
     const result2 = test2(path);
     if (result2) {
       if (this._sequelizeModelNames.includes(result2.params.model)) {
-        return result2.params.model
+        return result2.params.model;
       }
       return false;
     }

@@ -33,39 +33,38 @@ export type SequelizeModelsCollection = {
 export interface ScaffoldModelParser {
   [key: string]: {
     // eslint-disable-next-line no-unused-vars
-    findAll: (params: unknown) => FindOptions,
+    findAll: (params: unknown) => FindOptions;
     // eslint-disable-next-line no-unused-vars
-    findOne: (params: unknown) => FindOptions,
+    findOne: (params: unknown) => FindOptions;
     // eslint-disable-next-line no-unused-vars
-    findAndCountAll: (params: unknown) => FindOptions,
+    findAndCountAll: (params: unknown) => FindOptions;
     // eslint-disable-next-line no-unused-vars
-    create: (params: unknown) => CreateOptions,
+    create: (params: unknown) => CreateOptions;
     // eslint-disable-next-line no-unused-vars
-    delete: (params: unknown) => DestroyOptions,
+    destroy: (params: unknown) => DestroyOptions;
     // eslint-disable-next-line no-unused-vars
-    update: (params: unknown) => UpdateOptions
-  }
-};
+    update: (params: unknown) => UpdateOptions;
+  };
+}
 
 export type ScaffoldSerializedResponse = Record<string, unknown>;
-
 
 export interface ScaffoldModelSerialize {
   [key: string]: {
     // eslint-disable-next-line no-unused-vars
-    findAll: (data: unknown) => ScaffoldSerializedResponse,
+    findAll: (data: unknown) => ScaffoldSerializedResponse;
     // eslint-disable-next-line no-unused-vars
-    findOne: (data: unknown) => ScaffoldSerializedResponse,
+    findOne: (data: unknown) => ScaffoldSerializedResponse;
     // eslint-disable-next-line no-unused-vars
-    findAndCountAll: (data: unknown) => ScaffoldSerializedResponse,
+    findAndCountAll: (data: unknown) => ScaffoldSerializedResponse;
     // eslint-disable-next-line no-unused-vars
-    create: (data: unknown) => ScaffoldSerializedResponse,
+    create: (data: unknown) => ScaffoldSerializedResponse;
     // eslint-disable-next-line no-unused-vars
-    delete: (data: unknown) => ScaffoldSerializedResponse,
+    destroy: (data: unknown) => ScaffoldSerializedResponse;
     // eslint-disable-next-line no-unused-vars
-    update: (data: unknown) => ScaffoldSerializedResponse
-  }
-};
+    update: (data: unknown) => ScaffoldSerializedResponse;
+  };
+}
 
 export type ScaffoldModelAccessor = any;
 
