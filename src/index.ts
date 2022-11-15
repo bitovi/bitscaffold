@@ -1,6 +1,7 @@
 import { Context, Middleware, Next } from "koa";
 import { Sequelize } from "sequelize";
 import { match } from "path-to-regexp";
+import bodyParser from "co-body";
 
 import {
   ScaffoldModel,
@@ -14,24 +15,28 @@ import { buildParserForModels } from "./parse";
 import { buildSerializerForModels } from "./serialize";
 
 export class Scaffold {
-  private _scaffoldModels: ScaffoldModel[];
+  // private _scaffoldModels: ScaffoldModelCollection;
   private _sequelizeModels: SequelizeModelsCollection;
   private _sequelize: Sequelize;
   private _allowedMethods: ["GET", "POST", "PUT", "DELETE"];
   private _sequelizeModelNames: string[];
+  private _scaffoldModelNames: string[];
   private _prefix: string;
 
   constructor(models: ScaffoldModel[], options: ScaffoldOptions = {}) {
     // Prepare all of the ORM and keep references to the different Models
     this._sequelize = createSequelizeInstance(options.database);
-    this._scaffoldModels = models;
-    this._sequelizeModels = convertScaffoldModels(
-      this._sequelize,
-      this._scaffoldModels
-    );
+
+    // this._scaffoldModels = {};
+    // models.forEach((model) => {
+    //   this._scaffoldModels[model.name] = model;
+    // });
+
+    this._sequelizeModels = convertScaffoldModels(this._sequelize, models);
 
     this._allowedMethods = ["GET", "POST", "PUT", "DELETE"];
     this._sequelizeModelNames = Object.keys(this._sequelizeModels);
+    // this._scaffoldModelNames = Object.keys(this._scaffoldModels)
 
     this._prefix = options.prefix || "";
 
@@ -44,16 +49,16 @@ export class Scaffold {
     return this._sequelize;
   }
 
-  get parse(): { [modelName: string]: ScaffoldModelParser; } {
-    return buildParserForModels(this._sequelizeModelNames);
+  get parse(): { [modelName: string]: ScaffoldModelParser } {
+    return buildParserForModels(this._sequelizeModels);
   }
 
   get model(): SequelizeModelsCollection {
     return this._sequelizeModels;
   }
 
-  get serialize(): { [name: string]: ScaffoldModelSerialize; } {
-    return buildSerializerForModels(this._sequelizeModelNames);
+  get serialize(): { [modelName: string]: ScaffoldModelSerialize } {
+    return buildSerializerForModels(this._sequelizeModels);
   }
 
   /**
@@ -83,22 +88,20 @@ export class Scaffold {
         }
 
         case "POST": {
+          const body = await bodyParser(ctx);
+
           const params = await this.parse[name].create(ctx.params);
-          const result = await this.model[name].create(
-            ctx.request.body,
-            params
-          );
+          const result = await this.model[name].create(body, params);
           const response = await this.serialize[name].create(result);
           ctx.body = response;
           return;
         }
 
         case "PUT": {
+          const body = await bodyParser(ctx);
+
           const params = await this.parse[name].update(ctx.params);
-          const result = await this.model[name].update(
-            ctx.request.body,
-            params
-          );
+          const result = await this.model[name].update(body, params);
           const response = await this.serialize[name].update(result);
           ctx.body = response;
           return;

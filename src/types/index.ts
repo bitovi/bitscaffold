@@ -26,8 +26,18 @@ export interface ScaffoldOptions {
   database?: Options;
 }
 
+export const ScaffoldSymbolModel = Symbol("scaffold");
+
+export type SequelizeModelInstance = ModelCtor<Model<any, any>> & {
+  [ScaffoldSymbolModel]: ScaffoldModel;
+};
+
 export type SequelizeModelsCollection = {
-  [key: string]: ModelCtor<Model<any, any>>;
+  [key: string]: SequelizeModelInstance;
+};
+
+export type ScaffoldModelCollection = {
+  [key: string]: ScaffoldModel;
 };
 
 export interface ScaffoldModelParser {

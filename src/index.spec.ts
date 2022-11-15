@@ -1,4 +1,5 @@
 import { Scaffold } from "./index";
+import { ScaffoldSymbolModel } from "./types";
 
 describe("Initial Tests", () => {
   const Model = {
@@ -39,4 +40,15 @@ describe("Initial Tests", () => {
 
     await scaffold.orm.close();
   });
+
+  it("should test the existance of scaffold symbol on models", async () => {
+    const scaffold = new Scaffold([Model], { prefix: "/api" });
+
+    const model2 = scaffold.model.Model[ScaffoldSymbolModel];
+    expect(model2).toBeTruthy();
+    expect(model2).toHaveProperty('attributes')
+    expect(model2).toHaveProperty('name')
+
+    await scaffold.orm.close();
+  })
 });

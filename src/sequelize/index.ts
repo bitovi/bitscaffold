@@ -1,6 +1,10 @@
 import { Model, Sequelize, Options } from "sequelize";
 import signale from "signale";
-import { ScaffoldModel, SequelizeModelsCollection } from "../types";
+import {
+  ScaffoldModel,
+  SequelizeModelsCollection,
+  ScaffoldSymbolModel,
+} from "../types";
 
 export function createSequelizeInstance(options?: Options): Sequelize {
   if (!options) {
@@ -24,7 +28,7 @@ export function convertScaffoldModels(
   signale.info("Attaching Models to Sequelize instance");
   models.forEach((model) => {
     signale.info("Creating Model", model.name);
-    sequelize.define<Model<ScaffoldModel["attributes"]>>(
+    const temp = sequelize.define<Model<ScaffoldModel["attributes"]>>(
       model.name,
       model.attributes,
       {
@@ -34,6 +38,8 @@ export function convertScaffoldModels(
         freezeTableName: true,
       }
     );
+
+    temp[ScaffoldSymbolModel] = model;
   });
 
   models.forEach((model) => {
@@ -71,5 +77,5 @@ export function convertScaffoldModels(
     });
   });
 
-  return sequelize.models;
+  return sequelize.models as SequelizeModelsCollection;
 }

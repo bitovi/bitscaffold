@@ -1,7 +1,6 @@
 import { Scaffold } from "../../exports";
 import path from "path";
 import Koa, { Context } from "koa";
-import KoaBody from "koa-body";
 import signale from "signale";
 import KoaRouter from "@koa/router";
 
@@ -30,8 +29,6 @@ app.use(async (ctx, next) => {
   signale.info("Incoming Request: ", ctx.method, ctx.path);
   await next();
 });
-
-app.use(KoaBody());
 
 router.get("/employee", async (ctx: Context) => {
   const params = await scaffold.parse.Employee.findAll(ctx.params);

@@ -4,9 +4,19 @@ import {
   FindOptions,
   UpdateOptions,
 } from "sequelize";
-import { ScaffoldModelParser } from "../types";
+import {
+  ScaffoldModelParser,
+  SequelizeModelInstance,
+  SequelizeModelsCollection,
+  ScaffoldSymbolModel,
+} from "../types";
 
-export function buildParserForModel(name: string): ScaffoldModelParser {
+export function buildParserForModel(
+  name: string,
+  seq: SequelizeModelInstance
+): ScaffoldModelParser {
+  // eslint-disable-next-line no-unused-vars
+  const scaffoldModel = seq[ScaffoldSymbolModel];
   return {
     findAll: async (params): Promise<FindOptions> => {
       console.log("findAll", name, params);
@@ -37,10 +47,14 @@ export function buildParserForModel(name: string): ScaffoldModelParser {
   };
 }
 
-export function buildParserForModels(names: string[]): { [modelName: string]: ScaffoldModelParser } {
+export function buildParserForModels(models: SequelizeModelsCollection): {
+  [modelName: string]: ScaffoldModelParser;
+} {
+  const names = Object.keys(models);
+
   const result = {};
   names.forEach((name) => {
-    result[name] = buildParserForModel(name);
+    result[name] = buildParserForModel(name, models[name]);
   });
   return result;
 }
