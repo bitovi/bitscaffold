@@ -1,4 +1,6 @@
-import Koa, { Context, DefaultState, DefaultContext } from "koa";
+/* eslint-disable no-unused-vars */
+import Koa, { Context, DefaultState, DefaultContext, Middleware } from "koa";
+import { ParsedUrlQuery } from "querystring";
 import {
   Sequelize,
   Model,
@@ -15,8 +17,10 @@ import {
   CreateOptions,
   UpdateOptions,
   DestroyOptions,
+  Identifier,
 } from "sequelize";
 import signale from "signale";
+import { Scaffold } from "..";
 
 export { DataTypes } from "sequelize";
 
@@ -40,42 +44,59 @@ export type ScaffoldModelCollection = {
   [key: string]: ScaffoldModel;
 };
 
-export interface ScaffoldModelParser {
-  // eslint-disable-next-line no-unused-vars
-  findAll: (query: unknown) => Promise<FindOptions>;
-  // eslint-disable-next-line no-unused-vars
-  findOne: (query: unknown, id: unknown) => Promise<FindOptions>;
-  // eslint-disable-next-line no-unused-vars
-  findAndCountAll: (query: unknown) => Promise<FindOptions>;
-  // eslint-disable-next-line no-unused-vars
-  create: (body: unknown, query: unknown) => Promise<CreateOptions>;
-  // eslint-disable-next-line no-unused-vars
-  destroy: (query: unknown) => Promise<DestroyOptions>;
-  // eslint-disable-next-line no-unused-vars
-  update: (body: unknown, query: unknown) => Promise<UpdateOptions>;
-}
-
 export type ScaffoldSerializedResponse = Record<string, unknown>;
 
-export interface ScaffoldModelSerialize {
-  // eslint-disable-next-line no-unused-vars
-  findAll: (data: unknown) => Promise<ScaffoldSerializedResponse>;
-  // eslint-disable-next-line no-unused-vars
-  findOne: (data: unknown) => Promise<ScaffoldSerializedResponse>;
-  // eslint-disable-next-line no-unused-vars
-  findAndCountAll: (data: unknown) => Promise<ScaffoldSerializedResponse>;
-  // eslint-disable-next-line no-unused-vars
-  create: (data: unknown) => Promise<ScaffoldSerializedResponse>;
-  // eslint-disable-next-line no-unused-vars
-  destroy: (data: unknown) => Promise<ScaffoldSerializedResponse>;
-  // eslint-disable-next-line no-unused-vars
-  update: (data: unknown) => Promise<ScaffoldSerializedResponse>;
+export interface ScaffoldFunctionExportParse {
+  findAll: (query: ParsedUrlQuery) => Promise<FindOptions>;
+  findOne: (query: ParsedUrlQuery, id: Identifier) => Promise<FindOptions>;
+  findAndCountAll: (query: ParsedUrlQuery) => Promise<FindOptions>;
+  create: (body: any, query: ParsedUrlQuery) => Promise<CreateOptions>;
+  update: (body: any, query: ParsedUrlQuery) => Promise<UpdateOptions>;
+  destroy: (query: ParsedUrlQuery) => Promise<DestroyOptions>;
 }
 
-export type ScaffoldModelAccessor = any;
+export interface ScaffoldFunctionExportSerialize {
+  findAll: (params: any) => Promise<ScaffoldSerializedResponse>;
+  findOne: (params: any) => Promise<ScaffoldSerializedResponse>;
+  findAndCountAll: (params: any) => Promise<ScaffoldSerializedResponse>;
+  create: (params: any) => Promise<ScaffoldSerializedResponse>;
+  update: (params: any) => Promise<ScaffoldSerializedResponse>;
+  destroy: (params: any) => Promise<ScaffoldSerializedResponse>;
+}
+
+export interface ScaffoldFunctionExportsMiddleware {
+  findAll: Middleware;
+  findOne: Middleware;
+  findAndCountAll: Middleware;
+  create: Middleware;
+  update: Middleware;
+  destroy: Middleware;
+}
+
+export interface ScaffoldFunctionExportEverything {
+  findAll: (query: ParsedUrlQuery) => Promise<ScaffoldSerializedResponse>;
+  findOne: (
+    query: ParsedUrlQuery,
+    id: Identifier
+  ) => Promise<ScaffoldSerializedResponse>;
+  findAndCountAll: (
+    query: ParsedUrlQuery
+  ) => Promise<ScaffoldSerializedResponse>;
+  create: (ctx: Context) => Promise<ScaffoldSerializedResponse>;
+  update: (ctx: Context) => Promise<ScaffoldSerializedResponse>;
+  destroy: (query: ParsedUrlQuery) => Promise<ScaffoldSerializedResponse>;
+}
+
+export interface ScaffoldFunctionExportsCollection<T> {
+  [modelName: string]: T;
+}
+
+export type ScaffoldFunctionExportHandler<T> = (
+  scaffold: Scaffold,
+  name: string
+) => T;
 
 export type ScaffoldAttributes = ModelAttributes<Model>;
-
 export type ScaffoldApplication = Koa<DefaultState, DefaultContext>;
 
 export interface ScaffoldModelContext extends ScaffoldContext {

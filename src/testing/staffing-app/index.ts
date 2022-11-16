@@ -17,7 +17,7 @@ const router = new KoaRouter();
 // Create a Scaffold instance containing your Models
 const scaffold = new Scaffold([Assignment, Employee, Project, Role, Skill], {
   prefix: "/api",
-  sync: true,
+  //  sync: true,
   database: {
     dialect: "sqlite",
     storage: path.join(__dirname, "..", "example.sqlite"),
@@ -30,12 +30,30 @@ app.use(async (ctx, next) => {
   await next();
 });
 
-router.get("/employee", async (ctx: Context) => {
-  const params = await scaffold.parse.Employee.findAll(ctx.query);
-  const result = await scaffold.model.Employee.findAll(params);
-  const response = await scaffold.serialize.Employee.findAll(result);
-  ctx.body = response;
+router.get("/skill", async (ctx: Context) => {
+  const params = await scaffold.parse.Skill.findAll(ctx.query);
+  const result = await scaffold.model.Skill.findAll(params);
+  const response = await scaffold.serialize.Skill.findAll(result);
+  ctx.body = { customRouteTest1: true, data: response };
 });
+
+router.get("/skill2", async (ctx: Context) => {
+  const response = await scaffold.everything.Skill.findAll(ctx.query);
+  ctx.body = { customRouteTest2: true, data: response };
+});
+
+router.get("/skill-special-route", scaffold.middleware.Skill.findAll);
+
+router.get(
+  "/skill-special-auth",
+  async (ctx, next) => {
+    if (!ctx.headers.authorization) {
+      return ctx.throw("This route requires authorization");
+    }
+    return await next();
+  },
+  scaffold.middleware.Skill.findAndCountAll
+);
 
 // Hook up the router
 app.use(router.routes());

@@ -1,54 +1,29 @@
-import {
-  ScaffoldModelSerialize,
-  ScaffoldSerializedResponse,
-  SequelizeModelsCollection,
-  ScaffoldSymbolModel,
-  SequelizeModelInstance,
-} from "../types";
+/* eslint-disable no-unused-vars */
+import { Scaffold } from "..";
+import { ScaffoldFunctionExportSerialize } from "../types";
 
 export function buildSerializerForModel(
-  name: string,
-  seq: SequelizeModelInstance
-): ScaffoldModelSerialize {
-  // eslint-disable-next-line no-unused-vars
-  const scaffoldModel = seq[ScaffoldSymbolModel];
-
+  scaffold: Scaffold,
+  modelName: string
+): ScaffoldFunctionExportSerialize {
   return {
-    findAll: async (params): Promise<ScaffoldSerializedResponse> => {
-      console.log("findAll", name);
-      return params as ScaffoldSerializedResponse;
+    findAll: async (params) => {
+      return params;
     },
-    findOne: async (params): Promise<ScaffoldSerializedResponse> => {
-      console.log("findOne", name);
-      return params as ScaffoldSerializedResponse;
+    findOne: async (params) => {
+      return params;
     },
-    findAndCountAll: async (params): Promise<ScaffoldSerializedResponse> => {
-      console.log("findAndCountAll", name);
-      return params as ScaffoldSerializedResponse;
+    findAndCountAll: async (params) => {
+      return params;
     },
-    create: async (params): Promise<ScaffoldSerializedResponse> => {
-      console.log("create", name);
-      return params as ScaffoldSerializedResponse;
+    create: async (params) => {
+      return params;
     },
-    destroy: async (params): Promise<ScaffoldSerializedResponse> => {
-      console.log("destroy", name);
-      return params as ScaffoldSerializedResponse;
+    destroy: async (params) => {
+      return params;
     },
-    update: async (params): Promise<ScaffoldSerializedResponse> => {
-      console.log("update", name);
-      return params as ScaffoldSerializedResponse;
+    update: async (params) => {
+      return params;
     },
   };
-}
-
-export function buildSerializerForModels(models: SequelizeModelsCollection): {
-  [name: string]: ScaffoldModelSerialize;
-} {
-  const names = Object.keys(models);
-
-  const result = {};
-  names.forEach((name) => {
-    result[name] = buildSerializerForModel(name, models[name]);
-  });
-  return result;
 }

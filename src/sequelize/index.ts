@@ -4,7 +4,20 @@ import {
   ScaffoldModel,
   SequelizeModelsCollection,
   ScaffoldSymbolModel,
+  ScaffoldModelCollection,
 } from "../types";
+
+export function buildScaffoldModelObject(
+  models: SequelizeModelsCollection
+): ScaffoldModelCollection {
+  const names = Object.keys(models);
+
+  const result: ScaffoldModelCollection = {};
+  names.forEach((name) => {
+    result[name] = models[name][ScaffoldSymbolModel];
+  });
+  return result;
+}
 
 export function createSequelizeInstance(options?: Options): Sequelize {
   if (!options) {
