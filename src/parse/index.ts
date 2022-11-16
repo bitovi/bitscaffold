@@ -14,9 +14,9 @@ export function buildParserForModel(
     findOne: async (query, id) => {
       return {
         where: {
-          id: id
-        }
-      }
+          id: id,
+        },
+      };
     },
     findAndCountAll: async (query) => {
       return {};
@@ -29,7 +29,7 @@ export function buildParserForModel(
 
       if (query.id) {
         options.where = {};
-        options.where.id = query.id
+        options.where.id = query.id;
       }
 
       return options;
@@ -37,8 +37,8 @@ export function buildParserForModel(
     update: async (body, query) => {
       const options: UpdateOptions = {
         where: {
-          id: null
-        }
+          id: null,
+        },
       };
 
       return options;

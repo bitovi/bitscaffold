@@ -20,7 +20,7 @@ function parse(result) {
   }
 
   if (result.text) {
-    text = result.text
+    text = result.text;
 
     try {
       const temp = JSON.parse(result.text);
@@ -33,10 +33,8 @@ function parse(result) {
   return {
     text,
     status,
-    json
-  }
-
-
+    json,
+  };
 }
 
 export async function GET(server, path) {
