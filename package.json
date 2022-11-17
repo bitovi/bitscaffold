@@ -6,6 +6,7 @@
   "scripts": {
     "prebuild": "npm run pretty:fix",
     "build": "tsc",
+    "build:watch": "tsc --watch",
     "test": "jest",
     "docs": "typedoc",
     "docs:watch": "typedoc --watch",
