@@ -89,7 +89,7 @@ describe("Initial Tests", () => {
 
     const server = createServer(app);
     await scaffold.createDatabase();
-    const find = await GET(server, "/api/Model?id=1");
+    const find = await GET(server, "/api/Model/1");
 
     expect(find).toBeTruthy();
     expect(find.status).toBe(204); // No Content
@@ -116,7 +116,7 @@ describe("Initial Tests", () => {
     expect(create.status).toBe(200);
     expect(create.json).toHaveProperty("id");
 
-    const find = await GET(server, "/api/Model?id=" + create.json.id);
+    const find = await GET(server, "/api/Model/" + create.json.id);
 
     expect(find).toBeTruthy();
     expect(find.status).toBe(200);
@@ -209,7 +209,7 @@ describe("Initial Tests", () => {
     expect(findall1.json).toHaveProperty("length");
     expect(findall1.json.length).toBe(1);
 
-    const update = await DELETE(server, "/api/Model?id=" + create.json.id);
+    const update = await DELETE(server, "/api/Model/" + create.json.id);
     expect(update).toBeTruthy();
     expect(update.status).toBe(200);
 

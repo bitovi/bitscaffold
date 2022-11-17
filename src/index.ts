@@ -84,13 +84,13 @@ export class Scaffold {
   /**
    * The `model` export is one of the primary tools provided by Scaffold for working
    * with your Models in custom routes.
-   * 
+   *
    * From the `model` export you can target one of your Models by name which will
    * give you further access to a number of named functions
-   * 
+   *
    * For more information about the underlying per-model functions:
    * @see {@link ScaffoldFunctionExportEverything}
-   * 
+   *
    * @returns {ScaffoldFunctionExportsCollection<ScaffoldFunctionExportEverything>}
    * @category General Use
    */
@@ -109,13 +109,13 @@ export class Scaffold {
   /**
    * The `parse` export is one of the primary tools provided by Scaffold for working
    * with your Models in custom routes.
-   * 
+   *
    * From the `parse` export you can target one of your Models by name which will
    * give you further access to a number of named functions
-   * 
+   *
    * For more information about the underlying per-model functions:
    * @see {@link ScaffoldFunctionExportParse}
-   * 
+   *
    * @returns {ScaffoldFunctionExportsCollection<ScaffoldFunctionExportParse>}
    * @category General Use
    */
@@ -129,13 +129,13 @@ export class Scaffold {
   /**
    * The `serialize` export is one of the primary tools provided by Scaffold for working
    * with your Models in custom routes.
-   * 
+   *
    * From the `serialize` export you can target one of your Models by name which will
    * give you further access to a number of named functions
-   * 
+   *
    * For more information about the underlying per-model functions:
    * @see {@link ScaffoldFunctionExportSerialize}
-   * 
+   *
    * @returns {ScaffoldFunctionExportsCollection<ScaffoldFunctionExportSerialize>}
    * @category General Use
    */
@@ -149,13 +149,13 @@ export class Scaffold {
   /**
    * The `middleware` export is one of the primary tools provided by Scaffold for working
    * with your Models in custom routes.
-   * 
+   *
    * From the `middleware` export you can target one of your Models by name which will
    * give you further access to a number of named functions
-   * 
+   *
    * For more information about the underlying per-model functions:
    * @see {@link ScaffoldFunctionExportsMiddleware}
-   * 
+   *
    * @returns {ScaffoldFunctionExportsCollection<ScaffoldFunctionExportsMiddleware>}
    * @category General Use
    */
@@ -169,16 +169,16 @@ export class Scaffold {
   /**
    * The `everything` export is one of the primary tools provided by Scaffold for working
    * with your Models in custom routes.
-   * 
+   *
    * The `everything` export calls the `parse`, `model`, and `serialize` under the hood
    * allowing you to do 'everything' in one function instead of calling each part individually.
-   * 
+   *
    * From the `everything` export you can target one of your Models by name which will
    * give you further access to a number of named functions
-   * 
+   *
    * For more information about the underlying per-model functions:
    * @see {@link ScaffoldFunctionExportEverything}
-   * 
+   *
    * @returns {ScaffoldFunctionExportsCollection<ScaffoldFunctionExportEverything>}
    * @category General Use
    */
@@ -215,37 +215,39 @@ export class Scaffold {
         return await next();
       }
 
-      // Check if this request URL has a valid Scaffold Model associated with it
-      const modelName = this.getScaffoldModelNameForRoute(ctx.path);
-      if (!modelName) {
+      const params = this.getScaffoldURLParamsForRoute(ctx.path);
+      if (!params.model) {
         return await next();
       }
 
       switch (ctx.method) {
         case "GET": {
-          if (ctx.query && ctx.query.id) {
-            ctx.body = await this.everything[modelName].findOne(
+          if (params.id) {
+            ctx.body = await this.everything[params.model].findOne(
               ctx.query,
-              ctx.query.id as Identifier
+              params.id
             );
             return;
           }
-          ctx.body = await this.everything[modelName].findAll(ctx.query);
+          ctx.body = await this.everything[params.model].findAll(ctx.query);
           return;
         }
 
         case "POST": {
-          ctx.body = await this.everything[modelName].create(ctx);
+          ctx.body = await this.everything[params.model].create(ctx);
           return;
         }
 
         case "PUT": {
-          ctx.body = await this.everything[modelName].update(ctx);
+          ctx.body = await this.everything[params.model].update(ctx, params.id);
           return;
         }
 
         case "DELETE": {
-          ctx.body = await this.everything[modelName].destroy(ctx.query);
+          ctx.body = await this.everything[params.model].destroy(
+            ctx.query,
+            params.id
+          );
           return;
         }
 
@@ -327,15 +329,13 @@ export class Scaffold {
    * Note: While this function is exported from Scaffold it is unusual to need to it externally
    *
    * @param path Usually the incoming request URL
-   * @returns {Record<string, never> | { model: string; id: Identifier } | { model: string }}
+   * @returns { model?: string; id?: Identifier }
    * @internal
    */
-  getScaffoldURLParamsForRoute(
-    path: string
-  ):
-    | Record<string, never>
-    | { model: string; id: Identifier }
-    | { model: string } {
+  getScaffoldURLParamsForRoute(path: string): {
+    model?: string;
+    id?: Identifier;
+  } {
     const isPathWithModelId = match<{ model: string; id: Identifier }>(
       this._prefix + "/:model/:id",
       {

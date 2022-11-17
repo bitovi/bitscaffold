@@ -85,8 +85,12 @@ export interface ScaffoldFunctionExportParse {
   findOne: (query: ParsedUrlQuery, id: Identifier) => Promise<FindOptions>;
   findAndCountAll: (query: ParsedUrlQuery) => Promise<FindOptions>;
   create: (body: any, query: ParsedUrlQuery) => Promise<CreateOptions>;
-  update: (body: any, query: ParsedUrlQuery) => Promise<UpdateOptions>;
-  destroy: (query: ParsedUrlQuery) => Promise<DestroyOptions>;
+  update: (
+    body: any,
+    query: ParsedUrlQuery,
+    id?: Identifier
+  ) => Promise<UpdateOptions>;
+  destroy: (query: ParsedUrlQuery, id?: Identifier) => Promise<DestroyOptions>;
 }
 
 export interface ScaffoldFunctionExportSerialize {
@@ -127,8 +131,14 @@ export interface ScaffoldFunctionExportEverything {
     query: ParsedUrlQuery
   ) => Promise<ScaffoldSerializedResponse>;
   create: (ctx: Context) => Promise<ScaffoldSerializedResponse>;
-  update: (ctx: Context) => Promise<ScaffoldSerializedResponse>;
-  destroy: (query: ParsedUrlQuery) => Promise<ScaffoldSerializedResponse>;
+  update: (
+    ctx: Context,
+    id?: Identifier
+  ) => Promise<ScaffoldSerializedResponse>;
+  destroy: (
+    query: ParsedUrlQuery,
+    id?: Identifier
+  ) => Promise<ScaffoldSerializedResponse>;
 }
 
 export interface ScaffoldFunctionExportsCollection<T> {

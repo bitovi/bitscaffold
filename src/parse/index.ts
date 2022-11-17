@@ -24,24 +24,28 @@ export function buildParserForModel(
     create: async (body, query) => {
       return {};
     },
-    destroy: async (query) => {
+    destroy: async (query, id) => {
       const options: DestroyOptions = {};
 
-      if (query.id) {
+      if (id) {
         options.where = {};
         options.where.id = query.id;
       }
 
       return options;
     },
-    update: async (body, query) => {
-      const options: UpdateOptions = {
-        where: {
-          id: null,
-        },
-      };
+    update: async (body, query, id) => {
+      if (id) {
+        return {
+          where: {
+            id: id,
+          },
+        };
+      }
 
-      return options;
+      return {
+        where: {},
+      };
     },
   };
 }

@@ -62,9 +62,9 @@ export function createEverything(scaffold: Scaffold, modelName: string) {
 }
 
 export function updateEverything(scaffold: Scaffold, modelName: string) {
-  return async function updateImpl(ctx: Koa.Context) {
+  return async function updateImpl(ctx: Koa.Context, id: Identifier) {
     const body = await bodyParser(ctx);
-    const params = await scaffold.parse[modelName].update(body, ctx.query);
+    const params = await scaffold.parse[modelName].update(body, ctx.query, id);
     const result = await scaffold.model[modelName].update(body, params);
     const response = await scaffold.serialize[modelName].update(result);
     return response;
@@ -72,8 +72,8 @@ export function updateEverything(scaffold: Scaffold, modelName: string) {
 }
 
 export function destroyEverything(scaffold: Scaffold, modelName: string) {
-  return async function destroyImpl(query: ParsedUrlQuery) {
-    const params = await scaffold.parse[modelName].destroy(query);
+  return async function destroyImpl(query: ParsedUrlQuery, id: Identifier) {
+    const params = await scaffold.parse[modelName].destroy(query, id);
     const result = await scaffold.model[modelName].destroy(params);
     const response = await scaffold.serialize[modelName].destroy(result);
     return response;

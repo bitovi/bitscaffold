@@ -15,5 +15,5 @@ export {
   ScaffoldFunctionExportsMiddleware,
   ScaffoldFunctionExportEverything,
   ScaffoldFunctionExportsCollection,
-  ScaffoldFunctionExportParse
+  ScaffoldFunctionExportParse,
 } from "./types";
