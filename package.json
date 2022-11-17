@@ -1,12 +1,14 @@
 {
   "name": "bitscaffold",
-  "version": "0.0.1",
+  "version": "0.0.8",
   "description": "Fullstack CRUD Application Solution",
   "main": "dist/exports.js",
   "scripts": {
     "prebuild": "npm run pretty:fix",
     "build": "tsc",
     "test": "jest",
+    "docs": "typedoc",
+    "docs:watch": "typedoc --watch",
     "test:watch": "jest --watch",
     "test:verbose": "jest --watch --verbose",
     "lint": "eslint .",
@@ -31,6 +33,9 @@
     "@sequelize/core": "^7.0.0-alpha.10",
     "chevrotain": "^10.4.0",
     "co-body": "^6.1.0",
+    "documentjs": "^0.5.5",
+    "esdoc": "^1.1.0",
+    "esdoc-standard-plugin": "^1.0.0",
     "koa": "^2.13.4",
     "koa-body": "^6.0.1",
     "koa-compose": "^4.1.0",
@@ -41,6 +46,7 @@
     "sequelize": "^6.25.3",
     "signale": "^1.4.0",
     "sqlite3": "^5.1.2",
+    "typedoc": "^0.23.21",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

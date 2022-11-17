@@ -1,9 +1,10 @@
-import { Context, Middleware, Next } from "koa";
 import { Identifier, Sequelize } from "sequelize";
 import { match } from "path-to-regexp";
 import signale from "signale";
 
 import {
+  ExpressMiddleware,
+  KoaMiddleware,
   ScaffoldFunctionExportEverything,
   ScaffoldFunctionExportHandler,
   ScaffoldFunctionExportParse,
@@ -32,6 +33,14 @@ export class Scaffold {
   private _sequelizeModelNames: string[];
   private _prefix: string;
 
+  /**
+   * Creates a new Scaffold instance
+   *
+   * @param {ScaffoldModel[]} models An array of Scaffold Models
+   * @param {ScaffoldOptions} options Configuration options for Scaffold
+   *
+   * @return {Scaffold}
+   */
   constructor(models: ScaffoldModel[], options: ScaffoldOptions = {}) {
     // Prepare the ORM instance and keep references to the different Models
     this._sequelize = createSequelizeInstance(options.database);
@@ -128,20 +137,18 @@ export class Scaffold {
    * If these criteria are not met the request will be ignored by
    * Scaffold and the request passed to the next available Middleware
    *
-   * @returns
+   * @return {KoaMiddleware} Koa Middleware function that can be attached to a Koa instance (`app`) using `app.use`
    */
-  handleEverythingKoaMiddleware(): Middleware {
-    return async (ctx: Context, next: Next) => {
-      signale.pending("handleEverythingKoaMiddleware");
-      // Check if this request takes the format of one that we expect
+  handleEverythingKoaMiddleware(): KoaMiddleware {
+    return async (ctx, next) => {
+      // Check if this request URL takes the format of one that we expect
       if (!this.isValidScaffoldRoute(ctx.method, ctx.path)) {
-        signale.success("handleEverythingKoaMiddleware, not a scaffold route");
         return await next();
       }
 
+      // Check if this request URL has a valid Scaffold Model associated with it
       const modelName = this.getScaffoldModelNameForRoute(ctx.path);
       if (!modelName) {
-        signale.success("handleEverythingKoaMiddleware, not a scaffold model");
         return await next();
       }
 
@@ -184,13 +191,48 @@ export class Scaffold {
   }
 
   /**
+   * The `handleEverythingExpressMiddleware` Middleware provides the primary hooks
+   * between your Express application and the Scaffold library
+   *
+   * It will use the Request to determine if:
+   *    1. The route resembles a Scaffold default route, by regex
+   *    2. The route contains an expected Scaffold model name
+   *    3. The request method is one of GET, POST, PUT, DELETE
+   *
+   * If these criteria pass the context will be passed to the 'everything'
+   * function for the given model. Under the hood this will parse the params,
+   * perform the requested model query, and serialize the result.
+   *
+   * If these criteria are not met the request will be ignored by
+   * Scaffold and the request passed to the next available Middleware
+   *
+   * @return {ExpressMiddleware} Express Middleware function that can be attached to a Koa instance (`app`) using `app.use`
+   */
+  handleEverythingExpressMiddleware(): ExpressMiddleware {
+    return (req, res, next) => {
+      // Check if this request URL takes the format of one that we expect
+      if (!this.isValidScaffoldRoute(req.method, req.path)) {
+        return next();
+      }
+
+      // Check if this request URL has a valid Scaffold Model associated with it
+      const modelName = this.getScaffoldModelNameForRoute(req.path);
+      if (!modelName) {
+        return next();
+      }
+
+      throw new Error("Not Implemented");
+    };
+  }
+
+  /**
    * This function takes the method, path, and the known list of models
    * from the Scaffold instance and determines if the current requested path
    * is one that matches a Scaffold operation.
    *
-   * @param method GET, PUT, POST, DELETE, PATCH
-   * @param path URL
-   * @returns boolean
+   * @param {string} method GET, PUT, POST, DELETE, PATCH
+   * @param {string} path Usuall the incoming request URL
+   * @return {boolean}
    */
   isValidScaffoldRoute(method, path: string): boolean {
     if (!this._allowedMethods.includes(method)) {

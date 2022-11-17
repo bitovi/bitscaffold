@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+import { NextFunction, Request, Response } from "express";
 import Koa, { Context, DefaultState, DefaultContext, Middleware } from "koa";
 import { ParsedUrlQuery } from "querystring";
 import {
@@ -24,6 +25,16 @@ import { Scaffold } from "..";
 
 export { DataTypes } from "sequelize";
 
+export type KoaMiddleware = Middleware;
+export type ExpressMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => void;
+
+/**
+ * Options Description Does This Show In Docs?
+ */
 export interface ScaffoldOptions {
   prefix?: string;
   sync?: boolean;
@@ -47,6 +58,14 @@ export type ScaffoldModelCollection = {
 export type ScaffoldSerializedResponse = Record<string, unknown>;
 
 export interface ScaffoldFunctionExportParse {
+  /**
+   * Parses the parameters for the provided Model oo prepare
+   * the options needed for an ORM findAll query
+   *
+   * In most normal use cases this can come directly from the
+   * Koa Context as `ctx.query`
+   *
+   */
   findAll: (query: ParsedUrlQuery) => Promise<FindOptions>;
   findOne: (query: ParsedUrlQuery, id: Identifier) => Promise<FindOptions>;
   findAndCountAll: (query: ParsedUrlQuery) => Promise<FindOptions>;
@@ -56,6 +75,16 @@ export interface ScaffoldFunctionExportParse {
 }
 
 export interface ScaffoldFunctionExportSerialize {
+  /**
+   * Takes a Model instance and converts it into a
+   * JSON:API serialized response that can be returned
+   * to the caller
+   *
+   * In most normal use cases this can come directly from the
+   * output of a Model query operation.
+   *
+   * @returns JSON:API Response
+   */
   findAll: (params: any) => Promise<ScaffoldSerializedResponse>;
   findOne: (params: any) => Promise<ScaffoldSerializedResponse>;
   findAndCountAll: (params: any) => Promise<ScaffoldSerializedResponse>;

@@ -42,7 +42,7 @@ router.get("/skill2", async (ctx: Context) => {
   ctx.body = { customRouteTest2: true, data: response };
 });
 
-router.get("/skill-special-route", scaffold.middleware.Skill.findAll);
+router.get("/skill3", scaffold.middleware.Skill.findAll);
 
 router.get(
   "/skill-special-auth",
