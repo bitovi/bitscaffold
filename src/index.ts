@@ -31,13 +31,13 @@ import { buildEverythingForModel } from "./everything";
  *
  * This class provides the entry point into the Scaffold library. To use Scaffold with your project
  * you will create an instance of this class passing it your Model definitions along with (optional) settings.
- * 
+ *
  * @see {@link constructor}
- * 
+ *
  * In order to use Scaffold with Koa or Express you should look at the Middleware exports below
  * @see {@link handleEverythingExpressMiddleware}
  * @see {@link handleEverythingKoaMiddleware}
- * 
+ *
  */
 export class Scaffold {
   private _sequelizeModels: SequelizeModelsCollection;

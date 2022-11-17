@@ -39,7 +39,7 @@ export interface ScaffoldOptions {
   /**
    * Setting this prefix will signal to Scaffold that it should
    * expect this path at the beginning of any incoming requests.
-   * 
+   *
    * This is used internally for regex path matching
    */
   prefix?: string;
