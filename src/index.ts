@@ -26,6 +26,23 @@ import { buildSerializerForModel } from "./serialize";
 import { buildMiddlewareForModel } from "./middleware";
 import { buildEverythingForModel } from "./everything";
 
+/**
+ * Scaffold can be imported from the `@bitovi/scaffold` package
+ *
+ * ```ts
+ * import { Scaffold, DataTypes } from "@bitovi/scaffold";
+ *
+ * const scaffold = new Scaffold([User], {
+ *   name: "Scaffold Example",
+ *   prefix: "/api",
+ *   db: {
+ *     dialect: "sqlite",
+ *     storage: path.join(__dirname, "example.sqlite"),
+ *   },
+ * });
+ *
+ * ```
+ */
 export class Scaffold {
   private _sequelizeModels: SequelizeModelsCollection;
   private _sequelize: Sequelize;

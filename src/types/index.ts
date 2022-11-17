@@ -23,7 +23,7 @@ import {
 import signale from "signale";
 import { Scaffold } from "..";
 
-export { DataTypes } from "sequelize";
+export { DataTypes, ModelValidateOptions, ModelAttributes } from "sequelize";
 
 export type KoaMiddleware = Middleware;
 export type ExpressMiddleware = (
@@ -142,9 +142,15 @@ export interface BelongsToManyResult {
   target: string;
   options: BelongsToManyOptions;
 }
-
+/**
+ * Used when defining a Scaffold Model relationship
+ * to bridge Scaffold Models and Sequelize Model options
+ */
 export interface BelongsToResult {
   target: string;
+  /**
+   * 
+   */
   options?: BelongsToOptions;
 }
 
@@ -166,15 +172,60 @@ export interface ScaffoldContext extends Context {
   models: { [ModelName: string]: ModelStatic<Model> };
 }
 
+/**
+ * Models can be defined in Scaffold by creating a `[name].ts` file containing
+ * the following required (and optional) fields shown here.
+ * 
+ * After a model is defined and passed to a Scaffold instance it will be
+ * available within scaffold.orm.* by its model name
+ * 
+ * The model name field will also dictate the usage for the dynamicly exported
+ * functions provided by your Scaffold instance
+ * 
+ */
 export interface ScaffoldModel {
+  /**
+   * Model Attributes define the fields that are associated with this model and 
+   * also reflect, generally, on the associated columns in your underlying database
+   *
+   * As an example, if you were creating a `User` model you might want to represent
+   * a `firstName` and `lastName` field.
+   * 
+   * ```ts
+   * attributes: {
+   *  firstName: DataTypes.STRING,
+   *  lastName: DataTypes.STRING,
+   * }
+   * ```
+   */
   attributes: ModelAttributes;
 
+  /**
+   * The Model `name` dictates the underlying database table name as well
+   * as how your model can be accessed later through your Scaffold instance
+   */
   name: string;
 
+  /**
+   * Validation in Scaffold is directly tied to features within the Sequelize ORM
+   * See the Sequelize [documentation for more information](https://sequelize.org/docs/v6/core-concepts/validations-and-constraints/#model-wide-validations)
+   */
   validation?: ModelValidateOptions;
 
+  /**
+   * Relationship Documentation belongsTo
+   */
   belongsTo?: BelongsToResult[];
+  /**
+   * Relationship Documentation belongsToMany
+   */
   belongsToMany?: BelongsToManyResult[];
+  /**
+   * Relationship Documentation hasOne
+   */
   hasOne?: HasOneResult[];
+  /**
+   * Relationship Documentation hasMany
+   */
   hasMany?: HasManyResult[];
 }

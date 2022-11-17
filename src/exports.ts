@@ -1,3 +1,14 @@
 export * from "./index";
-export { ScaffoldModel } from "./types";
-export { DataTypes } from "sequelize";
+export {
+    ScaffoldModel,
+    KoaMiddleware,
+    ExpressMiddleware,
+    DataTypes,
+    ScaffoldOptions,
+    BelongsToManyResult,
+    BelongsToResult,
+    HasOneResult,
+    HasManyResult,
+    ModelValidateOptions,
+    ModelAttributes
+} from "./types";
