@@ -33,11 +33,26 @@ export type ExpressMiddleware = (
 ) => void;
 
 /**
- * Options Description Does This Show In Docs?
+ * Scaffold Configuration
  */
 export interface ScaffoldOptions {
+  /**
+   * Setting this prefix will signal to Scaffold that it should
+   * expect this path at the beginning of any incoming requests.
+   * 
+   * This is used internally for regex path matching
+   */
   prefix?: string;
+
+  /**
+   * This flag should mostly be used for development and will
+   * force your Models onto the database schema at startup.
+   */
   sync?: boolean;
+
+  /**
+   * Notes about Sequelize connections
+   */
   database?: Options;
 }
 

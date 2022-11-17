@@ -29,19 +29,15 @@ import { buildEverythingForModel } from "./everything";
 /**
  * Scaffold can be imported from the `@bitovi/scaffold` package
  *
- * ```ts
- * import { Scaffold, DataTypes } from "@bitovi/scaffold";
- *
- * const scaffold = new Scaffold([User], {
- *   name: "Scaffold Example",
- *   prefix: "/api",
- *   db: {
- *     dialect: "sqlite",
- *     storage: path.join(__dirname, "example.sqlite"),
- *   },
- * });
- *
- * ```
+ * This class provides the entry point into the Scaffold library. To use Scaffold with your project
+ * you will create an instance of this class passing it your Model definitions along with (optional) settings.
+ * 
+ * @see {@link constructor}
+ * 
+ * In order to use Scaffold with Koa or Express you should look at the Middleware exports below
+ * @see {@link handleEverythingExpressMiddleware}
+ * @see {@link handleEverythingKoaMiddleware}
+ * 
  */
 export class Scaffold {
   private _sequelizeModels: SequelizeModelsCollection;
@@ -79,6 +75,7 @@ export class Scaffold {
 
   /**
    * Returns the raw Sequelize instance directly
+   * @hidden
    */
   get orm(): Sequelize {
     return this._sequelize;
@@ -86,6 +83,7 @@ export class Scaffold {
 
   /**
    * Returns an object mapping model names to Sequelize models
+   * @category General Use
    */
   get model(): SequelizeModelsCollection {
     return this._sequelizeModels;
@@ -93,6 +91,7 @@ export class Scaffold {
 
   /**
    * Returns an object mapping model names to Scaffold models
+   * @hidden
    */
   get models(): ScaffoldModelCollection {
     return buildScaffoldModelObject(this._sequelizeModels);
@@ -100,6 +99,7 @@ export class Scaffold {
 
   /**
    * Returns an object containing the model names as keys
+   * @category General Use
    */
   get parse() {
     return buildExportWrapper<ScaffoldFunctionExportParse>(
@@ -110,6 +110,7 @@ export class Scaffold {
 
   /**
    * Returns an object containing the model names as keys
+   * @category General Use
    */
   get serialize() {
     return buildExportWrapper<ScaffoldFunctionExportSerialize>(
@@ -120,6 +121,7 @@ export class Scaffold {
 
   /**
    * Returns an object containing the model names as keys
+   * @category General Use
    */
   get middleware() {
     return buildExportWrapper<ScaffoldFunctionExportsMiddleware>(
@@ -130,6 +132,7 @@ export class Scaffold {
 
   /**
    * Returns an object containing the model names as keys
+   * @category General Use
    */
   get everything() {
     return buildExportWrapper<ScaffoldFunctionExportEverything>(
@@ -155,6 +158,7 @@ export class Scaffold {
    * Scaffold and the request passed to the next available Middleware
    *
    * @return {KoaMiddleware} Koa Middleware function that can be attached to a Koa instance (`app`) using `app.use`
+   * @category General Use
    */
   handleEverythingKoaMiddleware(): KoaMiddleware {
     return async (ctx, next) => {
@@ -224,6 +228,7 @@ export class Scaffold {
    * Scaffold and the request passed to the next available Middleware
    *
    * @return {ExpressMiddleware} Express Middleware function that can be attached to a Koa instance (`app`) using `app.use`
+   * @category General Use
    */
   handleEverythingExpressMiddleware(): ExpressMiddleware {
     return (req, res, next) => {
@@ -247,9 +252,12 @@ export class Scaffold {
    * from the Scaffold instance and determines if the current requested path
    * is one that matches a Scaffold operation.
    *
+   * Note: While this function is exported from Scaffold it is unusual to need to it externally
+   *
    * @param {string} method GET, PUT, POST, DELETE, PATCH
    * @param {string} path Usually the incoming request URL
    * @return {boolean}
+   * @internal
    */
   isValidScaffoldRoute(method, path: string): boolean {
     if (!this._allowedMethods.includes(method)) {
@@ -268,8 +276,11 @@ export class Scaffold {
    * This function will take a URL and attempt to pull Scaffold
    * specific parameters from it. Generally these are the `model` and or `id`
    *
+   * Note: While this function is exported from Scaffold it is unusual to need to it externally
+   *
    * @param path Usually the incoming request URL
    * @returns {Record<string, never> | { model: string; id: Identifier } | { model: string }}
+   * @internal
    */
   getScaffoldURLParamsForRoute(
     path: string
@@ -313,8 +324,11 @@ export class Scaffold {
    *
    * If there is no model, or it is not a known name, `false` will be returned
    *
+   * Note: While this function is exported from Scaffold it is unusual to need to it externally
+   *
    * @param {string} path Usually the incoming request URL
    * @returns {string | false} Returns a `string` with the model name, if found, otherwise `false`
+   * @internal
    */
   getScaffoldModelNameForRoute(path: string): false | string {
     const result = this.getScaffoldURLParamsForRoute(path);

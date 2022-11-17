@@ -207,19 +207,19 @@ node index.js
 
 Once you see `Started on port 3000` you can open your browser to http://localhost:3000/ to see things in action. The default homepage will show you a list of the current loaded models with a link to their respective page.
 
-<img src="img/Screen Shot 2022-11-04 at 1.02.36 PM.png" alt="list of resources" />
+<img src="media/Screen Shot 2022-11-04 at 1.02.36 PM.png" alt="list of resources" />
 
 Navigate to [http://localhost:3000/Players](http://localhost:3000/Players) and you will see a page containing a list of all the Players in our database. Because we have not yet created any, this list will be empty.
 
-<img src="img/Screen Shot 2022-11-04 at 1.03.18 PM.png" alt="empty list of players" />
+<img src="media/Screen Shot 2022-11-04 at 1.03.18 PM.png" alt="empty list of players" />
 
 Navigate to [http://localhost:3000/Players/new](http://localhost:3000/Players/new) by clicking on the provided 'Create Player' button at the bottom of the page. From here, fill in the first name and last name fields, and click "Save":
 
-<img src="img/Screen Shot 2022-11-04 at 1.04.13 PM.png" alt="Create a new player" />
+<img src="media/Screen Shot 2022-11-04 at 1.04.13 PM.png" alt="Create a new player" />
 
 Navigate to [http://localhost:3000/Players](http://localhost:3000/Players), and you will see the user that you just created has been fetched from the database and displayed for you!
 
-<img src="img/Screen Shot 2022-11-04 at 1.05.33 PM.png" alt="populated list of players" />
+<img src="media/Screen Shot 2022-11-04 at 1.05.33 PM.png" alt="populated list of players" />
 
 Just like that we created an example Player within the database! A lot of things happened under the hood here, with Scaffold handling all of the frontend forms as well as backend default behavior for creating these records.
 
@@ -227,11 +227,11 @@ Lets try one more thing using the Scaffold defaults before we move on to customi
 
 Navigate to [http://localhost:3000/Team/new](http://localhost:3000/Team/new), fill out the 'Name' field. Because a Team can have many players assigned to it, you can select your existing users from the dropdown, and click "Save" to create the new team:
 
-<img src="img/Screen Shot 2022-11-04 at 1.11.15 PM.png" alt="Create a new team" />
+<img src="media/Screen Shot 2022-11-04 at 1.11.15 PM.png" alt="Create a new team" />
 
 Just like the player list, if you navigate to Navigate to [http://localhost:3000/Teams](http://localhost:3000/Teams), you can see the Team you just created.
 
-<img src="img/Screen Shot 2022-11-04 at 1.13.31 PM.png" alt="populated list of teams" />
+<img src="media/Screen Shot 2022-11-04 at 1.13.31 PM.png" alt="populated list of teams" />
 
 Now that we have our basic application up and running we can start looking at how to make changed and rapidly develop
 
@@ -279,7 +279,7 @@ Once you see `Started on port 3000` you can open your browser to http://localhos
 
 Navigate to http://localhost:3000/Players/new by clicking ‘Players’ on the left side menu and then on the provided 'Create Player' button at the bottom of the page. From here, fill in the first name and last name fields, along with our new position field in a dropdown, and click "Save":
 
-<img src="img/placeholder.png" alt="Player create with position dropdown" />
+<img src="media/placeholder.png" alt="Player create with position dropdown" />
 
 Just like that we have updated our Player CRUD, both frontend and backend, to support a new field! There are many more things you can do with Scaffold but this is the end of the getting started tutorial.
 
