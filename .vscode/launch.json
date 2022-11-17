@@ -7,20 +7,10 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug Scaffold",
+      "name": "Staffing App Demo",
       "preLaunchTask": "tsc: build - tsconfig.json",
       "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}/src/standalone.ts",
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "console": "integratedTerminal"
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Debug Scaffold Test",
-      "preLaunchTask": "tsc: build - tsconfig.json",
-      "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}/src/testing/sequelize/index.ts",
+      "program": "${workspaceFolder}/src/testing/staffing-app/index.ts",
       "outFiles": ["${workspaceFolder}/dist/**/*.js"],
       "console": "integratedTerminal"
     }

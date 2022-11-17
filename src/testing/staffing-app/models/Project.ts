@@ -1,31 +1,31 @@
 import { ScaffoldModel, DataTypes } from "../../../types";
 
 export const Project: ScaffoldModel = {
-    name: "Project",
-    attributes: {
-        id: {
-            type: DataTypes.UUID,
-            primaryKey: true,
-            defaultValue: DataTypes.UUIDV4,
-            allowNull: false,
-        },
-        name: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
-        description: {
-            type: DataTypes.TEXT,
-            allowNull: true
-        }
+  name: "Project",
+  attributes: {
+    id: {
+      type: DataTypes.UUID,
+      primaryKey: true,
+      defaultValue: DataTypes.UUIDV4,
+      allowNull: false,
     },
-    hasMany: [
-        { target: "Role", options: { as: "roles" } }
-    ],
-    belongsToMany: [
-        { target: "Assignment", options: { as: "assignments", through: { model: "Role" } } }
-    ]
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+  },
+  hasMany: [{ target: "Role", options: { as: "roles" } }],
+  belongsToMany: [
+    {
+      target: "Assignment",
+      options: { as: "assignments", through: { model: "Role" } },
+    },
+  ],
 };
-
 
 /*
 -- public.project definition

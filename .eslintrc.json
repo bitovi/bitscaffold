@@ -8,10 +8,21 @@
   "extends": [
     "@bitovi/eslint-config/rules/base",
     "@bitovi/eslint-config/rules/jest",
+    "plugin:@typescript-eslint/recommended",
     "prettier"
   ],
   "parserOptions": {
     "ecmaVersion": "latest"
   },
-  "rules": { "no-unused-vars": ["error", { "varsIgnorePattern": "^[_]" }] }
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint"],
+  "rules": {
+    "no-unused-vars": [
+      "error",
+      {
+        "varsIgnorePattern": "^[_]"
+      }
+    ]
+  },
+  "ignorePatterns": ["dist/**/*"]
 }

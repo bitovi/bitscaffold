@@ -1,29 +1,41 @@
 import { ScaffoldModel, DataTypes } from "../../../types";
 
 export const Assignment: ScaffoldModel = {
-    name: "Assignment",
-    attributes: {
-        id: {
-            type: DataTypes.UUID,
-            primaryKey: true,
-            defaultValue: DataTypes.UUIDV4,
-            allowNull: false,
-        },
-        start_date: {
-            type: DataTypes.DATE,
-            allowNull: false
-        },
-        end_date: DataTypes.DATE
+  name: "Assignment",
+  attributes: {
+    id: {
+      type: DataTypes.UUID,
+      primaryKey: true,
+      defaultValue: DataTypes.UUIDV4,
+      allowNull: false,
     },
-    belongsTo: [
-        { target: "Role", options: { as: "role", foreignKey: "role_id", keyType: DataTypes.UUID } },
-        { target: "Employee", options: { as: "employee", foreignKey: "employee_id", keyType: DataTypes.UUID } }
-    ],
-    belongsToMany: [
-        { target: "Project", options: { as: "projects", through: { model: "Role" } } }
-    ]
+    start_date: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    end_date: DataTypes.DATE,
+  },
+  belongsTo: [
+    {
+      target: "Role",
+      options: { as: "role", foreignKey: "role_id", keyType: DataTypes.UUID },
+    },
+    {
+      target: "Employee",
+      options: {
+        as: "employee",
+        foreignKey: "employee_id",
+        keyType: DataTypes.UUID,
+      },
+    },
+  ],
+  belongsToMany: [
+    {
+      target: "Project",
+      options: { as: "projects", through: { model: "Role" } },
+    },
+  ],
 };
-
 
 /*
 -- public."assignment" definition

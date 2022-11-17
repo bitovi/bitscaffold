@@ -1,128 +1,309 @@
-import Koa, { Middleware } from "koa";
-import KoaBodyParser from "koa-body";
-import http, { Server } from "node:http";
-import Router from "@koa/router";
-import signale, { Signale } from "signale";
-import KoaCors from "@koa/cors";
-import { v4 } from "uuid";
-import os from "os";
-import { prepareDefaultRoutes } from "./routes";
-import { ScaffoldApplication, ScaffoldModel } from "./types";
-import { prepareModels, prepareSequelize } from "./sequelize";
+import { Identifier, Sequelize } from "sequelize";
+import { match } from "path-to-regexp";
+import signale from "signale";
 
-/**
- * Entrypoint
- */
-export async function createScaffoldApplication(
-  models: ScaffoldModel[],
-  routes?: Router
-): Promise<ScaffoldApplication> {
-  signale.info("Creating Scaffold Application");
-  const app = new Koa();
-  await prepareKoaApplication(app);
-  await prepareSequelize(app);
-  await prepareModels(app, models);
+import {
+  ExpressMiddleware,
+  KoaMiddleware,
+  ScaffoldFunctionExportEverything,
+  ScaffoldFunctionExportHandler,
+  ScaffoldFunctionExportParse,
+  ScaffoldFunctionExportsCollection,
+  ScaffoldFunctionExportSerialize,
+  ScaffoldFunctionExportsMiddleware,
+  ScaffoldModel,
+  ScaffoldModelCollection,
+  ScaffoldOptions,
+  SequelizeModelsCollection,
+} from "./types";
+import {
+  convertScaffoldModels,
+  createSequelizeInstance,
+  buildScaffoldModelObject,
+} from "./sequelize";
+import { buildParserForModel } from "./parse";
+import { buildSerializerForModel } from "./serialize";
+import { buildMiddlewareForModel } from "./middleware";
+import { buildEverythingForModel } from "./everything";
 
-  if (routes) {
-    signale.info("Attaching externally defined Routes");
-    app.use(routes.routes());
-    app.use(routes.allowedMethods());
+export class Scaffold {
+  private _sequelizeModels: SequelizeModelsCollection;
+  private _sequelize: Sequelize;
+  private _allowedMethods: ["GET", "POST", "PUT", "DELETE"];
+  private _sequelizeModelNames: string[];
+  private _prefix: string;
+
+  /**
+   * Creates a new Scaffold instance
+   *
+   * @param {ScaffoldModel[]} models An array of Scaffold Models
+   * @param {ScaffoldOptions} options Configuration options for Scaffold
+   *
+   * @return {Scaffold}
+   */
+  constructor(models: ScaffoldModel[], options: ScaffoldOptions = {}) {
+    // Prepare the ORM instance and keep references to the different Models
+    this._sequelize = createSequelizeInstance(options.database);
+    this._sequelizeModels = convertScaffoldModels(this._sequelize, models);
+
+    // Types of requests that Scaffold should attempt to process
+    this._allowedMethods = ["GET", "POST", "PUT", "DELETE"];
+
+    // Do some quick work up front to get the list of model names
+    this._sequelizeModelNames = Object.keys(this._sequelizeModels);
+
+    // Store the route prefix if the user set one
+    this._prefix = options.prefix || "";
+
+    if (options.sync) {
+      this.createDatabase();
+    }
   }
 
-  signale.info("Attaching default Routes");
-  const router = await prepareDefaultRoutes();
-  app.use(router.routes());
-  app.use(router.allowedMethods());
+  /**
+   * Returns the raw Sequelize instance directly
+   */
+  get orm(): Sequelize {
+    return this._sequelize;
+  }
 
-  return app;
-}
+  /**
+   * Returns an object mapping model names to Sequelize models
+   */
+  get model(): SequelizeModelsCollection {
+    return this._sequelizeModels;
+  }
 
-export async function __mockApplication(
-  models: ScaffoldModel[]
-): Promise<Server> {
-  const app = await createScaffoldApplication(models);
-  return http.createServer(app.callback());
-}
+  /**
+   * Returns an object mapping model names to Scaffold models
+   */
+  get models(): ScaffoldModelCollection {
+    return buildScaffoldModelObject(this._sequelizeModels);
+  }
 
-export async function startScaffoldApplication(
-  app: ScaffoldApplication,
-  port?: number
-): Promise<void> {
-  signale.info("Starting Scaffold Application listening");
-  await app.listen(port || 3000);
-}
-
-export function attachScaffoldDefaultMiddleware(
-  models: ScaffoldModel[],
-  app: Koa
-): Middleware {
-  const setup = async () => {
-    signale.info("Running Middleware Setup Function");
-    await prepareKoaApplication(app);
-    await prepareSequelize(app);
-    await prepareModels(app, models);
-  };
-  setup();
-  return async function attachScaffoldDefault(ctx, next) {
-    signale.info("attachScaffoldDefaultMiddleware no-op");
-    await next();
-  };
-}
-
-async function prepareKoaApplication(app: Koa): Promise<void> {
-  if (!app.context.bitscaffold) {
-    signale.info("Creating Koa Application Defaults");
-    // Check if this koa app has already been processed
-    app.context.bitscaffold = true;
-
-    // Catch top level errors and format them correctly
-    app.use(ErrorHandler());
-
-    // Hook up cors
-    app.use(KoaCors({ origin: "*" }));
-
-    // Enable the body parser for relevant methods
-    app.use(
-      KoaBodyParser({
-        parsedMethods: ["POST", "PUT", "PATCH", "DELETE"],
-        multipart: true,
-        includeUnparsed: true,
-        formidable: { multiples: true, uploadDir: os.tmpdir() },
-      })
+  /**
+   * Returns an object containing the model names as keys
+   */
+  get parse() {
+    return buildExportWrapper<ScaffoldFunctionExportParse>(
+      this,
+      buildParserForModel
     );
-
-    // Attach some debugging uuid information to
-    // state, logging, and response headers
-    app.use(async (ctx: Koa.Context, next: Koa.Next) => {
-      ctx.state.uuid = v4();
-      ctx.state.logger = new Signale({ scope: ctx.state.uuid });
-
-      ctx.set("x-koa-uuid", ctx.state.uuid);
-      await next();
-    });
   }
-}
 
-function ErrorHandler() {
-  return async function ErrorHandlerMiddleware(
-    ctx: Koa.Context,
-    next: Koa.Next
-  ) {
-    return next().catch((err) => {
-      ctx.type = "json";
+  /**
+   * Returns an object containing the model names as keys
+   */
+  get serialize() {
+    return buildExportWrapper<ScaffoldFunctionExportSerialize>(
+      this,
+      buildSerializerForModel
+    );
+  }
 
-      ctx.status = err.statusCode || 500;
-      ctx.body = {
-        errors: [err.message],
-        data: null,
-        meta: err,
-      };
+  /**
+   * Returns an object containing the model names as keys
+   */
+  get middleware() {
+    return buildExportWrapper<ScaffoldFunctionExportsMiddleware>(
+      this,
+      buildMiddlewareForModel
+    );
+  }
 
-      if (ctx.state.logger) {
-        ctx.state.logger.error(err.message, err);
+  /**
+   * Returns an object containing the model names as keys
+   */
+  get everything() {
+    return buildExportWrapper<ScaffoldFunctionExportEverything>(
+      this,
+      buildEverythingForModel
+    );
+  }
+
+  /**
+   * The `handleEverythingKoaMiddleware` Middleware provides the primary hooks
+   * between your Koa application and the Scaffold library
+   *
+   * It will use the Koa Context to determine if:
+   *    1. The route resembles a Scaffold default route, by regex
+   *    2. The route contains an expected Scaffold model name
+   *    3. The request method is one of GET, POST, PUT, DELETE
+   *
+   * If these criteria pass the context will be passed to the 'everything'
+   * function for the given model. Under the hood this will parse the params,
+   * perform the requested model query, and serialize the result.
+   *
+   * If these criteria are not met the request will be ignored by
+   * Scaffold and the request passed to the next available Middleware
+   *
+   * @return {KoaMiddleware} Koa Middleware function that can be attached to a Koa instance (`app`) using `app.use`
+   */
+  handleEverythingKoaMiddleware(): KoaMiddleware {
+    return async (ctx, next) => {
+      // Check if this request URL takes the format of one that we expect
+      if (!this.isValidScaffoldRoute(ctx.method, ctx.path)) {
+        return await next();
       }
 
-      ctx.app.emit("error", err, ctx);
+      // Check if this request URL has a valid Scaffold Model associated with it
+      const modelName = this.getScaffoldModelNameForRoute(ctx.path);
+      if (!modelName) {
+        return await next();
+      }
+
+      switch (ctx.method) {
+        case "GET": {
+          if (ctx.query && ctx.query.id) {
+            ctx.body = await this.everything[modelName].findOne(
+              ctx.query,
+              ctx.query.id as Identifier
+            );
+            return;
+          }
+          ctx.body = await this.everything[modelName].findAll(ctx.query);
+          return;
+        }
+
+        case "POST": {
+          ctx.body = await this.everything[modelName].create(ctx);
+          return;
+        }
+
+        case "PUT": {
+          ctx.body = await this.everything[modelName].update(ctx);
+          return;
+        }
+
+        case "DELETE": {
+          ctx.body = await this.everything[modelName].destroy(ctx.query);
+          return;
+        }
+
+        default: {
+          signale.success(
+            "handleEverythingKoaMiddleware, scaffold ignored method"
+          );
+          return await next();
+        }
+      }
+    };
+  }
+
+  /**
+   * The `handleEverythingExpressMiddleware` Middleware provides the primary hooks
+   * between your Express application and the Scaffold library
+   *
+   * It will use the Request to determine if:
+   *    1. The route resembles a Scaffold default route, by regex
+   *    2. The route contains an expected Scaffold model name
+   *    3. The request method is one of GET, POST, PUT, DELETE
+   *
+   * If these criteria pass the context will be passed to the 'everything'
+   * function for the given model. Under the hood this will parse the params,
+   * perform the requested model query, and serialize the result.
+   *
+   * If these criteria are not met the request will be ignored by
+   * Scaffold and the request passed to the next available Middleware
+   *
+   * @return {ExpressMiddleware} Express Middleware function that can be attached to a Koa instance (`app`) using `app.use`
+   */
+  handleEverythingExpressMiddleware(): ExpressMiddleware {
+    return (req, res, next) => {
+      // Check if this request URL takes the format of one that we expect
+      if (!this.isValidScaffoldRoute(req.method, req.path)) {
+        return next();
+      }
+
+      // Check if this request URL has a valid Scaffold Model associated with it
+      const modelName = this.getScaffoldModelNameForRoute(req.path);
+      if (!modelName) {
+        return next();
+      }
+
+      throw new Error("Not Implemented");
+    };
+  }
+
+  /**
+   * This function takes the method, path, and the known list of models
+   * from the Scaffold instance and determines if the current requested path
+   * is one that matches a Scaffold operation.
+   *
+   * @param {string} method GET, PUT, POST, DELETE, PATCH
+   * @param {string} path Usuall the incoming request URL
+   * @return {boolean}
+   */
+  isValidScaffoldRoute(method, path: string): boolean {
+    if (!this._allowedMethods.includes(method)) {
+      return false;
+    }
+
+    const model = this.getScaffoldModelNameForRoute(path);
+    if (model) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  getScaffoldModelNameForRoute(path: string): false | string {
+    const isPathWithModelId = match<{ model: string; id: unknown }>(
+      this._prefix + "/:model/:id",
+      {
+        decode: decodeURIComponent,
+        strict: false,
+        sensitive: false,
+        end: false,
+      }
+    );
+
+    const isPathWithModelIdResult = isPathWithModelId(path);
+    if (isPathWithModelIdResult) {
+      if (
+        this._sequelizeModelNames.includes(isPathWithModelIdResult.params.model)
+      ) {
+        return isPathWithModelIdResult.params.model;
+      }
+      return false;
+    }
+
+    const isPathWithModel = match<{ model: string }>(this._prefix + "/:model", {
+      decode: decodeURIComponent,
+      strict: false,
+      sensitive: false,
+      end: false,
     });
-  };
+
+    const isPathWithModelResult = isPathWithModel(path);
+    if (isPathWithModelResult) {
+      if (
+        this._sequelizeModelNames.includes(isPathWithModelResult.params.model)
+      ) {
+        return isPathWithModelResult.params.model;
+      }
+      return false;
+    }
+
+    return false;
+  }
+
+  // This should mostly be used for testing. It will Sync
+  // all of the known Sequelize models against the sequelize
+  // instance. This is a destructive operation on a real database.
+  async createDatabase(): Promise<Sequelize> {
+    return this._sequelize.sync({ force: true });
+  }
+}
+
+function buildExportWrapper<T>(
+  scaffold: Scaffold,
+  handlerFunction: ScaffoldFunctionExportHandler<T>
+): ScaffoldFunctionExportsCollection<T> {
+  const wrapper = {};
+  Object.keys(scaffold.models).forEach((modelName) => {
+    wrapper[modelName] = handlerFunction(scaffold, modelName);
+  });
+
+  return wrapper;
 }
