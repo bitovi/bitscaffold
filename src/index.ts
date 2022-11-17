@@ -248,7 +248,7 @@ export class Scaffold {
    * is one that matches a Scaffold operation.
    *
    * @param {string} method GET, PUT, POST, DELETE, PATCH
-   * @param {string} path Usuall the incoming request URL
+   * @param {string} path Usually the incoming request URL
    * @return {boolean}
    */
   isValidScaffoldRoute(method, path: string): boolean {
@@ -264,8 +264,20 @@ export class Scaffold {
     }
   }
 
-  getScaffoldModelNameForRoute(path: string): false | string {
-    const isPathWithModelId = match<{ model: string; id: unknown }>(
+  /**
+   * This function will take a URL and attempt to pull Scaffold
+   * specific parameters from it. Generally these are the `model` and or `id`
+   *
+   * @param path Usually the incoming request URL
+   * @returns {Record<string, never> | { model: string; id: Identifier } | { model: string }}
+   */
+  getScaffoldURLParamsForRoute(
+    path: string
+  ):
+    | Record<string, never>
+    | { model: string; id: Identifier }
+    | { model: string } {
+    const isPathWithModelId = match<{ model: string; id: Identifier }>(
       this._prefix + "/:model/:id",
       {
         decode: decodeURIComponent,
@@ -277,12 +289,7 @@ export class Scaffold {
 
     const isPathWithModelIdResult = isPathWithModelId(path);
     if (isPathWithModelIdResult) {
-      if (
-        this._sequelizeModelNames.includes(isPathWithModelIdResult.params.model)
-      ) {
-        return isPathWithModelIdResult.params.model;
-      }
-      return false;
+      return isPathWithModelIdResult.params;
     }
 
     const isPathWithModel = match<{ model: string }>(this._prefix + "/:model", {
@@ -294,20 +301,43 @@ export class Scaffold {
 
     const isPathWithModelResult = isPathWithModel(path);
     if (isPathWithModelResult) {
-      if (
-        this._sequelizeModelNames.includes(isPathWithModelResult.params.model)
-      ) {
-        return isPathWithModelResult.params.model;
-      }
-      return false;
+      return isPathWithModelResult.params;
     }
 
+    return {};
+  }
+
+  /**
+   * This function will take a URL and attempt to pull a Scaffold model name
+   * parameter from it. If one is found, and valid, it will be returned.
+   *
+   * If there is no model, or it is not a known name, `false` will be returned
+   *
+   * @param {string} path Usually the incoming request URL
+   * @returns {string | false} Returns a `string` with the model name, if found, otherwise `false`
+   */
+  getScaffoldModelNameForRoute(path: string): false | string {
+    const result = this.getScaffoldURLParamsForRoute(path);
+    if (result.model) {
+      if (this._sequelizeModelNames.includes(result.model)) {
+        return result.model;
+      }
+    }
     return false;
   }
 
-  // This should mostly be used for testing. It will Sync
-  // all of the known Sequelize models against the sequelize
-  // instance. This is a destructive operation on a real database.
+  /**
+   * Note: This function should primarially be used for test cases.
+   *
+   * The `createDatabase` function is a destructive operation that will
+   * sync your defined models to the configured database.
+   *
+   * This means that your database will be dropped and its schema
+   * will be overwritten with your defined models.
+   *
+   * @returns {Promise<Sequelize>} Sequelize Instance
+   * @category Testing Use
+   */
   async createDatabase(): Promise<Sequelize> {
     return this._sequelize.sync({ force: true });
   }

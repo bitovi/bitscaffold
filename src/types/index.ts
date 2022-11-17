@@ -149,7 +149,7 @@ export interface BelongsToManyResult {
 export interface BelongsToResult {
   target: string;
   /**
-   * 
+   *
    */
   options?: BelongsToOptions;
 }
@@ -175,22 +175,22 @@ export interface ScaffoldContext extends Context {
 /**
  * Models can be defined in Scaffold by creating a `[name].ts` file containing
  * the following required (and optional) fields shown here.
- * 
+ *
  * After a model is defined and passed to a Scaffold instance it will be
  * available within scaffold.orm.* by its model name
- * 
+ *
  * The model name field will also dictate the usage for the dynamicly exported
  * functions provided by your Scaffold instance
- * 
+ *
  */
 export interface ScaffoldModel {
   /**
-   * Model Attributes define the fields that are associated with this model and 
+   * Model Attributes define the fields that are associated with this model and
    * also reflect, generally, on the associated columns in your underlying database
    *
    * As an example, if you were creating a `User` model you might want to represent
    * a `firstName` and `lastName` field.
-   * 
+   *
    * ```ts
    * attributes: {
    *  firstName: DataTypes.STRING,

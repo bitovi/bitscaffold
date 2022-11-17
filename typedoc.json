@@ -6,5 +6,12 @@
   "name": "@bitovi/scaffold",
   "includeVersion": true,
   "disableSources": true,
-  "titleLink": "https://github.com/bitovi/bitscaffold"
+  "navigationLinks": {
+    "Bitovi": "https://bitovi.com",
+    "GitHub": "https://github.com/bitovi/bitscaffold"
+  },
+  "sidebarLinks": {
+    "Confluence": "https://bitovi.atlassian.net/wiki/spaces/SCAFFOLD/overview",
+    "Jira Software": "https://bitovi.atlassian.net/browse/SCAFFOLD"
+  }
 }
