@@ -1,6 +1,8 @@
 {
   "$schema": "https://typedoc.org/schema.json",
-  "entryPoints": ["./src/exports.ts"],
+  "entryPoints": [
+    "./src/exports.ts"
+  ],
   "out": "docs",
   "theme": "default",
   "name": "@bitovi/scaffold",

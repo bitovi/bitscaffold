@@ -1,3 +1,6 @@
+# Note: Work In Progress
+Not everything here is totally functional or usable for real. Much of the work described below is in-progress and not available publically yet! 
+
 [![Join our Slack](https://img.shields.io/badge/slack-join%20chat-611f69.svg)](https://www.bitovi.com/community/slack?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 # About Scaffold

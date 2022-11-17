@@ -11,4 +11,9 @@ export {
   HasManyResult,
   ModelValidateOptions,
   ModelAttributes,
+  ScaffoldFunctionExportSerialize,
+  ScaffoldFunctionExportsMiddleware,
+  ScaffoldFunctionExportEverything,
+  ScaffoldFunctionExportsCollection,
+  ScaffoldFunctionExportParse
 } from "./types";

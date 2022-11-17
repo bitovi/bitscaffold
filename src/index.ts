@@ -82,7 +82,16 @@ export class Scaffold {
   }
 
   /**
-   * Returns an object mapping model names to Sequelize models
+   * The `model` export is one of the primary tools provided by Scaffold for working
+   * with your Models in custom routes.
+   * 
+   * From the `model` export you can target one of your Models by name which will
+   * give you further access to a number of named functions
+   * 
+   * For more information about the underlying per-model functions:
+   * @see {@link ScaffoldFunctionExportEverything}
+   * 
+   * @returns {ScaffoldFunctionExportsCollection<ScaffoldFunctionExportEverything>}
    * @category General Use
    */
   get model(): SequelizeModelsCollection {
@@ -98,7 +107,16 @@ export class Scaffold {
   }
 
   /**
-   * Returns an object containing the model names as keys
+   * The `parse` export is one of the primary tools provided by Scaffold for working
+   * with your Models in custom routes.
+   * 
+   * From the `parse` export you can target one of your Models by name which will
+   * give you further access to a number of named functions
+   * 
+   * For more information about the underlying per-model functions:
+   * @see {@link ScaffoldFunctionExportParse}
+   * 
+   * @returns {ScaffoldFunctionExportsCollection<ScaffoldFunctionExportParse>}
    * @category General Use
    */
   get parse() {
@@ -109,7 +127,16 @@ export class Scaffold {
   }
 
   /**
-   * Returns an object containing the model names as keys
+   * The `serialize` export is one of the primary tools provided by Scaffold for working
+   * with your Models in custom routes.
+   * 
+   * From the `serialize` export you can target one of your Models by name which will
+   * give you further access to a number of named functions
+   * 
+   * For more information about the underlying per-model functions:
+   * @see {@link ScaffoldFunctionExportSerialize}
+   * 
+   * @returns {ScaffoldFunctionExportsCollection<ScaffoldFunctionExportSerialize>}
    * @category General Use
    */
   get serialize() {
@@ -120,7 +147,16 @@ export class Scaffold {
   }
 
   /**
-   * Returns an object containing the model names as keys
+   * The `middleware` export is one of the primary tools provided by Scaffold for working
+   * with your Models in custom routes.
+   * 
+   * From the `middleware` export you can target one of your Models by name which will
+   * give you further access to a number of named functions
+   * 
+   * For more information about the underlying per-model functions:
+   * @see {@link ScaffoldFunctionExportsMiddleware}
+   * 
+   * @returns {ScaffoldFunctionExportsCollection<ScaffoldFunctionExportsMiddleware>}
    * @category General Use
    */
   get middleware() {
@@ -131,7 +167,19 @@ export class Scaffold {
   }
 
   /**
-   * Returns an object containing the model names as keys
+   * The `everything` export is one of the primary tools provided by Scaffold for working
+   * with your Models in custom routes.
+   * 
+   * The `everything` export calls the `parse`, `model`, and `serialize` under the hood
+   * allowing you to do 'everything' in one function instead of calling each part individually.
+   * 
+   * From the `everything` export you can target one of your Models by name which will
+   * give you further access to a number of named functions
+   * 
+   * For more information about the underlying per-model functions:
+   * @see {@link ScaffoldFunctionExportEverything}
+   * 
+   * @returns {ScaffoldFunctionExportsCollection<ScaffoldFunctionExportEverything>}
    * @category General Use
    */
   get everything() {
