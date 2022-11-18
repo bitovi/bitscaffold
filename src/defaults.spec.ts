@@ -61,20 +61,32 @@ describe("Default Tests", () => {
     const server = createServer(app);
     await scaffold.createDatabase();
 
-    const create = await POST(server, "/api/Model", {
+    await POST(server, "/api/Model", {
       firstName: "firstName",
       lastName: "lastName",
+    });
+
+    const create = await POST(server, "/api/Model", {
+      firstName: "firstName2",
+      lastName: "lastName2",
+    });
+
+    await POST(server, "/api/Model", {
+      firstName: "firstName3",
+      lastName: "lastName3",
     });
 
     expect(create).toBeTruthy();
     expect(create.status).toBe(200);
     expect(create.deserialized).toHaveProperty("id");
+    expect(create.deserialized.id).toBeTruthy();
 
     const find = await GET(server, "/api/Model/" + create.deserialized.id);
 
     expect(find).toBeTruthy();
     expect(find.status).toBe(200);
     expect(find.deserialized).toBeTruthy();
+    expect(find.deserialized.id).toBe(create.deserialized.id);
 
     await scaffold.orm.close();
   });

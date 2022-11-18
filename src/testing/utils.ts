@@ -61,19 +61,21 @@ export async function DELETE(server, path) {
   return await parse(result);
 }
 
-export async function POST(server, path, payload) {
+export async function POST(server, path, payload, type = "application/json") {
   const result = await request(server)
     .post(path)
     .set("authorization", "test")
+    .set("content-type", type)
     .send(payload);
 
   return await parse(result);
 }
 
-export async function PUT(server, path, payload) {
+export async function PUT(server, path, payload, type = "application/json") {
   const result = await request(server)
     .put(path)
     .set("authorization", "test")
+    .set("content-type", type)
     .send(payload);
 
   return await parse(result);

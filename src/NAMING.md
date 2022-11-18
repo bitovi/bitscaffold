@@ -20,4 +20,4 @@ Accessor
 
 # Exceptions
 
-handleEverythingKoaMiddleware
+### handleEverythingKoaMiddleware

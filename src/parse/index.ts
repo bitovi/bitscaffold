@@ -8,6 +8,7 @@ import {
   FindOptions,
 } from "sequelize";
 import { Scaffold } from "..";
+import { buildAttributeList, buildWhereClause } from "./builder";
 
 /**
  * Provides a set of exported functions, per Model, that
@@ -41,71 +42,34 @@ export function buildParserForModel(
 ): ParseFunctions {
   return {
     findAll: async (query) => {
-      let attributes: string[] = [];
-      if (query.attributes) {
-        if (!Array.isArray(query.attributes)) {
-          attributes = [query.attributes];
-        } else {
-          attributes = query.attributes;
-        }
-      }
-
-      if (!attributes.includes("id")) {
-        attributes.push("id");
-      }
-
       return {
-        attributes: attributes,
+        attributes: buildAttributeList(query),
+        where: buildWhereClause(query),
       };
     },
     findOne: async (query, id) => {
-      let attributes: string[] = [];
-      if (query.attributes) {
-        if (!Array.isArray(query.attributes)) {
-          attributes = [query.attributes];
-        } else {
-          attributes = query.attributes;
-        }
-      }
-
-      if (!attributes.includes("id")) {
-        attributes.push("id");
-      }
-
       return {
-        attributes: attributes,
-        where: {
-          id: id,
-        },
+        attributes: buildAttributeList(query),
+        where: buildWhereClause(query, id),
       };
     },
     findAndCountAll: async (query) => {
-      return {};
+      return {
+        attributes: buildAttributeList(query),
+        where: buildWhereClause(query),
+      };
     },
     create: async (body, query) => {
       return {};
     },
     destroy: async (query, id) => {
-      const options: DestroyOptions = {};
-
-      if (id) {
-        options.where = {};
-        options.where.id = id;
-      }
-
-      return options;
+      return {
+        where: buildWhereClause(query, id),
+      };
     },
     update: async (body, query, id) => {
-      if (id) {
-        return {
-          where: {
-            id: id,
-          },
-        };
-      }
-
       return {
-        where: {},
+        where: buildWhereClause(query, id),
       };
     },
   };

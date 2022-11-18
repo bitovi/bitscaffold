@@ -1,7 +1,7 @@
 import Koa from "koa";
-import coBody from "co-body";
 import { Scaffold } from "..";
 import { KoaMiddleware, ExpressMiddleware } from "../types";
+import { parseScaffoldBody } from "../parse/body";
 
 /**
  * Provides a set of exported functions, per Model, that
@@ -73,14 +73,14 @@ export function findAndCountAllMiddleware(
 
 export function createMiddleware(scaffold: Scaffold, modelName: string) {
   return async function createImpl(ctx: Koa.Context) {
-    const body = await coBody(ctx);
+    const body = await parseScaffoldBody(ctx, ctx.request.type);
     ctx.body = await scaffold.everything[modelName].create(body, ctx.query);
   };
 }
 
 export function updateMiddleware(scaffold: Scaffold, modelName: string) {
   return async function updateImpl(ctx: Koa.Context) {
-    const body = await coBody(ctx);
+    const body = await parseScaffoldBody(ctx, ctx.request.type);
     const params = scaffold.getScaffoldURLParamsForRoute(ctx.path);
     ctx.body = await scaffold.everything[modelName].update(
       body,

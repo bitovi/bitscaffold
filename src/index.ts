@@ -1,5 +1,4 @@
 import { Identifier, Sequelize } from "sequelize";
-import coBody from "co-body";
 import { match } from "path-to-regexp";
 import signale from "signale";
 import {
@@ -24,7 +23,10 @@ import {
   buildScaffoldModelObject,
 } from "./sequelize";
 import { buildParserForModel, ParseFunctions } from "./parse";
+import { parseScaffoldBody } from "./parse/body";
+
 import { buildSerializerForModel, SerializeFunctions } from "./serialize";
+import { buildDeserializerForModel, DeserializeFunctions } from "./deserialize";
 import { buildMiddlewareForModel, MiddlewareFunctionsKoa } from "./middleware";
 import { buildEverythingForModel, EverythingFunctions } from "./everything";
 
@@ -148,6 +150,26 @@ export class Scaffold {
   }
 
   /**
+   * The `deserialize` export is one of the primary tools provided by Scaffold for working
+   * with your Models in custom routes.
+   *
+   * From the `deserialize` export you can target one of your Models by name which will
+   * give you further access to a number of named functions
+   *
+   * For more information about the underlying per-model functions:
+   * @see {@link DeserializeFunctions}
+   *
+   * @returns {ModelFunctionsCollection<DeserializeFunctions>}
+   * @category General Use
+   */
+  get deserialize() {
+    return buildExportWrapper<DeserializeFunctions>(
+      this,
+      buildDeserializerForModel
+    );
+  }
+
+  /**
    * Create a JSON:API Compliant Error Result
    *
    * The behavior of this function depends on the value of `expose` set
@@ -264,7 +286,7 @@ export class Scaffold {
         }
 
         case "POST": {
-          const body = await coBody(ctx);
+          const body = await parseScaffoldBody(ctx, ctx.request.type);
           ctx.body = await this.everything[params.model].create(
             body,
             ctx.query
@@ -273,7 +295,7 @@ export class Scaffold {
         }
 
         case "PUT": {
-          const body = await coBody(ctx);
+          const body = await parseScaffoldBody(ctx, ctx.request.type);
           ctx.body = await this.everything[params.model].update(
             body,
             ctx.query,

@@ -1,5 +1,4 @@
 import { Model, Sequelize, Options } from "sequelize";
-import signale from "signale";
 import {
   ScaffoldModel,
   SequelizeModelsCollection,
@@ -21,15 +20,11 @@ export function buildScaffoldModelObject(
 
 export function createSequelizeInstance(options?: Options): Sequelize {
   if (!options) {
-    signale.info("Using in-memory database, no persistance configured");
     return new Sequelize("sqlite::memory:", {
-      logging: (message) => {
-        signale.info(" DB: ", message);
-      },
+      logging: false,
     });
   }
 
-  signale.info("Creating Sequelize instance with options:", options);
   const sequelize = new Sequelize(options);
   return sequelize;
 }
@@ -38,9 +33,7 @@ export function convertScaffoldModels(
   sequelize: Sequelize,
   models: ScaffoldModel[]
 ): SequelizeModelsCollection {
-  signale.info("Attaching Models to Sequelize instance");
   models.forEach((model) => {
-    signale.info("Creating Model", model.name);
     const temp = sequelize.define<Model<ScaffoldModel["attributes"]>>(
       model.name,
       model.attributes,
@@ -56,8 +49,6 @@ export function convertScaffoldModels(
   });
 
   models.forEach((model) => {
-    signale.info("Creating Model associations", model.name);
-
     const relationships = [
       "belongsTo",
       "belongsToMany",
