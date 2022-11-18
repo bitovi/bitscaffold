@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { Model } from "sequelize";
-import { JSONAPIError, Serializer } from "jsonapi-serializer";
+import { JSONAPIError, Serializer, SerializerOptions } from "jsonapi-serializer";
 import { Scaffold } from "..";
 import { JSONObject } from "../types";
 import { Error, JSONAPIErrorOptions } from "jsonapi-serializer";
@@ -23,12 +23,12 @@ export interface SerializeFunctions {
    *
    * @returns {JSONObject}
    */
-  findAll: (data: Model<any, any>[]) => Promise<JSONObject>;
-  findOne: (data: Model<any, any>) => Promise<JSONObject>;
-  findAndCountAll: (data: { rows: Model<any, any>[], count: number }) => Promise<JSONObject>;
-  create: (data: Model<any, any>) => Promise<JSONObject>;
-  update: (rowCount: number) => Promise<JSONObject>;
-  destroy: (rowCount: number) => Promise<JSONObject>;
+  findAll: (data: Model<any, any>[], options?: SerializerOptions) => Promise<JSONObject>;
+  findOne: (data: Model<any, any>, options?: SerializerOptions) => Promise<JSONObject>;
+  findAndCountAll: (data: { rows: Model<any, any>[], count: number }, options?: SerializerOptions) => Promise<JSONObject>;
+  create: (data: Model<any, any>, options?: SerializerOptions) => Promise<JSONObject>;
+  update: (rowCount: number, options?: SerializerOptions) => Promise<JSONObject>;
+  destroy: (rowCount: number, options?: SerializerOptions) => Promise<JSONObject>;
   error: (options: JSONAPIErrorOptions) => createHttpError.HttpError;
 }
 
@@ -37,23 +37,26 @@ export function buildSerializerForModel(
   modelName: string
 ): SerializeFunctions {
   return {
-    findAll: async (array) => {
-      return new Serializer(modelName, {}).serialize(array);
+    findAll: async (array, options: SerializerOptions = {}) => {
+      return new Serializer(modelName, options).serialize(array);
     },
-    findOne: async (instance) => {
-      return new Serializer(modelName, {}).serialize(instance);
+    findOne: async (instance, options: SerializerOptions = {}) => {
+      return new Serializer(modelName, options).serialize(instance);
     },
-    findAndCountAll: async (result) => {
-      return new Serializer(modelName, { dataMeta: { count: result.count } }).serialize(result.rows)
+    findAndCountAll: async (result, options: SerializerOptions = {}) => {
+      options = Object.assign(options, { dataMeta: { count: result.count } })
+      return new Serializer(modelName, options).serialize(result.rows)
     },
-    create: async (instance) => {
-      return new Serializer(modelName, {}).serialize(instance);
+    create: async (instance, options: SerializerOptions = {}) => {
+      return new Serializer(modelName, options).serialize(instance);
     },
-    destroy: async (rowCount) => {
-      return new Serializer(modelName, { dataMeta: { count: rowCount } }).serialize(null);
+    destroy: async (rowCount, options: SerializerOptions = {}) => {
+      options = Object.assign(options, { dataMeta: { count: rowCount } })
+      return new Serializer(modelName, options).serialize(null);
     },
-    update: async (rowCount) => {
-      return new Serializer(modelName, { dataMeta: { count: rowCount } }).serialize(null);
+    update: async (rowCount, options: SerializerOptions = {}) => {
+      options = Object.assign(options, { dataMeta: { count: rowCount } })
+      return new Serializer(modelName, options).serialize(null);
     },
     error: (options: JSONAPIErrorOptions) => {
       return scaffold.createError(options);
