@@ -31,9 +31,9 @@ app.use(async (ctx, next) => {
 });
 
 router.get("/skill", async (ctx: Context) => {
-  const params = await scaffold.parse.Skill.findAll(ctx.query);
-  const result = await scaffold.model.Skill.findAll(params);
-  const response = await scaffold.serialize.Skill.findAll(result);
+  const params = await scaffold.parse.Skill.findAndCountAll(ctx.query);
+  const result = await scaffold.model.Skill.findAndCountAll(params);
+  const response = await scaffold.serialize.Skill.findAndCountAll(result);
   ctx.body = { customRouteTest1: true, data: response };
 });
 

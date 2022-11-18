@@ -1,13 +1,15 @@
 import http from "node:http";
 import Koa from "koa";
 import request from "supertest";
+import { Deserializer } from "jsonapi-serializer";
 
 export function createServer(app: Koa) {
   return http.createServer(app.callback());
 }
 
-function parse(result) {
+async function parse(result) {
   let json;
+  let jsonapi;
   let text;
   let status;
 
@@ -26,7 +28,15 @@ function parse(result) {
       const temp = JSON.parse(result.text);
       json = temp;
     } catch (err) {
-      // do nothing, its just not JSON probvably
+      // do nothing, its just not JSON probably
+    }
+
+    try {
+      const deserializer = new Deserializer({});
+      const deserialized = await deserializer.deserialize(json)
+      jsonapi = deserialized;
+    } catch (err) {
+      // do nothing, its just not JSON:API probably
     }
   }
 
@@ -34,6 +44,7 @@ function parse(result) {
     text,
     status,
     json,
+    jsonapi
   };
 }
 
@@ -47,7 +58,7 @@ export async function DELETE(server, path) {
     .delete(path)
     .set("authorization", "test");
 
-  return parse(result);
+  return await parse(result);
 }
 
 export async function POST(server, path, payload) {
@@ -56,7 +67,7 @@ export async function POST(server, path, payload) {
     .set("authorization", "test")
     .send(payload);
 
-  return parse(result);
+  return await parse(result);
 }
 
 export async function PUT(server, path, payload) {
@@ -65,5 +76,5 @@ export async function PUT(server, path, payload) {
     .set("authorization", "test")
     .send(payload);
 
-  return parse(result);
+  return await parse(result);
 }

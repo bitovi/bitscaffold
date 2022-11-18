@@ -1,14 +1,12 @@
 /* eslint-disable no-unused-vars */
 import { NextFunction, Request, Response } from "express";
 import Koa, { Context, DefaultState, DefaultContext, Middleware } from "koa";
-import { ParsedUrlQuery } from "querystring";
+import { ParsedUrlQuery } from "node:querystring";
 import {
-  Sequelize,
   Model,
   BelongsToManyOptions,
   ModelValidateOptions,
   ModelAttributes,
-  ModelStatic,
   BelongsToOptions,
   HasOneOptions,
   HasManyOptions,
@@ -20,7 +18,6 @@ import {
   DestroyOptions,
   Identifier,
 } from "sequelize";
-import signale from "signale";
 import { Scaffold } from "..";
 
 export { DataTypes, ModelValidateOptions, ModelAttributes } from "sequelize";
@@ -45,6 +42,13 @@ export interface ScaffoldOptions {
   prefix?: string;
 
   /**
+   * This flag will configure error behavior. If true error details
+   * will be exposed to the client. If false only the error code and
+   * high level message will be exposed. 
+   */
+  expose? : boolean;
+
+  /**
    * This flag should mostly be used for development and will
    * force your Models onto the database schema at startup.
    */
@@ -58,6 +62,15 @@ export interface ScaffoldOptions {
 
 export const ScaffoldSymbolModel = Symbol("scaffold");
 
+/**
+ * Sequelize Models used internally within Scaffold contain an
+ * additional Symbol property that provides access back to the
+ * original Scaffold Model that was used to generate it.
+ * 
+ * This can be helpful if there are additional properties or fields
+ * provided on the original class that do not exist on the 
+ * Sequelize model itself.
+ */
 export type SequelizeModelInstance = ModelCtor<Model<any, any>> & {
   [ScaffoldSymbolModel]: ScaffoldModel;
 };
@@ -70,82 +83,13 @@ export type ScaffoldModelCollection = {
   [key: string]: ScaffoldModel;
 };
 
-export type ScaffoldSerializedResponse = Record<string, unknown>;
+export type JSONObject = Record<string, unknown>;
 
-export interface ScaffoldFunctionExportParse {
-  /**
-   * Parses the parameters for the provided Model oo prepare
-   * the options needed for an ORM findAll query
-   *
-   * In most normal use cases this can come directly from the
-   * Koa Context as `ctx.query`
-   *
-   */
-  findAll: (query: ParsedUrlQuery) => Promise<FindOptions>;
-  findOne: (query: ParsedUrlQuery, id: Identifier) => Promise<FindOptions>;
-  findAndCountAll: (query: ParsedUrlQuery) => Promise<FindOptions>;
-  create: (body: any, query: ParsedUrlQuery) => Promise<CreateOptions>;
-  update: (
-    body: any,
-    query: ParsedUrlQuery,
-    id?: Identifier
-  ) => Promise<UpdateOptions>;
-  destroy: (query: ParsedUrlQuery, id?: Identifier) => Promise<DestroyOptions>;
-}
-
-export interface ScaffoldFunctionExportSerialize {
-  /**
-   * Takes a Model instance and converts it into a
-   * JSON:API serialized response that can be returned
-   * to the caller
-   *
-   * In most normal use cases this can come directly from the
-   * output of a Model query operation.
-   *
-   * @returns JSON:API Response
-   */
-  findAll: (params: any) => Promise<ScaffoldSerializedResponse>;
-  findOne: (params: any) => Promise<ScaffoldSerializedResponse>;
-  findAndCountAll: (params: any) => Promise<ScaffoldSerializedResponse>;
-  create: (params: any) => Promise<ScaffoldSerializedResponse>;
-  update: (params: any) => Promise<ScaffoldSerializedResponse>;
-  destroy: (params: any) => Promise<ScaffoldSerializedResponse>;
-}
-
-export interface ScaffoldFunctionExportsMiddleware {
-  findAll: Middleware;
-  findOne: Middleware;
-  findAndCountAll: Middleware;
-  create: Middleware;
-  update: Middleware;
-  destroy: Middleware;
-}
-
-export interface ScaffoldFunctionExportEverything {
-  findAll: (query: ParsedUrlQuery) => Promise<ScaffoldSerializedResponse>;
-  findOne: (
-    query: ParsedUrlQuery,
-    id: Identifier
-  ) => Promise<ScaffoldSerializedResponse>;
-  findAndCountAll: (
-    query: ParsedUrlQuery
-  ) => Promise<ScaffoldSerializedResponse>;
-  create: (ctx: Context) => Promise<ScaffoldSerializedResponse>;
-  update: (
-    ctx: Context,
-    id?: Identifier
-  ) => Promise<ScaffoldSerializedResponse>;
-  destroy: (
-    query: ParsedUrlQuery,
-    id?: Identifier
-  ) => Promise<ScaffoldSerializedResponse>;
-}
-
-export interface ScaffoldFunctionExportsCollection<T> {
+export interface ModelFunctionsCollection<T> {
   [modelName: string]: T;
 }
 
-export type ScaffoldFunctionExportHandler<T> = (
+export type FunctionsHandler<T> = (
   scaffold: Scaffold,
   name: string
 ) => T;
@@ -153,48 +97,41 @@ export type ScaffoldFunctionExportHandler<T> = (
 export type ScaffoldAttributes = ModelAttributes<Model>;
 export type ScaffoldApplication = Koa<DefaultState, DefaultContext>;
 
-export interface ScaffoldModelContext extends ScaffoldContext {
-  state: ScaffoldContext["state"] & {
-    model: ModelStatic<Model>;
-  };
-}
 
-export interface LoadedModels {
-  [key: string]: ModelStatic<Model>;
-}
-
+/**
+ * Used when defining a Scaffold Model relationship
+ * to bridge Scaffold Models and Sequelize Model options
+ */
 export interface BelongsToManyResult {
   target: string;
   options: BelongsToManyOptions;
 }
+
 /**
  * Used when defining a Scaffold Model relationship
  * to bridge Scaffold Models and Sequelize Model options
  */
 export interface BelongsToResult {
   target: string;
-  /**
-   *
-   */
   options?: BelongsToOptions;
 }
 
+/**
+ * Used when defining a Scaffold Model relationship
+ * to bridge Scaffold Models and Sequelize Model options
+ */
 export interface HasOneResult {
   target: string;
   options?: HasOneOptions;
 }
 
+/**
+ * Used when defining a Scaffold Model relationship
+ * to bridge Scaffold Models and Sequelize Model options
+ */
 export interface HasManyResult {
   target: string;
   options?: HasManyOptions;
-}
-
-export interface ScaffoldContext extends Context {
-  state: Context["state"] & {
-    logger: signale;
-  };
-  database: Sequelize;
-  models: { [ModelName: string]: ModelStatic<Model> };
 }
 
 /**

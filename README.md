@@ -70,7 +70,7 @@ node index.js
 
 To check that things are working correctly you can try the following URLs:
 
-- http://localhost:3000/api/\_scaffold/
+- http://localhost:3000/api/scaffold/
   - This is a test URL that will show the loaded Scaffold endpoints
   - You should see a GET, PUT, POST and DELETE endpoints for the User model
 - http://localhost:3000/test

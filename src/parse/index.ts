@@ -1,12 +1,52 @@
 /* eslint-disable no-unused-vars */
-import { DestroyOptions, UpdateOptions, Identifier } from "sequelize";
+import { ParsedUrlQuery } from "node:querystring";
+import { DestroyOptions, UpdateOptions, Identifier, CreateOptions, FindOptions } from "sequelize";
 import { Scaffold } from "..";
-import { ScaffoldFunctionExportParse } from "../types";
+
+/**
+ * Provides a set of exported functions, per Model, that 
+ * take information from the URL and parse it into a valid
+ * Query options object
+ */
+export interface ParseFunctions {
+  /**
+   * Parses the parameters for the provided Model to prepare
+   * the options needed for an ORM findAll query
+   *
+   * In most normal use cases this can come directly from the
+   * Koa Context as `ctx.query`
+   *
+   */
+  findAll: (
+    query: ParsedUrlQuery
+  ) => Promise<FindOptions>;
+  findOne: (
+    query: ParsedUrlQuery,
+    id: Identifier
+  ) => Promise<FindOptions>;
+  findAndCountAll: (
+    query: ParsedUrlQuery
+  ) => Promise<FindOptions>;
+  create: (
+    body: unknown,
+    query: ParsedUrlQuery
+  ) => Promise<CreateOptions>;
+  update: (
+    body: unknown,
+    query: ParsedUrlQuery,
+    id?: Identifier
+  ) => Promise<UpdateOptions>;
+  destroy: (
+    query: ParsedUrlQuery,
+    id?: Identifier
+  ) => Promise<DestroyOptions>;
+}
+
 
 export function buildParserForModel(
   scaffold: Scaffold,
   modelName: string
-): ScaffoldFunctionExportParse {
+): ParseFunctions {
   return {
     findAll: async (query) => {
       return {};
@@ -29,7 +69,7 @@ export function buildParserForModel(
 
       if (id) {
         options.where = {};
-        options.where.id = query.id;
+        options.where.id = id;
       }
 
       return options;

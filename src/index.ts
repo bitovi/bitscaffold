@@ -1,30 +1,29 @@
 import { Identifier, Sequelize } from "sequelize";
+import coBody from "co-body"
 import { match } from "path-to-regexp";
 import signale from "signale";
+import { Error as SerializedError, JSONAPIErrorOptions } from "jsonapi-serializer";
+import createHttpError from "http-errors";
 
 import {
   ExpressMiddleware,
   KoaMiddleware,
-  ScaffoldFunctionExportEverything,
-  ScaffoldFunctionExportHandler,
-  ScaffoldFunctionExportParse,
-  ScaffoldFunctionExportsCollection,
-  ScaffoldFunctionExportSerialize,
-  ScaffoldFunctionExportsMiddleware,
   ScaffoldModel,
   ScaffoldModelCollection,
   ScaffoldOptions,
   SequelizeModelsCollection,
+  FunctionsHandler,
+  ModelFunctionsCollection
 } from "./types";
 import {
   convertScaffoldModels,
   createSequelizeInstance,
   buildScaffoldModelObject,
 } from "./sequelize";
-import { buildParserForModel } from "./parse";
-import { buildSerializerForModel } from "./serialize";
-import { buildMiddlewareForModel } from "./middleware";
-import { buildEverythingForModel } from "./everything";
+import { buildParserForModel, ParseFunctions } from "./parse";
+import { buildSerializerForModel, SerializeFunctions } from "./serialize";
+import { buildMiddlewareForModel, MiddlewareFunctionsKoa } from "./middleware";
+import { buildEverythingForModel, EverythingFunctions } from "./everything";
 
 /**
  * Scaffold can be imported from the `@bitovi/scaffold` package
@@ -45,6 +44,7 @@ export class Scaffold {
   private _allowedMethods: ["GET", "POST", "PUT", "DELETE"];
   private _sequelizeModelNames: string[];
   private _prefix: string;
+  private _exposeErrors: boolean;
 
   /**
    * Creates a new Scaffold instance
@@ -68,6 +68,9 @@ export class Scaffold {
     // Store the route prefix if the user set one
     this._prefix = options.prefix || "";
 
+    // Store the error expose settings if the user set it
+    this._exposeErrors = options.expose || false;
+
     if (options.sync) {
       this.createDatabase();
     }
@@ -88,10 +91,8 @@ export class Scaffold {
    * From the `model` export you can target one of your Models by name which will
    * give you further access to a number of named functions
    *
-   * For more information about the underlying per-model functions:
-   * @see {@link ScaffoldFunctionExportEverything}
    *
-   * @returns {ScaffoldFunctionExportsCollection<ScaffoldFunctionExportEverything>}
+   * @returns {SequelizeModelsCollection}
    * @category General Use
    */
   get model(): SequelizeModelsCollection {
@@ -114,13 +115,13 @@ export class Scaffold {
    * give you further access to a number of named functions
    *
    * For more information about the underlying per-model functions:
-   * @see {@link ScaffoldFunctionExportParse}
+   * @see {@link ParseFunctions}
    *
-   * @returns {ScaffoldFunctionExportsCollection<ScaffoldFunctionExportParse>}
+   * @returns {ModelFunctionsCollection<ParseFunctions>}
    * @category General Use
    */
   get parse() {
-    return buildExportWrapper<ScaffoldFunctionExportParse>(
+    return buildExportWrapper<ParseFunctions>(
       this,
       buildParserForModel
     );
@@ -134,16 +135,43 @@ export class Scaffold {
    * give you further access to a number of named functions
    *
    * For more information about the underlying per-model functions:
-   * @see {@link ScaffoldFunctionExportSerialize}
+   * @see {@link SerializeFunctions}
    *
-   * @returns {ScaffoldFunctionExportsCollection<ScaffoldFunctionExportSerialize>}
+   * @returns {ModelFunctionsCollection<SerializeFunctions>}
    * @category General Use
    */
   get serialize() {
-    return buildExportWrapper<ScaffoldFunctionExportSerialize>(
+    return buildExportWrapper<SerializeFunctions>(
       this,
       buildSerializerForModel
     );
+  }
+
+
+  /**
+   * Create a JSON:API Compliant Error Result
+   * 
+   * The behavior of this function depends on the value of `expose` set 
+   * in the Scaffold options. If `expose` is true then additional details
+   * will be returned to the client.
+   * 
+   * If `expost` is false only the HTTP error code and high level message
+   * will be returned to the client.
+   * 
+   * @param {JSONAPIErrorOptions} options 
+   * @returns { createHttpError.HttpError}
+   */
+  createError(options: JSONAPIErrorOptions): createHttpError.HttpError {
+    if (this._exposeErrors) {
+      const error = createHttpError(Number.parseInt(options.code || "500"), new SerializedError(options))
+      error.expose = this._exposeErrors;
+      return error;
+    }
+
+    const error = createHttpError(Number.parseInt(options.code || "500"), new SerializedError({ code: options.code, title: options.title }))
+    error.expose = true;
+    return error;
+
   }
 
   /**
@@ -154,13 +182,13 @@ export class Scaffold {
    * give you further access to a number of named functions
    *
    * For more information about the underlying per-model functions:
-   * @see {@link ScaffoldFunctionExportsMiddleware}
+   * @see {@link MiddlewareFunctionsKoa}
    *
-   * @returns {ScaffoldFunctionExportsCollection<ScaffoldFunctionExportsMiddleware>}
+   * @returns {ModelFunctionsCollection<MiddlewareFunctionsKoa>}
    * @category General Use
    */
   get middleware() {
-    return buildExportWrapper<ScaffoldFunctionExportsMiddleware>(
+    return buildExportWrapper<MiddlewareFunctionsKoa>(
       this,
       buildMiddlewareForModel
     );
@@ -177,13 +205,13 @@ export class Scaffold {
    * give you further access to a number of named functions
    *
    * For more information about the underlying per-model functions:
-   * @see {@link ScaffoldFunctionExportEverything}
+   * @see {@link EverythingFunctions}
    *
-   * @returns {ScaffoldFunctionExportsCollection<ScaffoldFunctionExportEverything>}
+   * @returns {ModelFunctionsCollection<EverythingFunctions>}
    * @category General Use
    */
   get everything() {
-    return buildExportWrapper<ScaffoldFunctionExportEverything>(
+    return buildExportWrapper<EverythingFunctions>(
       this,
       buildEverythingForModel
     );
@@ -192,12 +220,12 @@ export class Scaffold {
   /**
    * The `handleEverythingKoaMiddleware` Middleware provides the primary hooks
    * between your Koa application and the Scaffold library
-   *
+   * 
    * It will use the Koa Context to determine if:
    *    1. The route resembles a Scaffold default route, by regex
    *    2. The route contains an expected Scaffold model name
    *    3. The request method is one of GET, POST, PUT, DELETE
-   *
+   * 
    * If these criteria pass the context will be passed to the 'everything'
    * function for the given model. Under the hood this will parse the params,
    * perform the requested model query, and serialize the result.
@@ -205,6 +233,11 @@ export class Scaffold {
    * If these criteria are not met the request will be ignored by
    * Scaffold and the request passed to the next available Middleware
    *
+   * Valid Scaffold URLs formats
+   * 
+   * - `[prefix]/:model`
+   * - `[prefix]/:model/:id `
+   * 
    * @return {KoaMiddleware} Koa Middleware function that can be attached to a Koa instance (`app`) using `app.use`
    * @category General Use
    */
@@ -234,12 +267,14 @@ export class Scaffold {
         }
 
         case "POST": {
-          ctx.body = await this.everything[params.model].create(ctx);
+          const body = await coBody(ctx);
+          ctx.body = await this.everything[params.model].create(body, ctx.query);
           return;
         }
 
         case "PUT": {
-          ctx.body = await this.everything[params.model].update(ctx, params.id);
+          const body = await coBody(ctx);
+          ctx.body = await this.everything[params.model].update(body, ctx.query, params.id);
           return;
         }
 
@@ -277,6 +312,11 @@ export class Scaffold {
    * If these criteria are not met the request will be ignored by
    * Scaffold and the request passed to the next available Middleware
    *
+   * Valid Scaffold URLs formats
+   * 
+   * - `[prefix]/:model`
+   * - `[prefix]/:model/:id `
+   * 
    * @return {ExpressMiddleware} Express Middleware function that can be attached to a Koa instance (`app`) using `app.use`
    * @category General Use
    */
@@ -407,9 +447,9 @@ export class Scaffold {
 
 function buildExportWrapper<T>(
   scaffold: Scaffold,
-  handlerFunction: ScaffoldFunctionExportHandler<T>
-): ScaffoldFunctionExportsCollection<T> {
-  const wrapper = {};
+  handlerFunction: FunctionsHandler<T>
+): ModelFunctionsCollection<T> {
+  const wrapper: ModelFunctionsCollection<T> = {};
   Object.keys(scaffold.models).forEach((modelName) => {
     wrapper[modelName] = handlerFunction(scaffold, modelName);
   });

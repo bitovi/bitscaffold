@@ -1,14 +1,40 @@
-import Koa from "koa";
-import bodyParser from "co-body";
+/* eslint-disable no-unused-vars */
 import { Scaffold } from "..";
 import { Identifier } from "sequelize";
 import { ParsedUrlQuery } from "querystring";
-import { ScaffoldFunctionExportEverything } from "../types";
+import { JSONObject } from "../types";
+
+export interface EverythingFunctions {
+  findAll: (
+    query: ParsedUrlQuery
+  ) => Promise<JSONObject>;
+  findOne: (
+    query: ParsedUrlQuery,
+    id: Identifier
+  ) => Promise<JSONObject>;
+  findAndCountAll: (
+    query: ParsedUrlQuery
+  ) => Promise<JSONObject>;
+  create: (
+    body: unknown,
+    query: ParsedUrlQuery
+  ) => Promise<JSONObject>;
+  update: (
+    body: unknown,
+    query: ParsedUrlQuery,
+    id?: Identifier
+  ) => Promise<JSONObject>;
+  destroy: (
+    query: ParsedUrlQuery,
+    id?: Identifier
+  ) => Promise<JSONObject>;
+}
+
 
 export function buildEverythingForModel(
   scaffold: Scaffold,
   modelName: string
-): ScaffoldFunctionExportEverything {
+): EverythingFunctions {
   return {
     findAll: findAllEverything(scaffold, modelName),
     findOne: findOneEverything(scaffold, modelName),
@@ -32,6 +58,13 @@ export function findOneEverything(scaffold: Scaffold, modelName: string) {
   return async function findOneImpl(query: ParsedUrlQuery, id: Identifier) {
     const params = await scaffold.parse[modelName].findOne(query, id);
     const result = await scaffold.model[modelName].findByPk(id, params);
+    if (!result) {
+      throw scaffold.createError({
+        code: '404',
+        title: "Not Found",
+        detail: modelName + " with id " + id + " was not found"
+      });
+    }
     const response = await scaffold.serialize[modelName].findOne(result);
     return response;
   };
@@ -52,9 +85,8 @@ export function findAndCountAllEverything(
 }
 
 export function createEverything(scaffold: Scaffold, modelName: string) {
-  return async function createImpl(ctx: Koa.Context) {
-    const body = await bodyParser(ctx);
-    const params = await scaffold.parse[modelName].create(body, ctx.query);
+  return async function createImpl(body: any, query: ParsedUrlQuery,) {
+    const params = await scaffold.parse[modelName].create(body, query);
     const result = await scaffold.model[modelName].create(body, params);
     const response = await scaffold.serialize[modelName].create(result);
     return response;
@@ -62,11 +94,10 @@ export function createEverything(scaffold: Scaffold, modelName: string) {
 }
 
 export function updateEverything(scaffold: Scaffold, modelName: string) {
-  return async function updateImpl(ctx: Koa.Context, id: Identifier) {
-    const body = await bodyParser(ctx);
-    const params = await scaffold.parse[modelName].update(body, ctx.query, id);
+  return async function updateImpl(body: any, query: ParsedUrlQuery, id?: Identifier) {
+    const params = await scaffold.parse[modelName].update(body, query, id);
     const result = await scaffold.model[modelName].update(body, params);
-    const response = await scaffold.serialize[modelName].update(result);
+    const response = await scaffold.serialize[modelName].update(result[0]);
     return response;
   };
 }

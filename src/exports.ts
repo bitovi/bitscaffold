@@ -11,9 +11,21 @@ export {
   HasManyResult,
   ModelValidateOptions,
   ModelAttributes,
-  ScaffoldFunctionExportSerialize,
-  ScaffoldFunctionExportsMiddleware,
-  ScaffoldFunctionExportEverything,
-  ScaffoldFunctionExportsCollection,
-  ScaffoldFunctionExportParse,
+  ModelFunctionsCollection,
 } from "./types";
+
+export {
+  EverythingFunctions
+} from "./everything"
+
+export {
+  MiddlewareFunctionsExpress, MiddlewareFunctionsKoa
+} from "./middleware"
+
+export {
+  ParseFunctions
+} from "./parse"
+
+export {
+  SerializeFunctions
+} from "./serialize"

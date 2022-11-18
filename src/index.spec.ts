@@ -76,8 +76,8 @@ describe("Initial Tests", () => {
 
     expect(findall).toBeTruthy();
     expect(findall.status).toBe(200);
-    expect(findall.json).toHaveProperty("length");
-    expect(findall.json.length).toBe(0);
+    expect(findall.jsonapi).toHaveProperty("length");
+    expect(findall.jsonapi.length).toBe(0);
 
     await scaffold.orm.close();
   });
@@ -92,9 +92,9 @@ describe("Initial Tests", () => {
     const find = await GET(server, "/api/Model/1");
 
     expect(find).toBeTruthy();
-    expect(find.status).toBe(204); // No Content
-    expect(find.text).toBeFalsy();
-    expect(find.json).toBeFalsy();
+    expect(find.status).toBe(404);
+    expect(find.text).toBe("Not Found")
+    expect(find.jsonapi).toBeFalsy();
 
     await scaffold.orm.close();
   });
@@ -114,14 +114,14 @@ describe("Initial Tests", () => {
 
     expect(create).toBeTruthy();
     expect(create.status).toBe(200);
-    expect(create.json).toHaveProperty("id");
+    expect(create.jsonapi).toHaveProperty("id");
 
-    const find = await GET(server, "/api/Model/" + create.json.id);
+    const find = await GET(server, "/api/Model/" + create.jsonapi.id);
 
     expect(find).toBeTruthy();
     expect(find.status).toBe(200);
-    expect(find.json).toBeTruthy();
-    console.log(find.json);
+    expect(find.jsonapi).toBeTruthy();
+    console.log(find.jsonapi);
 
     await scaffold.orm.close();
   });
@@ -141,14 +141,14 @@ describe("Initial Tests", () => {
 
     expect(create).toBeTruthy();
     expect(create.status).toBe(200);
-    expect(create.json).toHaveProperty("id");
+    expect(create.jsonapi).toHaveProperty("id");
 
     const findall = await GET(server, "/api/Model");
 
     expect(findall).toBeTruthy();
     expect(findall.status).toBe(200);
-    expect(findall.json).toHaveProperty("length");
-    expect(findall.json.length).toBe(1);
+    expect(findall.jsonapi).toHaveProperty("length");
+    expect(findall.jsonapi.length).toBe(1);
 
     await scaffold.orm.close();
   });
@@ -167,9 +167,9 @@ describe("Initial Tests", () => {
     });
     expect(create).toBeTruthy();
     expect(create.status).toBe(200);
-    expect(create.json).toHaveProperty("id");
+    expect(create.jsonapi).toHaveProperty("id");
 
-    const update = await PUT(server, "/api/Model/" + create.json.id, {
+    const update = await PUT(server, "/api/Model/" + create.jsonapi.id, {
       firstName: "newFirstName",
       lastName: "newLastName",
     });
@@ -180,8 +180,8 @@ describe("Initial Tests", () => {
 
     expect(findall).toBeTruthy();
     expect(findall.status).toBe(200);
-    expect(findall.json).toHaveProperty("length");
-    expect(findall.json.length).toBe(1);
+    expect(findall.jsonapi).toHaveProperty("length");
+    expect(findall.jsonapi.length).toBe(1);
 
     await scaffold.orm.close();
   });
@@ -200,25 +200,25 @@ describe("Initial Tests", () => {
     });
     expect(create).toBeTruthy();
     expect(create.status).toBe(200);
-    expect(create.json).toHaveProperty("id");
+    expect(create.jsonapi).toHaveProperty("id");
 
     const findall1 = await GET(server, "/api/Model");
 
     expect(findall1).toBeTruthy();
     expect(findall1.status).toBe(200);
-    expect(findall1.json).toHaveProperty("length");
-    expect(findall1.json.length).toBe(1);
+    expect(findall1.jsonapi).toHaveProperty("length");
+    expect(findall1.jsonapi.length).toBe(1);
 
-    const update = await DELETE(server, "/api/Model/" + create.json.id);
-    expect(update).toBeTruthy();
-    expect(update.status).toBe(200);
+    const del = await DELETE(server, "/api/Model/" + create.jsonapi.id);
+    expect(del).toBeTruthy();
+    expect(del.status).toBe(200);
 
     const findall2 = await GET(server, "/api/Model");
 
     expect(findall2).toBeTruthy();
     expect(findall2.status).toBe(200);
-    expect(findall2.json).toHaveProperty("length");
-    expect(findall2.json.length).toBe(0);
+    expect(findall2.jsonapi).toHaveProperty("length");
+    expect(findall2.jsonapi.length).toBe(0);
 
     await scaffold.orm.close();
   });
@@ -261,7 +261,7 @@ describe("Initial Tests", () => {
     const req2 = await GET(server, "/alternative-model");
     expect(req2).toBeTruthy();
     expect(req2.status).toBe(200);
-    expect(req2.json).toHaveProperty("length");
+    expect(req2.jsonapi).toHaveProperty("length");
 
     const req3 = await GET(server, "/alternative-model-2");
     expect(req3).toBeTruthy();
@@ -310,7 +310,7 @@ describe("Initial Tests", () => {
     const req2 = await GET(server, "/alternative-model");
     expect(req2).toBeTruthy();
     expect(req2.status).toBe(200);
-    expect(req2.json).toHaveProperty("length");
+    expect(req2.jsonapi).toHaveProperty("length");
 
     await scaffold.orm.close();
   });
