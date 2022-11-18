@@ -44,9 +44,9 @@ export interface ScaffoldOptions {
   /**
    * This flag will configure error behavior. If true error details
    * will be exposed to the client. If false only the error code and
-   * high level message will be exposed. 
+   * high level message will be exposed.
    */
-  expose? : boolean;
+  expose?: boolean;
 
   /**
    * This flag should mostly be used for development and will
@@ -66,9 +66,9 @@ export const ScaffoldSymbolModel = Symbol("scaffold");
  * Sequelize Models used internally within Scaffold contain an
  * additional Symbol property that provides access back to the
  * original Scaffold Model that was used to generate it.
- * 
+ *
  * This can be helpful if there are additional properties or fields
- * provided on the original class that do not exist on the 
+ * provided on the original class that do not exist on the
  * Sequelize model itself.
  */
 export type SequelizeModelInstance = ModelCtor<Model<any, any>> & {
@@ -89,14 +89,10 @@ export interface ModelFunctionsCollection<T> {
   [modelName: string]: T;
 }
 
-export type FunctionsHandler<T> = (
-  scaffold: Scaffold,
-  name: string
-) => T;
+export type FunctionsHandler<T> = (scaffold: Scaffold, name: string) => T;
 
 export type ScaffoldAttributes = ModelAttributes<Model>;
 export type ScaffoldApplication = Koa<DefaultState, DefaultContext>;
-
 
 /**
  * Used when defining a Scaffold Model relationship

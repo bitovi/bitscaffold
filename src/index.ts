@@ -1,8 +1,11 @@
 import { Identifier, Sequelize } from "sequelize";
-import coBody from "co-body"
+import coBody from "co-body";
 import { match } from "path-to-regexp";
 import signale from "signale";
-import { Error as SerializedError, JSONAPIErrorOptions } from "jsonapi-serializer";
+import {
+  Error as SerializedError,
+  JSONAPIErrorOptions,
+} from "jsonapi-serializer";
 import createHttpError from "http-errors";
 
 import {
@@ -13,7 +16,7 @@ import {
   ScaffoldOptions,
   SequelizeModelsCollection,
   FunctionsHandler,
-  ModelFunctionsCollection
+  ModelFunctionsCollection,
 } from "./types";
 import {
   convertScaffoldModels,
@@ -121,10 +124,7 @@ export class Scaffold {
    * @category General Use
    */
   get parse() {
-    return buildExportWrapper<ParseFunctions>(
-      this,
-      buildParserForModel
-    );
+    return buildExportWrapper<ParseFunctions>(this, buildParserForModel);
   }
 
   /**
@@ -147,31 +147,28 @@ export class Scaffold {
     );
   }
 
-
   /**
    * Create a JSON:API Compliant Error Result
-   * 
-   * The behavior of this function depends on the value of `expose` set 
+   *
+   * The behavior of this function depends on the value of `expose` set
    * in the Scaffold options. If `expose` is true then additional details
    * will be returned to the client.
-   * 
+   *
    * If `expost` is false only the HTTP error code and high level message
    * will be returned to the client.
-   * 
-   * @param {JSONAPIErrorOptions} options 
+   *
+   * @param {JSONAPIErrorOptions} options
    * @returns { createHttpError.HttpError}
    */
   createError(options: JSONAPIErrorOptions): createHttpError.HttpError {
-    if (this._exposeErrors) {
-      const error = createHttpError(Number.parseInt(options.code || "500"), new SerializedError(options))
-      error.expose = this._exposeErrors;
-      return error;
-    }
+    const error = createHttpError(
+      Number.parseInt(options.code || "500"),
+      new SerializedError(options)
+    );
+    error.expose = this._exposeErrors;
 
-    const error = createHttpError(Number.parseInt(options.code || "500"), new SerializedError({ code: options.code, title: options.title }))
-    error.expose = true;
+    console.error(error);
     return error;
-
   }
 
   /**
@@ -220,12 +217,12 @@ export class Scaffold {
   /**
    * The `handleEverythingKoaMiddleware` Middleware provides the primary hooks
    * between your Koa application and the Scaffold library
-   * 
+   *
    * It will use the Koa Context to determine if:
    *    1. The route resembles a Scaffold default route, by regex
    *    2. The route contains an expected Scaffold model name
    *    3. The request method is one of GET, POST, PUT, DELETE
-   * 
+   *
    * If these criteria pass the context will be passed to the 'everything'
    * function for the given model. Under the hood this will parse the params,
    * perform the requested model query, and serialize the result.
@@ -234,10 +231,10 @@ export class Scaffold {
    * Scaffold and the request passed to the next available Middleware
    *
    * Valid Scaffold URLs formats
-   * 
+   *
    * - `[prefix]/:model`
    * - `[prefix]/:model/:id `
-   * 
+   *
    * @return {KoaMiddleware} Koa Middleware function that can be attached to a Koa instance (`app`) using `app.use`
    * @category General Use
    */
@@ -268,13 +265,20 @@ export class Scaffold {
 
         case "POST": {
           const body = await coBody(ctx);
-          ctx.body = await this.everything[params.model].create(body, ctx.query);
+          ctx.body = await this.everything[params.model].create(
+            body,
+            ctx.query
+          );
           return;
         }
 
         case "PUT": {
           const body = await coBody(ctx);
-          ctx.body = await this.everything[params.model].update(body, ctx.query, params.id);
+          ctx.body = await this.everything[params.model].update(
+            body,
+            ctx.query,
+            params.id
+          );
           return;
         }
 
@@ -313,10 +317,10 @@ export class Scaffold {
    * Scaffold and the request passed to the next available Middleware
    *
    * Valid Scaffold URLs formats
-   * 
+   *
    * - `[prefix]/:model`
    * - `[prefix]/:model/:id `
-   * 
+   *
    * @return {ExpressMiddleware} Express Middleware function that can be attached to a Koa instance (`app`) using `app.use`
    * @category General Use
    */

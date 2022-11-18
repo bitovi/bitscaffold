@@ -76,8 +76,8 @@ describe("Initial Tests", () => {
 
     expect(findall).toBeTruthy();
     expect(findall.status).toBe(200);
-    expect(findall.jsonapi).toHaveProperty("length");
-    expect(findall.jsonapi.length).toBe(0);
+    expect(findall.deserialized).toHaveProperty("length");
+    expect(findall.deserialized.length).toBe(0);
 
     await scaffold.orm.close();
   });
@@ -93,8 +93,8 @@ describe("Initial Tests", () => {
 
     expect(find).toBeTruthy();
     expect(find.status).toBe(404);
-    expect(find.text).toBe("Not Found")
-    expect(find.jsonapi).toBeFalsy();
+    expect(find.text).toBe("Not Found");
+    expect(find.deserialized).toBeFalsy();
 
     await scaffold.orm.close();
   });
@@ -114,14 +114,105 @@ describe("Initial Tests", () => {
 
     expect(create).toBeTruthy();
     expect(create.status).toBe(200);
-    expect(create.jsonapi).toHaveProperty("id");
+    expect(create.deserialized).toHaveProperty("id");
 
-    const find = await GET(server, "/api/Model/" + create.jsonapi.id);
+    const find = await GET(server, "/api/Model/" + create.deserialized.id);
 
     expect(find).toBeTruthy();
     expect(find.status).toBe(200);
-    expect(find.jsonapi).toBeTruthy();
-    console.log(find.jsonapi);
+    expect(find.deserialized).toBeTruthy();
+
+    await scaffold.orm.close();
+  });
+
+  it("should create a record and fetch specific attributes", async () => {
+    const app = new Koa();
+    const scaffold = new Scaffold([Model], { prefix: "/api" });
+    app.use(scaffold.handleEverythingKoaMiddleware());
+
+    const server = createServer(app);
+    await scaffold.createDatabase();
+
+    const create = await POST(server, "/api/Model", {
+      firstName: "firstName",
+      lastName: "lastName",
+    });
+
+    expect(create).toBeTruthy();
+    expect(create.status).toBe(200);
+    expect(create.deserialized).toHaveProperty("id");
+
+    const find1 = await GET(
+      server,
+      "/api/Model/" + create.deserialized.id + "?attributes=firstName"
+    );
+
+    expect(find1).toBeTruthy();
+    expect(find1.status).toBe(200);
+    expect(find1.serialized.data).toBeTruthy();
+    expect(find1.deserialized).toHaveProperty("firstName");
+    expect(find1.deserialized).not.toHaveProperty("lastName");
+
+    const find2 = await GET(
+      server,
+      "/api/Model/" + create.deserialized.id + "?attributes=lastName"
+    );
+
+    expect(find2).toBeTruthy();
+    expect(find2.status).toBe(200);
+    expect(find2.serialized.data).toBeTruthy();
+    expect(find2.deserialized).not.toHaveProperty("firstName");
+    expect(find2.deserialized).toHaveProperty("lastName");
+
+    await scaffold.orm.close();
+  });
+
+  it("should create several record and fetch all with specific attributes", async () => {
+    const app = new Koa();
+    const scaffold = new Scaffold([Model], { prefix: "/api" });
+    app.use(scaffold.handleEverythingKoaMiddleware());
+
+    const server = createServer(app);
+    await scaffold.createDatabase();
+
+    await POST(server, "/api/Model", {
+      firstName: "firstName1",
+      lastName: "lastName1",
+    });
+
+    await POST(server, "/api/Model", {
+      firstName: "firstName2",
+      lastName: "lastName2",
+    });
+
+    await POST(server, "/api/Model", {
+      firstName: "firstName3",
+      lastName: "lastName3",
+    });
+
+    const find1 = await GET(server, "/api/Model/?attributes=firstName");
+
+    expect(find1).toBeTruthy();
+    expect(find1.status).toBe(200);
+    expect(find1.deserialized).toHaveProperty("length");
+    expect(find1.deserialized.length).toBe(3);
+
+    find1.deserialized.forEach((entry) => {
+      expect(entry).toHaveProperty("firstName");
+      expect(entry).not.toHaveProperty("lastName");
+    });
+
+    const find2 = await GET(server, "/api/Model/?attributes=lastName");
+
+    expect(find2).toBeTruthy();
+    expect(find2.status).toBe(200);
+    expect(find2.deserialized).toHaveProperty("length");
+    expect(find2.deserialized.length).toBe(3);
+
+    find2.deserialized.forEach((entry) => {
+      expect(entry).toHaveProperty("lastName");
+      expect(entry).not.toHaveProperty("firstName");
+    });
 
     await scaffold.orm.close();
   });
@@ -141,14 +232,14 @@ describe("Initial Tests", () => {
 
     expect(create).toBeTruthy();
     expect(create.status).toBe(200);
-    expect(create.jsonapi).toHaveProperty("id");
+    expect(create.deserialized).toHaveProperty("id");
 
     const findall = await GET(server, "/api/Model");
 
     expect(findall).toBeTruthy();
     expect(findall.status).toBe(200);
-    expect(findall.jsonapi).toHaveProperty("length");
-    expect(findall.jsonapi.length).toBe(1);
+    expect(findall.deserialized).toHaveProperty("length");
+    expect(findall.deserialized.length).toBe(1);
 
     await scaffold.orm.close();
   });
@@ -167,9 +258,9 @@ describe("Initial Tests", () => {
     });
     expect(create).toBeTruthy();
     expect(create.status).toBe(200);
-    expect(create.jsonapi).toHaveProperty("id");
+    expect(create.deserialized).toHaveProperty("id");
 
-    const update = await PUT(server, "/api/Model/" + create.jsonapi.id, {
+    const update = await PUT(server, "/api/Model/" + create.deserialized.id, {
       firstName: "newFirstName",
       lastName: "newLastName",
     });
@@ -180,8 +271,8 @@ describe("Initial Tests", () => {
 
     expect(findall).toBeTruthy();
     expect(findall.status).toBe(200);
-    expect(findall.jsonapi).toHaveProperty("length");
-    expect(findall.jsonapi.length).toBe(1);
+    expect(findall.deserialized).toHaveProperty("length");
+    expect(findall.deserialized.length).toBe(1);
 
     await scaffold.orm.close();
   });
@@ -200,16 +291,16 @@ describe("Initial Tests", () => {
     });
     expect(create).toBeTruthy();
     expect(create.status).toBe(200);
-    expect(create.jsonapi).toHaveProperty("id");
+    expect(create.deserialized).toHaveProperty("id");
 
     const findall1 = await GET(server, "/api/Model");
 
     expect(findall1).toBeTruthy();
     expect(findall1.status).toBe(200);
-    expect(findall1.jsonapi).toHaveProperty("length");
-    expect(findall1.jsonapi.length).toBe(1);
+    expect(findall1.deserialized).toHaveProperty("length");
+    expect(findall1.deserialized.length).toBe(1);
 
-    const del = await DELETE(server, "/api/Model/" + create.jsonapi.id);
+    const del = await DELETE(server, "/api/Model/" + create.deserialized.id);
     expect(del).toBeTruthy();
     expect(del.status).toBe(200);
 
@@ -217,8 +308,8 @@ describe("Initial Tests", () => {
 
     expect(findall2).toBeTruthy();
     expect(findall2.status).toBe(200);
-    expect(findall2.jsonapi).toHaveProperty("length");
-    expect(findall2.jsonapi.length).toBe(0);
+    expect(findall2.deserialized).toHaveProperty("length");
+    expect(findall2.deserialized.length).toBe(0);
 
     await scaffold.orm.close();
   });
@@ -256,18 +347,18 @@ describe("Initial Tests", () => {
     const req1 = await GET(server, "/user-custom-route");
     expect(req1).toBeTruthy();
     expect(req1.status).toBe(200);
-    expect(req1.json).toHaveProperty("test");
+    expect(req1.serialized).toHaveProperty("test");
 
     const req2 = await GET(server, "/alternative-model");
     expect(req2).toBeTruthy();
     expect(req2.status).toBe(200);
-    expect(req2.jsonapi).toHaveProperty("length");
+    expect(req2.deserialized).toHaveProperty("length");
 
     const req3 = await GET(server, "/alternative-model-2");
     expect(req3).toBeTruthy();
     expect(req3.status).toBe(200);
-    expect(req3.json).toHaveProperty("test");
-    expect(req3.json).toHaveProperty("data");
+    expect(req3.serialized).toHaveProperty("test");
+    expect(req3.serialized).toHaveProperty("data");
 
     const req4 = await GET(server, "/unknown-route-404");
     expect(req4).toBeTruthy();
@@ -310,7 +401,7 @@ describe("Initial Tests", () => {
     const req2 = await GET(server, "/alternative-model");
     expect(req2).toBeTruthy();
     expect(req2.status).toBe(200);
-    expect(req2.jsonapi).toHaveProperty("length");
+    expect(req2.deserialized).toHaveProperty("length");
 
     await scaffold.orm.close();
   });

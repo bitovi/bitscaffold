@@ -14,18 +14,13 @@ export {
   ModelFunctionsCollection,
 } from "./types";
 
-export {
-  EverythingFunctions
-} from "./everything"
+export { EverythingFunctions } from "./everything";
 
 export {
-  MiddlewareFunctionsExpress, MiddlewareFunctionsKoa
-} from "./middleware"
+  MiddlewareFunctionsExpress,
+  MiddlewareFunctionsKoa,
+} from "./middleware";
 
-export {
-  ParseFunctions
-} from "./parse"
+export { ParseFunctions } from "./parse";
 
-export {
-  SerializeFunctions
-} from "./serialize"
+export { SerializeFunctions } from "./serialize";

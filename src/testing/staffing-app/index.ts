@@ -17,6 +17,7 @@ const router = new KoaRouter();
 // Create a Scaffold instance containing your Models
 const scaffold = new Scaffold([Assignment, Employee, Project, Role, Skill], {
   prefix: "/api",
+  expose: true,
   //  sync: true,
   database: {
     dialect: "sqlite",

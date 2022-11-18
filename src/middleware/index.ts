@@ -1,10 +1,10 @@
 import Koa from "koa";
-import coBody from "co-body"
+import coBody from "co-body";
 import { Scaffold } from "..";
 import { KoaMiddleware, ExpressMiddleware } from "../types";
 
 /**
- * Provides a set of exported functions, per Model, that 
+ * Provides a set of exported functions, per Model, that
  * provide Koa Middleware for each operation
  */
 export interface MiddlewareFunctionsKoa {
@@ -17,7 +17,7 @@ export interface MiddlewareFunctionsKoa {
 }
 
 /**
- * Provides a set of exported functions, per Model, that 
+ * Provides a set of exported functions, per Model, that
  * provide Express Middleware for each operation
  */
 export interface MiddlewareFunctionsExpress {
@@ -28,8 +28,6 @@ export interface MiddlewareFunctionsExpress {
   update: ExpressMiddleware;
   destroy: ExpressMiddleware;
 }
-
-
 
 export function buildMiddlewareForModel(
   scaffold: Scaffold,
@@ -55,7 +53,7 @@ export function findOneMiddleware(scaffold: Scaffold, modelName: string) {
   return async function findOneImpl(ctx: Koa.Context) {
     const params = scaffold.getScaffoldURLParamsForRoute(ctx.path);
     if (!params.id) {
-      return ctx.throw(400, "BAD_REQUEST")
+      return ctx.throw(400, "BAD_REQUEST");
     }
     ctx.body = await scaffold.everything[modelName].findOne(
       ctx.query,
@@ -84,13 +82,20 @@ export function updateMiddleware(scaffold: Scaffold, modelName: string) {
   return async function updateImpl(ctx: Koa.Context) {
     const body = await coBody(ctx);
     const params = scaffold.getScaffoldURLParamsForRoute(ctx.path);
-    ctx.body = await scaffold.everything[modelName].update(body, ctx.query, params.id);
+    ctx.body = await scaffold.everything[modelName].update(
+      body,
+      ctx.query,
+      params.id
+    );
   };
 }
 
 export function destroyMiddleware(scaffold: Scaffold, modelName: string) {
   return async function destroyImpl(ctx: Koa.Context) {
     const params = scaffold.getScaffoldURLParamsForRoute(ctx.path);
-    ctx.body = await scaffold.everything[modelName].destroy(ctx.query, params.id);
+    ctx.body = await scaffold.everything[modelName].destroy(
+      ctx.query,
+      params.id
+    );
   };
 }

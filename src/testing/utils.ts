@@ -8,8 +8,8 @@ export function createServer(app: Koa) {
 }
 
 async function parse(result) {
-  let json;
-  let jsonapi;
+  let serialized;
+  let deserialized;
   let text;
   let status;
 
@@ -26,15 +26,15 @@ async function parse(result) {
 
     try {
       const temp = JSON.parse(result.text);
-      json = temp;
+      serialized = temp;
     } catch (err) {
       // do nothing, its just not JSON probably
     }
 
     try {
-      const deserializer = new Deserializer({});
-      const deserialized = await deserializer.deserialize(json)
-      jsonapi = deserialized;
+      const deserializer = new Deserializer({ keyForAttribute: "camelCase" });
+      const temp = await deserializer.deserialize(serialized);
+      deserialized = temp;
     } catch (err) {
       // do nothing, its just not JSON:API probably
     }
@@ -43,8 +43,8 @@ async function parse(result) {
   return {
     text,
     status,
-    json,
-    jsonapi
+    serialized,
+    deserialized,
   };
 }
 

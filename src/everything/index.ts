@@ -5,31 +5,17 @@ import { ParsedUrlQuery } from "querystring";
 import { JSONObject } from "../types";
 
 export interface EverythingFunctions {
-  findAll: (
-    query: ParsedUrlQuery
-  ) => Promise<JSONObject>;
-  findOne: (
-    query: ParsedUrlQuery,
-    id: Identifier
-  ) => Promise<JSONObject>;
-  findAndCountAll: (
-    query: ParsedUrlQuery
-  ) => Promise<JSONObject>;
-  create: (
-    body: unknown,
-    query: ParsedUrlQuery
-  ) => Promise<JSONObject>;
+  findAll: (query: ParsedUrlQuery) => Promise<JSONObject>;
+  findOne: (query: ParsedUrlQuery, id: Identifier) => Promise<JSONObject>;
+  findAndCountAll: (query: ParsedUrlQuery) => Promise<JSONObject>;
+  create: (body: unknown, query: ParsedUrlQuery) => Promise<JSONObject>;
   update: (
     body: unknown,
     query: ParsedUrlQuery,
     id?: Identifier
   ) => Promise<JSONObject>;
-  destroy: (
-    query: ParsedUrlQuery,
-    id?: Identifier
-  ) => Promise<JSONObject>;
+  destroy: (query: ParsedUrlQuery, id?: Identifier) => Promise<JSONObject>;
 }
-
 
 export function buildEverythingForModel(
   scaffold: Scaffold,
@@ -49,7 +35,10 @@ export function findAllEverything(scaffold: Scaffold, modelName: string) {
   return async function findAllImpl(query: ParsedUrlQuery) {
     const params = await scaffold.parse[modelName].findAll(query);
     const result = await scaffold.model[modelName].findAll(params);
-    const response = await scaffold.serialize[modelName].findAll(result);
+    const response = await scaffold.serialize[modelName].findAll(result, {
+      keyForAttribute: "camelCase",
+      attributes: params.attributes as string[],
+    });
     return response;
   };
 }
@@ -60,12 +49,15 @@ export function findOneEverything(scaffold: Scaffold, modelName: string) {
     const result = await scaffold.model[modelName].findByPk(id, params);
     if (!result) {
       throw scaffold.createError({
-        code: '404',
+        code: "404",
         title: "Not Found",
-        detail: modelName + " with id " + id + " was not found"
+        detail: modelName + " with id " + id + " was not found",
       });
     }
-    const response = await scaffold.serialize[modelName].findOne(result);
+    const response = await scaffold.serialize[modelName].findOne(result, {
+      keyForAttribute: "camelCase",
+      attributes: params.attributes as string[],
+    });
     return response;
   };
 }
@@ -85,7 +77,7 @@ export function findAndCountAllEverything(
 }
 
 export function createEverything(scaffold: Scaffold, modelName: string) {
-  return async function createImpl(body: any, query: ParsedUrlQuery,) {
+  return async function createImpl(body: any, query: ParsedUrlQuery) {
     const params = await scaffold.parse[modelName].create(body, query);
     const result = await scaffold.model[modelName].create(body, params);
     const response = await scaffold.serialize[modelName].create(result);
@@ -94,7 +86,11 @@ export function createEverything(scaffold: Scaffold, modelName: string) {
 }
 
 export function updateEverything(scaffold: Scaffold, modelName: string) {
-  return async function updateImpl(body: any, query: ParsedUrlQuery, id?: Identifier) {
+  return async function updateImpl(
+    body: any,
+    query: ParsedUrlQuery,
+    id?: Identifier
+  ) {
     const params = await scaffold.parse[modelName].update(body, query, id);
     const result = await scaffold.model[modelName].update(body, params);
     const response = await scaffold.serialize[modelName].update(result[0]);
