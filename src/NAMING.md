@@ -14,15 +14,16 @@ The Scaffold class exports a number of properties that provide functions, genera
 
 The general naming convention is as follows
 
-### `scaffold.[accessor].[name].[operation]`
+### `scaffold.[accessor].[name]|allModels.[operation]`
 
 - `scaffold` is a variable that points to your Scaffold instance with some assumed number of loaded models. This will always be the entry point into Scaffold.
 
 - `accessor` is a string acting as a namespace to indicate which subset of functions you want to use. This will always be some property exported from `Scaffold` itself and should have TypeScript support showing the different available options.
 
-- `name` is a property value that will correspond to one of your loaded models. These models come from the values passed to `Scaffold` at creation. Each of your model contains a `name` fields, these properties will reflect those `name` fields.
+- `name` is a property value that, genreally, will correspond to one of your loaded models. These models come from the values passed to `Scaffold` at creation. Each of your model contains a `name` fields, these properties will reflect those `name` fields.
 
   - By convention, because this is being used as a class, the name should start with a capital letter.
+  - In some cases there are special properties like `allModels` that can signify that the operation should determine the model itself or can otherwise apply to all defined models at once. 
 
 - `operation` is a property that reflects the different ORM/CRUD operations that you would like to perform or prepare data for. Because this is called off a specific model the general properties and attribute validation for that model will apply when running the operation.
 
