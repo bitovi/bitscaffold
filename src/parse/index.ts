@@ -43,19 +43,19 @@ export function buildParserForModel(
   return {
     findAll: async (query) => {
       return {
-        attributes: buildAttributeList(query),
+        attributes: buildAttributeList(query, scaffold.orm[modelName]),
         where: buildWhereClause(query),
       };
     },
     findOne: async (query, id) => {
       return {
-        attributes: buildAttributeList(query),
+        attributes: buildAttributeList(query, scaffold.orm[modelName]),
         where: buildWhereClause(query, id),
       };
     },
     findAndCountAll: async (query) => {
       return {
-        attributes: buildAttributeList(query),
+        attributes: buildAttributeList(query, scaffold.orm[modelName]),
         where: buildWhereClause(query),
       };
     },

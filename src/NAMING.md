@@ -12,11 +12,16 @@ scaffold.[accessor].[modelName].[function]
 
 Accessor
 
-- Everything
-- Parse
-- Middleware
-- Serialize
-- Model
+- everything
+- parse
+- middleware
+- serialize
+- model
+
+# Model Name
+capital first letter convention
+
+
 
 # Exceptions
 

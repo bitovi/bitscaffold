@@ -1,7 +1,7 @@
 import { ParsedUrlQuery } from "node:querystring";
-import { Identifier, WhereOptions } from "sequelize";
+import { Identifier, Model, WhereOptions } from "sequelize";
 
-export function buildAttributeList(query: ParsedUrlQuery): string[] {
+export function buildAttributeList(query: ParsedUrlQuery, seqModel: Model): string[] {
   const queryAttributes = query.attributes;
 
   let attributes: string[] = [];
@@ -13,9 +13,16 @@ export function buildAttributeList(query: ParsedUrlQuery): string[] {
     }
   }
 
+  // We should always return the pk, which is usually id?
   if (!attributes.includes("id")) {
     attributes.push("id");
   }
+
+  attributes.forEach((attr) => {
+    // Make sure that the requested attributes actually exist on the model
+    
+  });
+
 
   return attributes;
 }

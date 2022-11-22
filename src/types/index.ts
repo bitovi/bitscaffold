@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { NextFunction, Request, Response } from "express";
-import Koa, { Context, DefaultState, DefaultContext, Middleware } from "koa";
-import { ParsedUrlQuery } from "node:querystring";
+import Koa, { DefaultState, DefaultContext, Middleware } from "koa";
 import {
   Model,
   BelongsToManyOptions,
@@ -12,11 +11,6 @@ import {
   HasManyOptions,
   Options,
   ModelCtor,
-  FindOptions,
-  CreateOptions,
-  UpdateOptions,
-  DestroyOptions,
-  Identifier,
 } from "sequelize";
 import { Scaffold } from "..";
 

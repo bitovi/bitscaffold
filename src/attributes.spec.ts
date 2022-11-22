@@ -60,6 +60,35 @@ describe("Attribute Tests", () => {
     await scaffold.orm.close();
   });
 
+  it("should create a record and error when fetching unknown attributes", async () => {
+    const app = new Koa();
+    const scaffold = new Scaffold([Model], { prefix: "/api" });
+    app.use(scaffold.handleEverythingKoaMiddleware());
+
+    const server = createServer(app);
+    await scaffold.createDatabase();
+
+    const create = await POST(server, "/api/Model", {
+      firstName: "firstName",
+      lastName: "lastName",
+    });
+
+    expect(create).toBeTruthy();
+    expect(create.status).toBe(200);
+    expect(create.deserialized).toHaveProperty("id");
+
+    const find1 = await GET(
+      server,
+      "/api/Model/" + create.deserialized.id + "?attributes=badAttribute"
+    );
+
+    expect(find1).toBeTruthy();
+    expect(find1.status).toBe(400);
+    
+    await scaffold.orm.close();
+  });
+
+
   it("should create several record and fetch all with specific attributes", async () => {
     const app = new Koa();
     const scaffold = new Scaffold([Model], { prefix: "/api" });
