@@ -84,10 +84,9 @@ describe("Attribute Tests", () => {
 
     expect(find1).toBeTruthy();
     expect(find1.status).toBe(400);
-    
+
     await scaffold.orm.close();
   });
-
 
   it("should create several record and fetch all with specific attributes", async () => {
     const app = new Koa();

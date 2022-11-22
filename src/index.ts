@@ -475,7 +475,10 @@ function buildExportWrapper<T>(
   scaffold: Scaffold,
   handlerFunction: FunctionsHandler<T>
 ): ModelFunctionsCollection<T> {
-  const wrapper: ModelFunctionsCollection<T> = {};
+  const wrapper: ModelFunctionsCollection<T> = {
+    "*": handlerFunction(scaffold, "*"),
+    allModels: handlerFunction(scaffold, "*"),
+  };
   Object.keys(scaffold.models).forEach((modelName) => {
     wrapper[modelName] = handlerFunction(scaffold, modelName);
   });

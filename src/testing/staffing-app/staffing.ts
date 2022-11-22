@@ -51,9 +51,13 @@ export function createStaffingAppInstance(): [Koa, Scaffold] {
     scaffold.middleware.Skill.findAndCountAll
   );
 
+  router.get("/test-special-thing/:model", scaffold.middleware.allModels.crud);
+
   // Hook up the router
   app.use(router.routes());
   app.use(router.allowedMethods());
+
+  // app.use(scaffold.middleware.allModels);
 
   // Attach the Scaffold default middleware to your Koa application
   app.use(scaffold.handleEverythingKoaMiddleware());

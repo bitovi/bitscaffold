@@ -81,9 +81,14 @@ export type JSONObject = Record<string, unknown>;
 
 export interface ModelFunctionsCollection<T> {
   [modelName: string]: T;
+  "*": T;
+  allModels: T;
 }
 
-export type FunctionsHandler<T> = (scaffold: Scaffold, name: string) => T;
+export type FunctionsHandler<T> = (
+  scaffold: Scaffold,
+  name: string | symbol
+) => T;
 
 export type ScaffoldAttributes = ModelAttributes<Model>;
 export type ScaffoldApplication = Koa<DefaultState, DefaultContext>;

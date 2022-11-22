@@ -1,7 +1,12 @@
 import { ParsedUrlQuery } from "node:querystring";
-import { Identifier, Model, WhereOptions } from "sequelize";
+import { Identifier, WhereOptions } from "sequelize";
+import { SequelizeModelInstance } from "../types";
 
-export function buildAttributeList(query: ParsedUrlQuery, seqModel: Model): string[] {
+export function buildAttributeList(
+  query: ParsedUrlQuery,
+  // eslint-disable-next-line no-unused-vars
+  seqModel: SequelizeModelInstance
+): string[] {
   const queryAttributes = query.attributes;
 
   let attributes: string[] = [];
@@ -20,9 +25,11 @@ export function buildAttributeList(query: ParsedUrlQuery, seqModel: Model): stri
 
   attributes.forEach((attr) => {
     // Make sure that the requested attributes actually exist on the model
-    
+    const modelAttributes = seqModel.getAttributes()
+    if (!modelAttributes[attr]) {
+      throw new Error("Bad Attribute:" + attr);
+    }
   });
-
 
   return attributes;
 }

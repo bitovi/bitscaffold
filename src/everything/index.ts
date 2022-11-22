@@ -79,7 +79,7 @@ export function findAndCountAllEverything(
 export function createEverything(scaffold: Scaffold, modelName: string) {
   return async function createImpl(body: any, query: ParsedUrlQuery) {
     const body2 = await scaffold.deserialize[modelName].create(body);
-    const params = await scaffold.parse[modelName].create(body2, query);
+    const params = await scaffold.parse[modelName].create(body2);
     const result = await scaffold.model[modelName].create(body2, params);
     const response = await scaffold.serialize[modelName].create(result);
     return response;
@@ -93,7 +93,7 @@ export function updateEverything(scaffold: Scaffold, modelName: string) {
     id?: Identifier
   ) {
     const body2 = await scaffold.deserialize[modelName].create(body);
-    const params = await scaffold.parse[modelName].update(body2, query, id);
+    const params = await scaffold.parse[modelName].update(body2, id);
     const result = await scaffold.model[modelName].update(body2, params);
     const response = await scaffold.serialize[modelName].update(result[0]);
     return response;

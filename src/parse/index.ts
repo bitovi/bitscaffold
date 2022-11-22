@@ -27,12 +27,8 @@ export interface ParseFunctions {
   findAll: (query: ParsedUrlQuery) => Promise<FindOptions>;
   findOne: (query: ParsedUrlQuery, id: Identifier) => Promise<FindOptions>;
   findAndCountAll: (query: ParsedUrlQuery) => Promise<FindOptions>;
-  create: (body: unknown, query: ParsedUrlQuery) => Promise<CreateOptions>;
-  update: (
-    body: unknown,
-    query: ParsedUrlQuery,
-    id?: Identifier
-  ) => Promise<UpdateOptions>;
+  create: (body: unknown) => Promise<CreateOptions>;
+  update: (body: unknown, id?: Identifier) => Promise<UpdateOptions>;
   destroy: (query: ParsedUrlQuery, id?: Identifier) => Promise<DestroyOptions>;
 }
 
@@ -43,23 +39,23 @@ export function buildParserForModel(
   return {
     findAll: async (query) => {
       return {
-        attributes: buildAttributeList(query, scaffold.orm[modelName]),
+        attributes: buildAttributeList(query, scaffold.model[modelName]),
         where: buildWhereClause(query),
       };
     },
     findOne: async (query, id) => {
       return {
-        attributes: buildAttributeList(query, scaffold.orm[modelName]),
+        attributes: buildAttributeList(query, scaffold.model[modelName]),
         where: buildWhereClause(query, id),
       };
     },
     findAndCountAll: async (query) => {
       return {
-        attributes: buildAttributeList(query, scaffold.orm[modelName]),
+        attributes: buildAttributeList(query, scaffold.model[modelName]),
         where: buildWhereClause(query),
       };
     },
-    create: async (body, query) => {
+    create: async (body) => {
       return {};
     },
     destroy: async (query, id) => {
@@ -67,9 +63,9 @@ export function buildParserForModel(
         where: buildWhereClause(query, id),
       };
     },
-    update: async (body, query, id) => {
+    update: async (body, id) => {
       return {
-        where: buildWhereClause(query, id),
+        where: buildWhereClause({}, id),
       };
     },
   };
