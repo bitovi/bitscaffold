@@ -90,7 +90,7 @@ export function findAllMiddleware(scaffold: Scaffold, modelName: string) {
       modelName = resolveWildcard(scaffold, ctx.path);
     }
 
-    ctx.body = await scaffold.everything[modelName].findAll(ctx.query);
+    ctx.body = await scaffold.everything[modelName].findAll(ctx.querystring);
   };
 }
 
@@ -111,7 +111,7 @@ export function findOneMiddleware(scaffold: Scaffold, modelName: string) {
     }
 
     ctx.body = await scaffold.everything[modelName].findOne(
-      ctx.query,
+      ctx.querystring,
       params.id
     );
   };
@@ -127,7 +127,7 @@ export function findAndCountAllMiddleware(
       modelName = resolveWildcard(scaffold, ctx.path);
     }
 
-    ctx.body = await scaffold.everything[modelName].findAndCountAll(ctx.query);
+    ctx.body = await scaffold.everything[modelName].findAndCountAll(ctx.querystring);
   };
 }
 
@@ -139,7 +139,7 @@ export function createMiddleware(scaffold: Scaffold, modelName: string) {
     }
 
     const body = await parseScaffoldBody(ctx, ctx.request.type);
-    ctx.body = await scaffold.everything[modelName].create(body, ctx.query);
+    ctx.body = await scaffold.everything[modelName].create(body, ctx.querystring);
   };
 }
 
@@ -154,7 +154,7 @@ export function updateMiddleware(scaffold: Scaffold, modelName: string) {
     const params = scaffold.getScaffoldURLParamsForRoute(ctx.path);
     ctx.body = await scaffold.everything[modelName].update(
       body,
-      ctx.query,
+      ctx.querystring,
       params.id
     );
   };
@@ -169,7 +169,7 @@ export function destroyMiddleware(scaffold: Scaffold, modelName: string) {
 
     const params = scaffold.getScaffoldURLParamsForRoute(ctx.path);
     ctx.body = await scaffold.everything[modelName].destroy(
-      ctx.query,
+      ctx.querystring,
       params.id
     );
   };
@@ -191,12 +191,12 @@ export function handleAllMiddleware(scaffold: Scaffold) {
       case "GET": {
         if (params.id) {
           ctx.body = await scaffold.everything[params.model].findOne(
-            ctx.query,
+            ctx.querystring,
             params.id
           );
           return;
         }
-        ctx.body = await scaffold.everything[params.model].findAll(ctx.query);
+        ctx.body = await scaffold.everything[params.model].findAll(ctx.querystring);
         return;
       }
 
@@ -204,7 +204,7 @@ export function handleAllMiddleware(scaffold: Scaffold) {
         const body = await parseScaffoldBody(ctx, ctx.request.type);
         ctx.body = await scaffold.everything[params.model].create(
           body,
-          ctx.query
+          ctx.querystring
         );
         return;
       }
@@ -213,7 +213,7 @@ export function handleAllMiddleware(scaffold: Scaffold) {
         const body = await parseScaffoldBody(ctx, ctx.request.type);
         ctx.body = await scaffold.everything[params.model].update(
           body,
-          ctx.query,
+          ctx.querystring,
           params.id
         );
         return;
@@ -221,7 +221,7 @@ export function handleAllMiddleware(scaffold: Scaffold) {
 
       case "DELETE": {
         ctx.body = await scaffold.everything[params.model].destroy(
-          ctx.query,
+          ctx.querystring,
           params.id
         );
         return;

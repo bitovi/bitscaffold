@@ -1,5 +1,4 @@
 /* eslint-disable no-unused-vars */
-import { ParsedUrlQuery } from "node:querystring";
 import {
   DestroyOptions,
   UpdateOptions,
@@ -8,9 +7,10 @@ import {
   FindOptions,
 } from "sequelize";
 import { Scaffold } from "..";
-import { buildAttributeList, buildWhereClause } from "./builder";
+import { buildCreateOptions, buildDestroyOptions, buildFindOptions, buildUpdateOptions, buildWhereClause } from "./builder";
 import { buildDeserializerForModel } from "../deserialize";
 import { JSONObject } from "../types";
+
 
 /**
  * Provides a set of exported functions, per Model, that
@@ -26,15 +26,15 @@ export interface ParseFunctions {
    * Koa Context as `ctx.query`
    *
    */
-  findAll: (query: ParsedUrlQuery) => Promise<FindOptions>;
-  findOne: (query: ParsedUrlQuery, id: Identifier) => Promise<FindOptions>;
-  findAndCountAll: (query: ParsedUrlQuery) => Promise<FindOptions>;
+  findAll: (querystring: string) => Promise<FindOptions>;
+  findOne: (querystring: string, id: Identifier) => Promise<FindOptions>;
+  findAndCountAll: (querystring: string) => Promise<FindOptions>;
   create: (body: unknown) => Promise<{ body: JSONObject; ops: CreateOptions }>;
   update: (
     body: unknown,
     id?: Identifier
   ) => Promise<{ body: JSONObject; ops: UpdateOptions }>;
-  destroy: (query: ParsedUrlQuery, id?: Identifier) => Promise<DestroyOptions>;
+  destroy: (querystring: string, id?: Identifier) => Promise<DestroyOptions>;
 }
 
 export function buildParserForModel(
@@ -44,41 +44,62 @@ export function buildParserForModel(
   const deserializer = buildDeserializerForModel(scaffold, modelName);
 
   return {
-    findAll: async (query) => {
-      return {
-        attributes: buildAttributeList(query, scaffold.model[modelName]),
-        where: buildWhereClause(query),
-      };
+    findAll: async (querystring: string) => {
+      const { data, errors } = buildFindOptions(querystring)
+      if (errors.length > 0) {
+        throw scaffold.createError({ code: "400", title: "Bad Request, Invalid Query String" })
+      }
+      return data;
     },
-    findOne: async (query, id) => {
-      return {
-        attributes: buildAttributeList(query, scaffold.model[modelName]),
-        where: buildWhereClause(query, id),
-      };
+    findOne: async (querystring: string, id) => {
+      const { data, errors } = buildFindOptions(querystring, id)
+      if (errors.length > 0) {
+        throw scaffold.createError({ code: "400", title: "Bad Request, Invalid Query String" })
+      }
+      return data;
     },
-    findAndCountAll: async (query) => {
-      return {
-        attributes: buildAttributeList(query, scaffold.model[modelName]),
-        where: buildWhereClause(query),
-      };
+    findAndCountAll: async (querystring: string) => {
+      const { data, errors } = buildFindOptions(querystring)
+      if (errors.length > 0) {
+        throw scaffold.createError({ code: "400", title: "Bad Request, Invalid Query String" })
+      }
+      return data;
     },
     create: async (body: unknown) => {
+
+      const { data, errors } = buildCreateOptions("")
+      if (errors.length > 0) {
+        throw scaffold.createError({ code: "400", title: "Bad Request, Invalid Query String" })
+      }
+
+      const parsed = await deserializer.create(body, {})
+
       return {
-        body: await deserializer.create(body, {}),
-        ops: {},
+        body: parsed,
+        ops: data,
       };
     },
-    destroy: async (query, id) => {
-      return {
-        where: buildWhereClause(query, id),
-      };
+    destroy: async (querystring: string, id) => {
+
+      const { data, errors } = buildDestroyOptions(querystring, id)
+      if (errors.length > 0) {
+        throw scaffold.createError({ code: "400", title: "Bad Request, Invalid Query String" })
+      }
+
+      return data;
     },
     update: async (body, id) => {
+
+      const { data, errors } = buildUpdateOptions("", id)
+      if (errors.length > 0) {
+        throw scaffold.createError({ code: "400", title: "Bad Request, Invalid Query String" })
+      }
+
+      const parsed = await deserializer.create(body, {})
+
       return {
-        body: await deserializer.create(body, {}),
-        ops: {
-          where: buildWhereClause({}, id),
-        },
+        body: parsed,
+        ops: data,
       };
     },
   };

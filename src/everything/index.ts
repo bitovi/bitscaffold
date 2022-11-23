@@ -1,20 +1,19 @@
 /* eslint-disable no-unused-vars */
 import { Scaffold } from "..";
 import { Identifier } from "sequelize";
-import { ParsedUrlQuery } from "querystring";
 import { JSONObject } from "../types";
 
 export interface EverythingFunctions {
-  findAll: (query: ParsedUrlQuery) => Promise<JSONObject>;
-  findOne: (query: ParsedUrlQuery, id: Identifier) => Promise<JSONObject>;
-  findAndCountAll: (query: ParsedUrlQuery) => Promise<JSONObject>;
-  create: (body: unknown, query: ParsedUrlQuery) => Promise<JSONObject>;
+  findAll: (querystring: string) => Promise<JSONObject>;
+  findOne: (querystring: string, id: Identifier) => Promise<JSONObject>;
+  findAndCountAll: (query: string) => Promise<JSONObject>;
+  create: (body: unknown, querystring: string) => Promise<JSONObject>;
   update: (
     body: unknown,
-    query: ParsedUrlQuery,
+    querystring: string,
     id?: Identifier
   ) => Promise<JSONObject>;
-  destroy: (query: ParsedUrlQuery, id?: Identifier) => Promise<JSONObject>;
+  destroy: (querystring: string, id?: Identifier) => Promise<JSONObject>;
 }
 
 export function buildEverythingForModel(
@@ -32,8 +31,8 @@ export function buildEverythingForModel(
 }
 
 export function findAllEverything(scaffold: Scaffold, modelName: string) {
-  return async function findAllImpl(query: ParsedUrlQuery) {
-    const params = await scaffold.parse[modelName].findAll(query);
+  return async function findAllImpl(querystring: string) {
+    const params = await scaffold.parse[modelName].findAll(querystring);
     const result = await scaffold.model[modelName].findAll(params);
     const response = await scaffold.serialize[modelName].findAll(result, {
       keyForAttribute: "camelCase",
@@ -44,8 +43,8 @@ export function findAllEverything(scaffold: Scaffold, modelName: string) {
 }
 
 export function findOneEverything(scaffold: Scaffold, modelName: string) {
-  return async function findOneImpl(query: ParsedUrlQuery, id: Identifier) {
-    const params = await scaffold.parse[modelName].findOne(query, id);
+  return async function findOneImpl(querystring: string, id: Identifier) {
+    const params = await scaffold.parse[modelName].findOne(querystring, id);
     const result = await scaffold.model[modelName].findByPk(id, params);
     if (!result) {
       throw scaffold.createError({
@@ -66,8 +65,8 @@ export function findAndCountAllEverything(
   scaffold: Scaffold,
   modelName: string
 ) {
-  return async function findAndCountAllImpl(query: ParsedUrlQuery) {
-    const params = await scaffold.parse[modelName].findAndCountAll(query);
+  return async function findAndCountAllImpl(querystring: string) {
+    const params = await scaffold.parse[modelName].findAndCountAll(querystring);
     const result = await scaffold.model[modelName].findAndCountAll(params);
     const response = await scaffold.serialize[modelName].findAndCountAll(
       result
@@ -88,7 +87,7 @@ export function createEverything(scaffold: Scaffold, modelName: string) {
 export function updateEverything(scaffold: Scaffold, modelName: string) {
   return async function updateImpl(
     rawbody: any,
-    query: ParsedUrlQuery,
+    querystring: string,
     id?: Identifier
   ) {
     const { body, ops } = await scaffold.parse[modelName].update(rawbody, id);
@@ -99,8 +98,8 @@ export function updateEverything(scaffold: Scaffold, modelName: string) {
 }
 
 export function destroyEverything(scaffold: Scaffold, modelName: string) {
-  return async function destroyImpl(query: ParsedUrlQuery, id: Identifier) {
-    const params = await scaffold.parse[modelName].destroy(query, id);
+  return async function destroyImpl(querystring: string, id: Identifier) {
+    const params = await scaffold.parse[modelName].destroy(querystring, id);
     const result = await scaffold.model[modelName].destroy(params);
     const response = await scaffold.serialize[modelName].destroy(result);
     return response;
