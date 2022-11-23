@@ -25,7 +25,7 @@ export function buildAttributeList(
 
   attributes.forEach((attr) => {
     // Make sure that the requested attributes actually exist on the model
-    const modelAttributes = seqModel.getAttributes()
+    const modelAttributes = seqModel.getAttributes();
     if (!modelAttributes[attr]) {
       throw new Error("Bad Attribute:" + attr);
     }

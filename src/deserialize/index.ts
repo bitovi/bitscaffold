@@ -20,14 +20,8 @@ export interface DeserializeFunctions {
    *
    * @returns {JSONObject}
    */
-  create: (
-    data: Model<any, any>,
-    options?: DeserializerOptions
-  ) => Promise<JSONObject>;
-  update: (
-    rowCount: number,
-    options?: DeserializerOptions
-  ) => Promise<JSONObject>;
+  create: (data: unknown, options?: DeserializerOptions) => Promise<JSONObject>;
+  update: (data: unknown, options?: DeserializerOptions) => Promise<JSONObject>;
 }
 
 export function buildDeserializerForModel(

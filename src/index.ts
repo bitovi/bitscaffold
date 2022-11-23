@@ -26,7 +26,6 @@ import { buildParserForModel, ParseFunctions } from "./parse";
 import { parseScaffoldBody } from "./parse/body";
 
 import { buildSerializerForModel, SerializeFunctions } from "./serialize";
-import { buildDeserializerForModel, DeserializeFunctions } from "./deserialize";
 import { buildMiddlewareForModel, MiddlewareFunctionsKoa } from "./middleware";
 import { buildEverythingForModel, EverythingFunctions } from "./everything";
 
@@ -146,26 +145,6 @@ export class Scaffold {
     return buildExportWrapper<SerializeFunctions>(
       this,
       buildSerializerForModel
-    );
-  }
-
-  /**
-   * The `deserialize` export is one of the primary tools provided by Scaffold for working
-   * with your Models in custom routes.
-   *
-   * From the `deserialize` export you can target one of your Models by name which will
-   * give you further access to a number of named functions
-   *
-   * For more information about the underlying per-model functions:
-   * @see {@link DeserializeFunctions}
-   *
-   * @returns {ModelFunctionsCollection<DeserializeFunctions>}
-   * @category General Use
-   */
-  get deserialize() {
-    return buildExportWrapper<DeserializeFunctions>(
-      this,
-      buildDeserializerForModel
     );
   }
 
