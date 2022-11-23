@@ -21,7 +21,7 @@ describe("Attribute Tests", () => {
   it("should create a record and fetch specific attributes", async () => {
     const app = new Koa();
     const scaffold = new Scaffold([Model], { prefix: "/api" });
-    app.use(scaffold.handleEverythingKoaMiddleware());
+    app.use(scaffold.middleware.allModels.all);
 
     const server = createServer(app);
     await scaffold.createDatabase();
@@ -63,7 +63,7 @@ describe("Attribute Tests", () => {
   it("should create a record and error when fetching unknown attributes", async () => {
     const app = new Koa();
     const scaffold = new Scaffold([Model], { prefix: "/api" });
-    app.use(scaffold.handleEverythingKoaMiddleware());
+    app.use(scaffold.middleware.allModels.all);
 
     const server = createServer(app);
     await scaffold.createDatabase();
@@ -91,7 +91,7 @@ describe("Attribute Tests", () => {
   it("should create several record and fetch all with specific attributes", async () => {
     const app = new Koa();
     const scaffold = new Scaffold([Model], { prefix: "/api" });
-    app.use(scaffold.handleEverythingKoaMiddleware());
+    app.use(scaffold.middleware.allModels.all);
 
     const server = createServer(app);
     await scaffold.createDatabase();

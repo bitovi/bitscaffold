@@ -75,7 +75,7 @@ describe("Internal Tests", () => {
 
     app.use(router.routes());
     app.use(router.allowedMethods());
-    app.use(scaffold.handleEverythingKoaMiddleware());
+    app.use(scaffold.middleware.allModels.all);
 
     // Add a fallthrough default handler that just returns not found
     app.use((ctx) => {
@@ -139,7 +139,7 @@ describe("Internal Tests", () => {
 
     app.use(router.routes());
     app.use(router.allowedMethods());
-    app.use(scaffold.handleEverythingKoaMiddleware());
+    app.use(scaffold.middleware.allModels.all);
 
     // Add a fallthrough default handler that just returns not found
     app.use((ctx) => {
@@ -178,7 +178,7 @@ describe("Internal Tests", () => {
 
     app.use(router.routes());
     app.use(router.allowedMethods());
-    app.use(scaffold.handleEverythingKoaMiddleware());
+    app.use(scaffold.middleware.allModels.all);
 
     // Add a fallthrough default handler that just returns not found
     app.use((ctx) => {

@@ -31,7 +31,7 @@ describe("JSON:API Tests", () => {
   it("should handle JSON:API create body", async () => {
     const app = new Koa();
     const scaffold = new Scaffold([Model], { prefix: "/api" });
-    app.use(scaffold.handleEverythingKoaMiddleware());
+    app.use(scaffold.middleware.allModels.all);
 
     const server = createServer(app);
     await scaffold.createDatabase();

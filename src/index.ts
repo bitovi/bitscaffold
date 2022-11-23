@@ -1,6 +1,5 @@
 import { Identifier, Sequelize } from "sequelize";
 import { match } from "path-to-regexp";
-import signale from "signale";
 import {
   Error as SerializedError,
   JSONAPIErrorOptions,
@@ -8,8 +7,6 @@ import {
 import createHttpError from "http-errors";
 
 import {
-  ExpressMiddleware,
-  KoaMiddleware,
   ScaffoldModel,
   ScaffoldModelCollection,
   ScaffoldOptions,
@@ -23,7 +20,6 @@ import {
   buildScaffoldModelObject,
 } from "./sequelize";
 import { buildParserForModel, ParseFunctions } from "./parse";
-import { parseScaffoldBody } from "./parse/body";
 
 import { buildSerializerForModel, SerializeFunctions } from "./serialize";
 import { buildMiddlewareForModel, MiddlewareFunctionsKoa } from "./middleware";
@@ -38,8 +34,7 @@ import { buildEverythingForModel, EverythingFunctions } from "./everything";
  * @see {@link constructor}
  *
  * In order to use Scaffold with Koa or Express you should look at the Middleware exports below
- * @see {@link handleEverythingExpressMiddleware}
- * @see {@link handleEverythingKoaMiddleware}
+ * @see {@link MiddlewareFunctionsKoa.all}
  *
  */
 export class Scaffold {
@@ -213,133 +208,6 @@ export class Scaffold {
       this,
       buildEverythingForModel
     );
-  }
-
-  /**
-   * The `handleEverythingKoaMiddleware` Middleware provides the primary hooks
-   * between your Koa application and the Scaffold library
-   *
-   * It will use the Koa Context to determine if:
-   *    1. The route resembles a Scaffold default route, by regex
-   *    2. The route contains an expected Scaffold model name
-   *    3. The request method is one of GET, POST, PUT, DELETE
-   *
-   * If these criteria pass the context will be passed to the 'everything'
-   * function for the given model. Under the hood this will parse the params,
-   * perform the requested model query, and serialize the result.
-   *
-   * If these criteria are not met the request will be ignored by
-   * Scaffold and the request passed to the next available Middleware
-   *
-   * Valid Scaffold URLs formats
-   *
-   * - `[prefix]/:model`
-   * - `[prefix]/:model/:id `
-   *
-   * @return {KoaMiddleware} Koa Middleware function that can be attached to a Koa instance (`app`) using `app.use`
-   * @category General Use
-   */
-  handleEverythingKoaMiddleware(): KoaMiddleware {
-    return async (ctx, next) => {
-      // Check if this request URL takes the format of one that we expect
-      if (!this.isValidScaffoldRoute(ctx.method, ctx.path)) {
-        return await next();
-      }
-
-      const params = this.getScaffoldURLParamsForRoute(ctx.path);
-      if (!params.model) {
-        return await next();
-      }
-
-      switch (ctx.method) {
-        case "GET": {
-          if (params.id) {
-            ctx.body = await this.everything[params.model].findOne(
-              ctx.query,
-              params.id
-            );
-            return;
-          }
-          ctx.body = await this.everything[params.model].findAll(ctx.query);
-          return;
-        }
-
-        case "POST": {
-          const body = await parseScaffoldBody(ctx, ctx.request.type);
-          ctx.body = await this.everything[params.model].create(
-            body,
-            ctx.query
-          );
-          return;
-        }
-
-        case "PUT": {
-          const body = await parseScaffoldBody(ctx, ctx.request.type);
-          ctx.body = await this.everything[params.model].update(
-            body,
-            ctx.query,
-            params.id
-          );
-          return;
-        }
-
-        case "DELETE": {
-          ctx.body = await this.everything[params.model].destroy(
-            ctx.query,
-            params.id
-          );
-          return;
-        }
-
-        default: {
-          signale.success(
-            "handleEverythingKoaMiddleware, scaffold ignored method"
-          );
-          return await next();
-        }
-      }
-    };
-  }
-
-  /**
-   * The `handleEverythingExpressMiddleware` Middleware provides the primary hooks
-   * between your Express application and the Scaffold library
-   *
-   * It will use the Request to determine if:
-   *    1. The route resembles a Scaffold default route, by regex
-   *    2. The route contains an expected Scaffold model name
-   *    3. The request method is one of GET, POST, PUT, DELETE
-   *
-   * If these criteria pass the context will be passed to the 'everything'
-   * function for the given model. Under the hood this will parse the params,
-   * perform the requested model query, and serialize the result.
-   *
-   * If these criteria are not met the request will be ignored by
-   * Scaffold and the request passed to the next available Middleware
-   *
-   * Valid Scaffold URLs formats
-   *
-   * - `[prefix]/:model`
-   * - `[prefix]/:model/:id `
-   *
-   * @return {ExpressMiddleware} Express Middleware function that can be attached to a Koa instance (`app`) using `app.use`
-   * @category General Use
-   */
-  handleEverythingExpressMiddleware(): ExpressMiddleware {
-    return (req, res, next) => {
-      // Check if this request URL takes the format of one that we expect
-      if (!this.isValidScaffoldRoute(req.method, req.path)) {
-        return next();
-      }
-
-      // Check if this request URL has a valid Scaffold Model associated with it
-      const modelName = this.getScaffoldModelNameForRoute(req.path);
-      if (!modelName) {
-        return next();
-      }
-
-      throw new Error("Not Implemented");
-    };
   }
 
   /**
