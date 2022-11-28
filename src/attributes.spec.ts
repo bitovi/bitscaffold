@@ -21,7 +21,7 @@ describe("Attribute Tests", () => {
   it("should create a record and fetch specific attributes", async () => {
     const app = new Koa();
     const scaffold = new Scaffold([Model], { prefix: "/api" });
-    app.use(scaffold.handleEverythingKoaMiddleware());
+    app.use(scaffold.middleware.allModels.all);
 
     const server = createServer(app);
     await scaffold.createDatabase();
@@ -37,7 +37,7 @@ describe("Attribute Tests", () => {
 
     const find1 = await GET(
       server,
-      "/api/Model/" + create.deserialized.id + "?attributes=firstName"
+      "/api/Model/" + create.deserialized.id + "?fields[Model]=firstName"
     );
 
     expect(find1).toBeTruthy();
@@ -48,7 +48,7 @@ describe("Attribute Tests", () => {
 
     const find2 = await GET(
       server,
-      "/api/Model/" + create.deserialized.id + "?attributes=lastName"
+      "/api/Model/" + create.deserialized.id + "?fields[Model]=lastName"
     );
 
     expect(find2).toBeTruthy();
@@ -63,7 +63,7 @@ describe("Attribute Tests", () => {
   it("should create a record and error when fetching unknown attributes", async () => {
     const app = new Koa();
     const scaffold = new Scaffold([Model], { prefix: "/api" });
-    app.use(scaffold.handleEverythingKoaMiddleware());
+    app.use(scaffold.middleware.allModels.all);
 
     const server = createServer(app);
     await scaffold.createDatabase();
@@ -79,11 +79,11 @@ describe("Attribute Tests", () => {
 
     const find1 = await GET(
       server,
-      "/api/Model/" + create.deserialized.id + "?attributes=badAttribute"
+      "/api/Model/" + create.deserialized.id + "?fields[Model]=badAttribute"
     );
 
     expect(find1).toBeTruthy();
-    expect(find1.status).toBe(400);
+    expect(find1.status).not.toBe(200);
 
     await scaffold.orm.close();
   });
@@ -91,7 +91,7 @@ describe("Attribute Tests", () => {
   it("should create several record and fetch all with specific attributes", async () => {
     const app = new Koa();
     const scaffold = new Scaffold([Model], { prefix: "/api" });
-    app.use(scaffold.handleEverythingKoaMiddleware());
+    app.use(scaffold.middleware.allModels.all);
 
     const server = createServer(app);
     await scaffold.createDatabase();
@@ -111,7 +111,7 @@ describe("Attribute Tests", () => {
       lastName: "lastName3",
     });
 
-    const find1 = await GET(server, "/api/Model/?attributes=firstName");
+    const find1 = await GET(server, "/api/Model/?fields[Model]=firstName");
 
     expect(find1).toBeTruthy();
     expect(find1.status).toBe(200);
@@ -123,7 +123,7 @@ describe("Attribute Tests", () => {
       expect(entry).not.toHaveProperty("lastName");
     });
 
-    const find2 = await GET(server, "/api/Model/?attributes=lastName");
+    const find2 = await GET(server, "/api/Model/?fields[Model]=lastName");
 
     expect(find2).toBeTruthy();
     expect(find2.status).toBe(200);

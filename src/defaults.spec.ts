@@ -21,7 +21,7 @@ describe("Default Tests", () => {
   it("should handle default read all operations", async () => {
     const app = new Koa();
     const scaffold = new Scaffold([Model], { prefix: "/api" });
-    app.use(scaffold.handleEverythingKoaMiddleware());
+    app.use(scaffold.middleware.allModels.all);
 
     const server = createServer(app);
     await scaffold.createDatabase();
@@ -39,7 +39,7 @@ describe("Default Tests", () => {
   it("should handle default read one not found operations", async () => {
     const app = new Koa();
     const scaffold = new Scaffold([Model], { prefix: "/api" });
-    app.use(scaffold.handleEverythingKoaMiddleware());
+    app.use(scaffold.middleware.allModels.all);
 
     const server = createServer(app);
     await scaffold.createDatabase();
@@ -56,7 +56,7 @@ describe("Default Tests", () => {
   it("should handle default read one after create operations", async () => {
     const app = new Koa();
     const scaffold = new Scaffold([Model], { prefix: "/api" });
-    app.use(scaffold.handleEverythingKoaMiddleware());
+    app.use(scaffold.middleware.allModels.all);
 
     const server = createServer(app);
     await scaffold.createDatabase();
@@ -94,7 +94,7 @@ describe("Default Tests", () => {
   it("should handle default create operations", async () => {
     const app = new Koa();
     const scaffold = new Scaffold([Model], { prefix: "/api" });
-    app.use(scaffold.handleEverythingKoaMiddleware());
+    app.use(scaffold.middleware.allModels.all);
 
     const server = createServer(app);
     await scaffold.createDatabase();
@@ -121,7 +121,7 @@ describe("Default Tests", () => {
   it("should handle default update operations", async () => {
     const app = new Koa();
     const scaffold = new Scaffold([Model], { prefix: "/api" });
-    app.use(scaffold.handleEverythingKoaMiddleware());
+    app.use(scaffold.middleware.allModels.all);
 
     const server = createServer(app);
     await scaffold.createDatabase();
@@ -154,7 +154,7 @@ describe("Default Tests", () => {
   it("should handle default delete operations", async () => {
     const app = new Koa();
     const scaffold = new Scaffold([Model], { prefix: "/api" });
-    app.use(scaffold.handleEverythingKoaMiddleware());
+    app.use(scaffold.middleware.allModels.all);
 
     const server = createServer(app);
     await scaffold.createDatabase();

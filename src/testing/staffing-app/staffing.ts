@@ -27,14 +27,14 @@ export function createStaffingAppInstance(): [Koa, Scaffold] {
   });
 
   router.get("/skill", async (ctx: Context) => {
-    const params = await scaffold.parse.Skill.findAndCountAll(ctx.query);
+    const params = await scaffold.parse.Skill.findAndCountAll(ctx.querystring);
     const result = await scaffold.model.Skill.findAndCountAll(params);
     const response = await scaffold.serialize.Skill.findAndCountAll(result);
     ctx.body = { customRouteTest1: true, data: response };
   });
 
   router.get("/skill2", async (ctx: Context) => {
-    const response = await scaffold.everything.Skill.findAll(ctx.query);
+    const response = await scaffold.everything.Skill.findAll(ctx.querystring);
     ctx.body = { customRouteTest2: true, data: response };
   });
 
@@ -60,7 +60,7 @@ export function createStaffingAppInstance(): [Koa, Scaffold] {
   // app.use(scaffold.middleware.allModels);
 
   // Attach the Scaffold default middleware to your Koa application
-  app.use(scaffold.handleEverythingKoaMiddleware());
+  app.use(scaffold.middleware.allModels.all);
 
   // Set up any other Koa routes, middleware, etc, that you want.
   app.use(async (ctx) => {

@@ -51,7 +51,7 @@ const scaffold = new Scaffold([User], {
   },
 });
 
-app.use(scaffold.handleEverythingKoaMiddleware());
+app.use(scaffold.middleware.allModels.all);
 
 app.use(async (ctx) => {
   ctx.body = "Hello From Koa";
@@ -128,7 +128,7 @@ const scaffold = new Scaffold([User], {
   },
 });
 
-app.use(scaffold.handleEverythingKoaMiddleware());
+app.use(scaffold.middleware.allModels.all);
 
 app.use(async (ctx) => {
   ctx.body = "Hello From Koa";
@@ -188,7 +188,7 @@ const scaffold = new Scaffold([Player, Team], {
   },
 });
 
-app.use(scaffold.handleEverythingKoaMiddleware());
+app.use(scaffold.middleware.allModels.all);
 
 app.use(async (ctx) => {
   ctx.body = "Hello From Koa";
@@ -325,7 +325,7 @@ router.get("/User", async (ctx, next) => {
 
 app.use(router.routes());
 app.use(router.allowedMethods());
-app.use(scaffold.handleEverythingKoaMiddleware());
+app.use(scaffold.middleware.allModels.all);
 
 app.use(async (ctx) => {
   ctx.body = "Hello From Koa";
@@ -457,7 +457,7 @@ router.get("/generate-report", async (ctx) => {
 
 app.use(router.routes());
 app.use(router.allowedMethods());
-app.use(scaffold.handleEverythingKoaMiddleware());
+app.use(scaffold.middleware.allModels.all);
 
 app.listen(3000, () => {
   console.log("Started on port 3000");
@@ -508,7 +508,7 @@ router.get(
 
 app.use(router.routes());
 app.use(router.allowedMethods());
-app.use(scaffold.handleEverythingKoaMiddleware());
+app.use(scaffold.middleware.allModels.all);
 
 app.listen(3000, () => {
   console.log("Started on port 3000");
@@ -637,7 +637,7 @@ router.post('/Assignment', await (ctx, next) => {
 
 app.use(router.routes());
 app.use(router.allowedMethods());
-app.use(scaffold.handleEverythingKoaMiddleware());
+app.use(scaffold.middleware.allModels.all);
 
 app.listen(3000, () => {
     console.log("Started on port 3000");
