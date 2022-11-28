@@ -19,8 +19,9 @@ describe("Default Tests", () => {
   };
 
   it("should handle global parse behavior", async () => {
-    const findOptions = await Parse(Model).findAll("");
-    expect(findOptions).toBeTruthy();
+    const findOptions = await Parse(Model).findAll("?attributes=badAttribute");
+    console.error(findOptions);
+    expect(findOptions).toEqual(null);
   });
 
   it("should handle global serialize behavior", async () => {

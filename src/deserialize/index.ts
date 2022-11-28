@@ -23,6 +23,26 @@ export interface DeserializeFunctions {
   update: (data: unknown, options?: DeserializerOptions) => Promise<JSONObject>;
 }
 
+export function buildDeserializerForModelStandalone() {
+  return {
+    create: async (data, options: DeserializerOptions = {}) => {
+      try {
+        return new Deserializer(options).deserialize(data);
+      } catch (err) {
+        return data;
+      }
+    },
+
+    update: async (data, options: DeserializerOptions = {}) => {
+      try {
+        return new Deserializer(options).deserialize(data);
+      } catch (err) {
+        return data;
+      }
+    },
+  };
+}
+
 export function buildDeserializerForModel(
   scaffold: Scaffold,
   modelName: string
