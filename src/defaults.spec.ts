@@ -1,4 +1,4 @@
-import { Scaffold } from "./index";
+import { Scaffold, Parse, Serialize } from "./index";
 import Koa from "koa";
 import { DataTypes, ScaffoldModel } from "./types";
 import { createServer, GET, DELETE, POST, PUT } from "./testing/utils";
@@ -17,6 +17,16 @@ describe("Default Tests", () => {
       },
     },
   };
+
+  it("should handle global parse behavior", async () => {
+    const findOptions = await Parse(Model).findAll("");
+    expect(findOptions).toBeTruthy();
+  });
+
+  it("should handle global serialize behavior", async () => {
+    const jsonApiResult = await Serialize(Model).findAll([]);
+    expect(jsonApiResult).toBeTruthy();
+  });
 
   it("should handle default read all operations", async () => {
     const app = new Koa();

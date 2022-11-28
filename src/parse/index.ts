@@ -14,7 +14,7 @@ import {
   buildUpdateOptions,
 } from "./builder";
 import { buildDeserializerForModel } from "../deserialize";
-import { JSONObject } from "../types";
+import { JSONObject, ScaffoldModel } from "../types";
 
 /**
  * Provides a set of exported functions, per Model, that
@@ -41,6 +41,12 @@ export interface ParseFunctions {
   destroy: (querystring: string, id?: Identifier) => Promise<DestroyOptions>;
 }
 
+export function buildParserForModelStandalone(
+  model: ScaffoldModel
+): ParseFunctions {
+  throw new Error("Not Implemented");
+}
+
 export function buildParserForModel(
   scaffold: Scaffold,
   modelName: string
@@ -49,7 +55,10 @@ export function buildParserForModel(
 
   return {
     findAll: async (querystring: string) => {
-      const { data, errors } = buildFindOptions(querystring);
+      const { data, errors } = buildFindOptions(
+        scaffold.model[modelName],
+        querystring
+      );
       if (errors.length > 0) {
         throw scaffold.createError({
           code: "400",
@@ -59,7 +68,11 @@ export function buildParserForModel(
       return data;
     },
     findOne: async (querystring: string, id) => {
-      const { data, errors } = buildFindOptions(querystring, id);
+      const { data, errors } = buildFindOptions(
+        scaffold.model[modelName],
+        querystring,
+        id
+      );
       if (errors.length > 0) {
         throw scaffold.createError({
           code: "400",
@@ -69,7 +82,10 @@ export function buildParserForModel(
       return data;
     },
     findAndCountAll: async (querystring: string) => {
-      const { data, errors } = buildFindOptions(querystring);
+      const { data, errors } = buildFindOptions(
+        scaffold.model[modelName],
+        querystring
+      );
       if (errors.length > 0) {
         throw scaffold.createError({
           code: "400",

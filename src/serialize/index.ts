@@ -2,7 +2,7 @@
 import { Model } from "sequelize";
 import { Serializer, SerializerOptions } from "jsonapi-serializer";
 import { Scaffold } from "..";
-import { JSONObject } from "../types";
+import { JSONObject, ScaffoldModel } from "../types";
 import { JSONAPIErrorOptions } from "jsonapi-serializer";
 import createHttpError from "http-errors";
 
@@ -47,6 +47,12 @@ export interface SerializeFunctions {
     options?: SerializerOptions
   ) => Promise<JSONObject>;
   error: (options: JSONAPIErrorOptions) => createHttpError.HttpError;
+}
+
+export function buildSerializerForModelStandalone(
+  model: ScaffoldModel
+): SerializeFunctions {
+  throw new Error("Not Implemented");
 }
 
 export function buildSerializerForModel(

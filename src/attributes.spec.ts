@@ -83,7 +83,7 @@ describe("Attribute Tests", () => {
     );
 
     expect(find1).toBeTruthy();
-    expect(find1.status).not.toBe(200);
+    expect(find1.status).toBe(400);
 
     await scaffold.orm.close();
   });

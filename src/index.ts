@@ -19,11 +19,48 @@ import {
   createSequelizeInstance,
   buildScaffoldModelObject,
 } from "./sequelize";
-import { buildParserForModel, ParseFunctions } from "./parse";
+import {
+  buildParserForModel,
+  buildParserForModelStandalone,
+  ParseFunctions,
+} from "./parse";
 
-import { buildSerializerForModel, SerializeFunctions } from "./serialize";
+import {
+  buildSerializerForModel,
+  buildSerializerForModelStandalone,
+  SerializeFunctions,
+} from "./serialize";
 import { buildMiddlewareForModel, MiddlewareFunctionsKoa } from "./middleware";
 import { buildEverythingForModel, EverythingFunctions } from "./everything";
+import { buildSchemaForModel } from "./schema";
+
+/**
+ * Parse can be imported from the `@bitovi/scaffold` package
+ *
+ * This function provides direct access to the querystring parsing and validation of Scaffold without
+ * needing to create a Scaffold instance. You can use a Scaffold Model directly along with your querystring
+ * and the Parse function will return the underlying ORM query options.
+ *
+ * @param {ScaffoldModel} model The Scaffold Model to use for validation, attributes, relationships, etc
+ * @returns {ModelFunctionsCollection<ParseFunctions>}
+ */
+export function Parse(model: ScaffoldModel) {
+  return buildParserForModelStandalone(model);
+}
+
+/**
+ * Serialize can be imported from the `@bitovi/scaffold` package
+ *
+ * This function provides direct access to the result serializer Scaffold without
+ * needing to create a Scaffold instance. You can use a Scaffold Model directly along with your data
+ * and the Serialize function will return a valid JSON:API serialized version.
+ *
+ * @param {ScaffoldModel} model The Scaffold Model to use for validation, attributes, relationships, etc
+ * @returns {ModelFunctionsCollection<SerializeFunctions>}
+ */
+export function Serialize(model: ScaffoldModel) {
+  return buildSerializerForModelStandalone(model);
+}
 
 /**
  * Scaffold can be imported from the `@bitovi/scaffold` package
@@ -185,6 +222,23 @@ export class Scaffold {
       this,
       buildMiddlewareForModel
     );
+  }
+
+  /**
+   * The `schema` export is one of the primary tools provided by Scaffold for working
+   * with your Models in custom routes.
+   *
+   * From the `schema` export you can target one of your Models by name which will
+   * give you further access to a number of named functions
+   *
+   * For more information about the underlying per-model functions:
+   * @see {@link ScaffoldModel}
+   *
+   * @returns {ModelFunctionsCollection<ScaffoldModel>}
+   * @category General Use
+   */
+  get schema() {
+    return buildExportWrapper<ScaffoldModel>(this, buildSchemaForModel);
   }
 
   /**
