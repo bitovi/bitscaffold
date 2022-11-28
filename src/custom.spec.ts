@@ -20,7 +20,7 @@ describe("Internal Tests", () => {
   };
 
   const Model2: ScaffoldModel = {
-    name: "Model",
+    name: "Model2",
     attributes: {
       firstName: {
         type: DataTypes.STRING,
@@ -34,7 +34,7 @@ describe("Internal Tests", () => {
   };
 
   const Model3: ScaffoldModel = {
-    name: "Model",
+    name: "Model3",
     attributes: {
       firstName: {
         type: DataTypes.STRING,
@@ -59,9 +59,6 @@ describe("Internal Tests", () => {
     router.get("/user-custom-route", async (ctx) => {
       ctx.body = { test: true };
     });
-
-    router.get("/Model2", scaffold.middleware["*"].findAll);
-    router.get("/Model3", scaffold.middleware.allModels.findAll);
 
     router.get("/alternative-model-2", async (ctx) => {
       const response = await scaffold.everything.Model.findAll(ctx.query);
@@ -88,11 +85,6 @@ describe("Internal Tests", () => {
     expect(req1.status).toBe(200);
     expect(req1.serialized).toHaveProperty("test");
 
-    const req2 = await GET(server, "/alternative-model");
-    expect(req2).toBeTruthy();
-    expect(req2.status).toBe(200);
-    expect(req2.deserialized).toHaveProperty("length");
-
     const req3 = await GET(server, "/alternative-model-2");
     expect(req3).toBeTruthy();
     expect(req3.status).toBe(200);
@@ -103,10 +95,29 @@ describe("Internal Tests", () => {
     expect(req4).toBeTruthy();
     expect(req4.status).toBe(404);
 
-    const req5 = await GET(server, "/Model2");
-    expect(req5).toBeTruthy();
-    expect(req5.status).toBe(200);
-    expect(req5.deserialized).toHaveProperty("length");
+    await scaffold.orm.close();
+  });
+
+  it("should handle allModel custom routes", async () => {
+    const app = new Koa();
+    const router = new KoaRouter();
+
+    const scaffold = new Scaffold([Model, Model2, Model3], {});
+
+    const server = createServer(app);
+    await scaffold.createDatabase();
+
+    router.get("/Model3", scaffold.middleware.allModels.findAll);
+
+    app.use(router.routes());
+    app.use(router.allowedMethods());
+    app.use(scaffold.middleware.allModels.all);
+
+    // Add a fallthrough default handler that just returns not found
+    app.use((ctx) => {
+      ctx.body = { error: true, default: true };
+      ctx.status = 404;
+    });
 
     const req6 = await GET(server, "/Model3");
     expect(req6).toBeTruthy();

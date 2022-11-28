@@ -1,7 +1,9 @@
 # Resource CRUD Operations
+
 From JSON:API Format 1.1: https://jsonapi.org/format/#crud
 
 # Fetching Resources
+
 Data, including resources and relationships, can be fetched by sending a GET request to an endpoint.
 
 Responses can be further refined with the optional features described below.
@@ -13,18 +15,21 @@ A server MUST support fetching resource data for every URL provided as:
 - a related link as part of a relationship-level links object
 
 For example, the following request fetches a collection of articles:
+
 ```
 GET /articles HTTP/1.1
 Accept: application/vnd.api+json
 ```
 
 The following request fetches an article:
+
 ```
 GET /articles/1 HTTP/1.1
 Accept: application/vnd.api+json
 ```
 
 And the following request fetches an article’s author:
+
 ```
 GET /articles/1/author HTTP/1.1
 Accept: application/vnd.api+json
@@ -35,6 +40,7 @@ A server MUST respond to a successful request to fetch an individual resource or
 A server MUST respond to a successful request to fetch a resource collection with an array of resource objects or an empty array ([]) as the response document’s primary data.
 
 For example, a GET request to a collection of articles could return:
+
 ```
 HTTP/1.1 200 OK
 Content-Type: application/vnd.api+json
@@ -60,6 +66,7 @@ Content-Type: application/vnd.api+json
 ```
 
 A similar response representing an empty collection would be:
+
 ```
 HTTP/1.1 200 OK
 Content-Type: application/vnd.api+json
@@ -73,6 +80,7 @@ Content-Type: application/vnd.api+json
 ```
 
 ### Inclusion of Related Resources
+
 An endpoint MAY return resources related to the primary data by default.
 
 An endpoint MAY also support an include query parameter to allow the client to customize which related resources should be returned.
@@ -90,12 +98,14 @@ If a server is unable to identify a relationship path or does not support inclus
 Note: For example, a relationship path could be comments.author, where comments is a relationship listed under a articles resource object, and author is a relationship listed under a comments resource object.
 
 For instance, comments could be requested with an article:
+
 ```
 GET /articles/1?include=comments HTTP/1.1
 Accept: application/vnd.api+json
 ```
 
 In order to request resources related to other resources, a dot-separated path for each relationship name can be specified:
+
 ```
 GET /articles/1?include=comments.author HTTP/1.1
 Accept: application/vnd.api+json
@@ -124,6 +134,7 @@ In this case, the primary data would be a collection of resource identifier obje
 Note: This section applies to any endpoint that responds with primary data, regardless of the request type. For instance, a server could support the inclusion of related resources along with a POST request to create a resource or relationship.
 
 ### Sparse Fieldsets
+
 A client MAY request that an endpoint return only specific fields in the response on a per-type basis by including a fields[TYPE] query parameter.
 
 The value of any fields[TYPE] parameter MUST be a comma-separated (U+002C COMMA, “,”) list that refers to the name(s) of the fields to be returned. An empty value indicates that no fields should be returned.
@@ -131,6 +142,7 @@ The value of any fields[TYPE] parameter MUST be a comma-separated (U+002C COMMA,
 If a client requests a restricted set of fields for a given resource type, an endpoint MUST NOT include additional fields in resource objects of that type in its response.
 
 If a client does not specify the set of fields for a given resource type, the server MAY send all fields, a subset of fields, or no fields for that resource type.
+
 ```
 GET /articles?include=author&fields[articles]=title,body&fields[people]=name HTTP/1.1
 Accept: application/vnd.api+json
@@ -141,6 +153,7 @@ Note: The above example URI shows unencoded [ and ] characters simply for readab
 Note: This section applies to any endpoint that responds with resources as primary or included data, regardless of the request type. For instance, a server could support sparse fieldsets along with a POST request to create a resource.
 
 ### Sorting
+
 A server MAY choose to support requests to sort resource collections according to one or more criteria (“sort fields”).
 
 `Note`: Although recommended, sort fields do not necessarily need to correspond to resource attribute and relationship names.
@@ -177,6 +190,7 @@ If sorting is supported by the server and requested by the client via query para
 Note: This section applies to any endpoint that responds with a resource collection as primary data, regardless of the request type.
 
 ### Pagination
+
 A server MAY choose to limit the number of resources returned in a response to a subset (“page”) of the whole set available.
 
 A server MAY provide links to traverse a paginated data set (“pagination links”).
@@ -199,16 +213,17 @@ The page query parameter family is reserved for pagination. Servers and clients 
 
 `Note`: This section applies to any endpoint that responds with a resource collection as primary data, regardless of the request type.
 
- Filtering
+Filtering
 The filter query parameter family is reserved for filtering data. Servers and clients SHOULD use these parameters for filtering operations.
 
 `Note`: JSON API is agnostic about the strategies supported by a server.
 
-
 # Creating Resources
+
 A resource can be created by sending a POST request to a URL that represents a collection of resources. The request MUST include a single resource object as primary data. The resource object MUST contain at least a type member.
 
 For instance, a new photo might be created with the following request:
+
 ```
 POST /photos HTTP/1.1
 Content-Type: application/vnd.api+json
@@ -229,10 +244,11 @@ Accept: application/vnd.api+json
   }
 }
 ```
+
 If a relationship is provided in the relationships member of the resource object, its value MUST be a relationship object with a data member. The value of this key represents the linkage the new resource is to have.
 
-
 # Updating Resources
+
 A resource can be updated by sending a PATCH request to the URL that represents the resource.
 
 The URL for a resource can be obtained in the self link of the resource object. Alternatively, when a GET request returns a single resource object as primary data, the same request URL can be used for updates.
@@ -240,6 +256,7 @@ The URL for a resource can be obtained in the self link of the resource object. 
 The PATCH request MUST include a single resource object as primary data. The resource object MUST contain type and id members.
 
 For example:
+
 ```
 PATCH /articles/1 HTTP/1.1
 Content-Type: application/vnd.api+json
@@ -255,12 +272,15 @@ Accept: application/vnd.api+json
   }
 }
 ```
+
 ### Updating a Resource’s Attributes
+
 Any or all of a resource’s attributes MAY be included in the resource object included in a PATCH request.
 
 If a request does not include all of the attributes for a resource, the server MUST interpret the missing attributes as if they were included with their current values. The server MUST NOT interpret missing attributes as null values.
 
 For example, the following PATCH request is interpreted as a request to update only the title and text attributes of an article:
+
 ```
 PATCH /articles/1 HTTP/1.1
 Content-Type: application/vnd.api+json
@@ -279,12 +299,14 @@ Accept: application/vnd.api+json
 ```
 
 # Deleting Resources
+
 A resource can be deleted by sending a DELETE request to the URL that represents the resource:
+
 ```
 DELETE /photos/1 HTTP/1.1
 Accept: application/vnd.api+json
 ```
 
 ### Responses
-`200 OK`: A server MAY return a 200 OK response with a document that contains no primary data if a deletion request is successful. Other top-level members, such as meta, could be included in the response document.
 
+`200 OK`: A server MAY return a 200 OK response with a document that contains no primary data if a deletion request is successful. Other top-level members, such as meta, could be included in the response document.

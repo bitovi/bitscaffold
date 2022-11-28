@@ -7,10 +7,14 @@ import {
   FindOptions,
 } from "sequelize";
 import { Scaffold } from "..";
-import { buildCreateOptions, buildDestroyOptions, buildFindOptions, buildUpdateOptions, buildWhereClause } from "./builder";
+import {
+  buildCreateOptions,
+  buildDestroyOptions,
+  buildFindOptions,
+  buildUpdateOptions,
+} from "./builder";
 import { buildDeserializerForModel } from "../deserialize";
 import { JSONObject } from "../types";
-
 
 /**
  * Provides a set of exported functions, per Model, that
@@ -45,34 +49,45 @@ export function buildParserForModel(
 
   return {
     findAll: async (querystring: string) => {
-      const { data, errors } = buildFindOptions(querystring)
+      const { data, errors } = buildFindOptions(querystring);
       if (errors.length > 0) {
-        throw scaffold.createError({ code: "400", title: "Bad Request, Invalid Query String" })
+        throw scaffold.createError({
+          code: "400",
+          title: "Bad Request, Invalid Query String",
+        });
       }
       return data;
     },
     findOne: async (querystring: string, id) => {
-      const { data, errors } = buildFindOptions(querystring, id)
+      const { data, errors } = buildFindOptions(querystring, id);
       if (errors.length > 0) {
-        throw scaffold.createError({ code: "400", title: "Bad Request, Invalid Query String" })
+        throw scaffold.createError({
+          code: "400",
+          title: "Bad Request, Invalid Query String",
+        });
       }
       return data;
     },
     findAndCountAll: async (querystring: string) => {
-      const { data, errors } = buildFindOptions(querystring)
+      const { data, errors } = buildFindOptions(querystring);
       if (errors.length > 0) {
-        throw scaffold.createError({ code: "400", title: "Bad Request, Invalid Query String" })
+        throw scaffold.createError({
+          code: "400",
+          title: "Bad Request, Invalid Query String",
+        });
       }
       return data;
     },
     create: async (body: unknown) => {
-
-      const { data, errors } = buildCreateOptions("")
+      const { data, errors } = buildCreateOptions("");
       if (errors.length > 0) {
-        throw scaffold.createError({ code: "400", title: "Bad Request, Invalid Query String" })
+        throw scaffold.createError({
+          code: "400",
+          title: "Bad Request, Invalid Query String",
+        });
       }
 
-      const parsed = await deserializer.create(body, {})
+      const parsed = await deserializer.create(body, {});
 
       return {
         body: parsed,
@@ -80,22 +95,26 @@ export function buildParserForModel(
       };
     },
     destroy: async (querystring: string, id) => {
-
-      const { data, errors } = buildDestroyOptions(querystring, id)
+      const { data, errors } = buildDestroyOptions(querystring, id);
       if (errors.length > 0) {
-        throw scaffold.createError({ code: "400", title: "Bad Request, Invalid Query String" })
+        throw scaffold.createError({
+          code: "400",
+          title: "Bad Request, Invalid Query String",
+        });
       }
 
       return data;
     },
     update: async (body, id) => {
-
-      const { data, errors } = buildUpdateOptions("", id)
+      const { data, errors } = buildUpdateOptions("", id);
       if (errors.length > 0) {
-        throw scaffold.createError({ code: "400", title: "Bad Request, Invalid Query String" })
+        throw scaffold.createError({
+          code: "400",
+          title: "Bad Request, Invalid Query String",
+        });
       }
 
-      const parsed = await deserializer.create(body, {})
+      const parsed = await deserializer.create(body, {});
 
       return {
         body: parsed,

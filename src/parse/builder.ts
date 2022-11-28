@@ -1,16 +1,25 @@
 import { ParsedUrlQuery } from "node:querystring";
-import { CreateOptions, DestroyOptions, FindOptions, Identifier, UpdateOptions, WhereOptions } from "sequelize";
+import {
+  CreateOptions,
+  DestroyOptions,
+  FindOptions,
+  Identifier,
+  UpdateOptions,
+  WhereOptions,
+} from "sequelize";
 import { SequelizeModelInstance } from "../types";
-import querystringParser from "@bitovi/sequelize-querystring-parser"
-
+import querystringParser from "@bitovi/sequelize-querystring-parser";
 
 interface QSP<T> {
-  data: T,
-  errors: Array<string>
-  orm: "sequelize"
+  data: T;
+  errors: Array<string>;
+  orm: "sequelize";
 }
 
-export function buildFindOptions(querystring: string, id?: Identifier): QSP<FindOptions> {
+export function buildFindOptions(
+  querystring: string,
+  id?: Identifier
+): QSP<FindOptions> {
   const ops: QSP<FindOptions> = querystringParser.parse(querystring);
 
   // If we do have an error, fail fast and return it, dont bother checking anything else
@@ -24,7 +33,7 @@ export function buildFindOptions(querystring: string, id?: Identifier): QSP<Find
   }
 
   if (!ops.data.where) {
-    ops.data.where = {}
+    ops.data.where = {};
     if (id) {
       ops.data.where.id = id;
     }
@@ -32,7 +41,6 @@ export function buildFindOptions(querystring: string, id?: Identifier): QSP<Find
 
   return ops;
 }
-
 
 export function buildCreateOptions(querystring: string): QSP<CreateOptions> {
   const ops: QSP<CreateOptions> = querystringParser.parse(querystring);
@@ -46,7 +54,10 @@ export function buildCreateOptions(querystring: string): QSP<CreateOptions> {
   return ops;
 }
 
-export function buildUpdateOptions(querystring: string, id?: Identifier): QSP<UpdateOptions> {
+export function buildUpdateOptions(
+  querystring: string,
+  id?: Identifier
+): QSP<UpdateOptions> {
   const ops: QSP<UpdateOptions> = querystringParser.parse(querystring);
 
   // If we do have an error, fail fast and return it, dont bother checking anything else
@@ -55,7 +66,7 @@ export function buildUpdateOptions(querystring: string, id?: Identifier): QSP<Up
   }
 
   if (!ops.data.where) {
-    ops.data.where = {}
+    ops.data.where = {};
     if (id) {
       ops.data.where.id = id;
     }
@@ -65,7 +76,10 @@ export function buildUpdateOptions(querystring: string, id?: Identifier): QSP<Up
   return ops;
 }
 
-export function buildDestroyOptions(querystring: string, id?: Identifier): QSP<DestroyOptions> {
+export function buildDestroyOptions(
+  querystring: string,
+  id?: Identifier
+): QSP<DestroyOptions> {
   const ops: QSP<DestroyOptions> = querystringParser.parse(querystring);
 
   // If we do have an error, fail fast and return it, dont bother checking anything else
@@ -74,7 +88,7 @@ export function buildDestroyOptions(querystring: string, id?: Identifier): QSP<D
   }
 
   if (!ops.data.where) {
-    ops.data.where = {}
+    ops.data.where = {};
     if (id) {
       ops.data.where.id = id;
     }
@@ -83,8 +97,6 @@ export function buildDestroyOptions(querystring: string, id?: Identifier): QSP<D
   // Perform additional checks if needed...
   return ops;
 }
-
-
 
 export function buildAttributeList(
   query: ParsedUrlQuery,

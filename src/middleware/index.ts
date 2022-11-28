@@ -18,7 +18,6 @@ export interface MiddlewareFunctionsKoa {
   schema: KoaMiddleware;
   crud: KoaMiddleware;
 
-
   /**
    * The `middleware.allModels.all` Middleware provides the primary hooks
    * between your Koa application and the Scaffold library
@@ -43,7 +42,7 @@ export interface MiddlewareFunctionsKoa {
    * @return {KoaMiddleware} Koa Middleware function that can be attached to a Koa instance (`app`) using `app.use`
    * @category General Use
    */
-  all: KoaMiddleware
+  all: KoaMiddleware;
 }
 
 /**
@@ -79,7 +78,7 @@ export function buildMiddlewareForModel(
     crud: async (ctx) => {
       ctx.throw(500, "Not Implemented");
     },
-    all: handleAllMiddleware(scaffold)
+    all: handleAllMiddleware(scaffold),
   };
 }
 
@@ -127,7 +126,9 @@ export function findAndCountAllMiddleware(
       modelName = resolveWildcard(scaffold, ctx.path);
     }
 
-    ctx.body = await scaffold.everything[modelName].findAndCountAll(ctx.querystring);
+    ctx.body = await scaffold.everything[modelName].findAndCountAll(
+      ctx.querystring
+    );
   };
 }
 
@@ -139,7 +140,10 @@ export function createMiddleware(scaffold: Scaffold, modelName: string) {
     }
 
     const body = await parseScaffoldBody(ctx, ctx.request.type);
-    ctx.body = await scaffold.everything[modelName].create(body, ctx.querystring);
+    ctx.body = await scaffold.everything[modelName].create(
+      body,
+      ctx.querystring
+    );
   };
 }
 
@@ -196,7 +200,9 @@ export function handleAllMiddleware(scaffold: Scaffold) {
           );
           return;
         }
-        ctx.body = await scaffold.everything[params.model].findAll(ctx.querystring);
+        ctx.body = await scaffold.everything[params.model].findAll(
+          ctx.querystring
+        );
         return;
       }
 
@@ -231,13 +237,18 @@ export function handleAllMiddleware(scaffold: Scaffold) {
         return await next();
       }
     }
-  }
+  };
 }
 
-function resolveWildcard(scaffold, path): string {
+function resolveWildcard(scaffold: Scaffold, path): string {
   const params = scaffold.getScaffoldURLParamsForRoute(path);
   if (!params.model) {
-    throw scaffold.createError({ code: "400", title: "Invalid URL Format: " });
+    throw scaffold.createError({ code: "400", title: "Invalid URL Format" });
   }
+
+  if (!scaffold.model[params.model]) {
+    throw scaffold.createError({ code: "400", title: "Bad Model Name: " });
+  }
+
   return params.model;
 }
