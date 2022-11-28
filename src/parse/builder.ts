@@ -17,6 +17,7 @@ interface QSP<T> {
 }
 
 export function buildFindOptions(
+  model: SequelizeModelInstance,
   querystring: string,
   id?: Identifier
 ): QSP<FindOptions> {
@@ -28,8 +29,12 @@ export function buildFindOptions(
   }
 
   // Perform additional checks if needed...
-  if (ops.data && ops.data.attributes) {
-    console.log(ops.data.attributes);
+  if (ops.data && ops.data.attributes && Array.isArray(ops.data.attributes)) {
+    ops.data.attributes.forEach((attr: string) => {
+      if (!model.rawAttributes[attr]) {
+        ops.errors.push("Unknown attribute " + attr);
+      }
+    });
   }
 
   if (!ops.data.where) {

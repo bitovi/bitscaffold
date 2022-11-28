@@ -49,7 +49,10 @@ export function buildParserForModel(
 
   return {
     findAll: async (querystring: string) => {
-      const { data, errors } = buildFindOptions(querystring);
+      const { data, errors } = buildFindOptions(
+        scaffold.model[modelName],
+        querystring
+      );
       if (errors.length > 0) {
         throw scaffold.createError({
           code: "400",
@@ -59,7 +62,11 @@ export function buildParserForModel(
       return data;
     },
     findOne: async (querystring: string, id) => {
-      const { data, errors } = buildFindOptions(querystring, id);
+      const { data, errors } = buildFindOptions(
+        scaffold.model[modelName],
+        querystring,
+        id
+      );
       if (errors.length > 0) {
         throw scaffold.createError({
           code: "400",
@@ -69,7 +76,10 @@ export function buildParserForModel(
       return data;
     },
     findAndCountAll: async (querystring: string) => {
-      const { data, errors } = buildFindOptions(querystring);
+      const { data, errors } = buildFindOptions(
+        scaffold.model[modelName],
+        querystring
+      );
       if (errors.length > 0) {
         throw scaffold.createError({
           code: "400",
