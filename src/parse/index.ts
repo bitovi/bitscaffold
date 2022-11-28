@@ -14,7 +14,7 @@ import {
   buildUpdateOptions,
 } from "./builder";
 import { buildDeserializerForModel } from "../deserialize";
-import { JSONObject } from "../types";
+import { JSONObject, ScaffoldModel } from "../types";
 
 /**
  * Provides a set of exported functions, per Model, that
@@ -39,6 +39,12 @@ export interface ParseFunctions {
     id?: Identifier
   ) => Promise<{ body: JSONObject; ops: UpdateOptions }>;
   destroy: (querystring: string, id?: Identifier) => Promise<DestroyOptions>;
+}
+
+export function buildParserForModelStandalone(
+  model: ScaffoldModel
+): ParseFunctions {
+  throw new Error("Not Implemented");
 }
 
 export function buildParserForModel(
