@@ -36,7 +36,7 @@ export interface ParseFunctions {
   findAll: (querystring: string) => Promise<FindOptions>;
   findOne: (querystring: string, id: Identifier) => Promise<FindOptions>;
   findAndCountAll: (querystring: string) => Promise<FindOptions>;
-  create: (body: unknown) => Promise<{ body: JSONObject; ops: CreateOptions }>;
+  create: <T extends ScaffoldModel = ScaffoldModel>(body: unknown) => Promise<{ body: JSONObject; ops: CreateOptions }>;
   update: (
     body: unknown,
     id?: Identifier
@@ -68,7 +68,7 @@ async function findAndCountAllImpl(model: ScaffoldModel, querystring: string) {
   return data;
 }
 
-async function createImpl(model: ScaffoldModel, body: unknown) {
+async function createImpl<T extends ScaffoldModel = ScaffoldModel>(model: T, body: unknown) {
   const deserializer = buildDeserializerForModelStandalone();
   const { data, errors } = buildCreateOptions("");
   if (errors.length > 0) {

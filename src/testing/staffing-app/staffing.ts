@@ -59,7 +59,7 @@ export function createStaffingAppInstance(): [Koa, Scaffold] {
     // Run a parse first to do a general check that all the required 
     // information is there, before we start the transactions and everything
     // If this doesnt pass we can fail fast and just bail out.
-    const createOptions = await scaffold.parse.Assignment.create(ctx.body);
+    const createOptions = await scaffold.parse.Assignment.create<Assignment>(ctx.body);
 
     const { start_date, end_date, employee_id } = ctx.body;
 
