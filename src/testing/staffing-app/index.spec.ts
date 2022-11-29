@@ -1,5 +1,5 @@
 import { createStaffingAppInstance } from "./staffing";
-import { createServer, GET } from "../utils";
+import { createServer, GET, POST } from "../utils";
 
 describe("Staffing App Example", () => {
   const [app, scaffold] = createStaffingAppInstance();
@@ -56,6 +56,19 @@ describe("Staffing App Example", () => {
     expect(findall.deserialized).toHaveProperty("length");
     expect(findall.deserialized.length).toBe(0);
   });
+
+  it("should handle complex validation", async () => {
+    const server = createServer(app);
+
+    const assignment = await POST(server, "/api/Assignment", {
+      employee_id: 1,
+      start_date: new Date(),
+      end_date: new Date()
+    });
+
+    expect(assignment).toBeTruthy();
+  });
+
 
   afterAll(async () => {
     await scaffold.orm.close();
