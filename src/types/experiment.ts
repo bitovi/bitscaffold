@@ -31,6 +31,8 @@ export const Skill: ScaffoldModelDefinition = {
     }
 };
 
+// I dont really want to have to define this interface.
+// I want it to figure these properties out via the Definition only...
 interface SkillModel extends InferModel<SkillModel> {
     id: string,
     name: string
@@ -54,6 +56,8 @@ function createModel<Q extends Model<any, any>, T extends ScaffoldModelDefinitio
 
 
 const TestSkillModel = createModel<SkillModel>(Skill);
+
+// These attributes, I assume, should be typechecked based on the actual property names in SkillModel or Skill definitions
 const result = TestSkillModel.findAll({ attributes: ["name", "id", "fish"] })
 console.log(result);
 
