@@ -33,7 +33,29 @@ describe("Internal Tests", () => {
     await scaffold.orm.close();
   });
 
-  it("should test valid scaffold model in url", async () => {
+  it("should test case difference for model name in url", async () => {
+    const scaffold = new Scaffold([Model], { prefix: "/api" });
+
+    // Test some with all lowercase
+    expect(scaffold.getScaffoldModelNameForRoute("/api/model")).toBe("Model");
+    expect(scaffold.getScaffoldModelNameForRoute("/api/model/1")).toBe("Model");
+    expect(
+      scaffold.getScaffoldModelNameForRoute("/api/model/1?params=true")
+    ).toBe("Model");
+    expect(scaffold.getScaffoldModelNameForRoute("/api/model")).toBe("Model");
+
+    // Test some in all caps
+    expect(scaffold.getScaffoldModelNameForRoute("/api/MODEL")).toBe("Model");
+    expect(scaffold.getScaffoldModelNameForRoute("/api/MODEL/1")).toBe("Model");
+    expect(
+      scaffold.getScaffoldModelNameForRoute("/api/MODEL/1?params=true")
+    ).toBe("Model");
+    expect(scaffold.getScaffoldModelNameForRoute("/api/MODEL")).toBe("Model");
+
+    await scaffold.orm.close();
+  });
+
+  it("should test exact match model name in url", async () => {
     const scaffold = new Scaffold([Model], { prefix: "/api" });
 
     // Test expected good paths
@@ -41,7 +63,12 @@ describe("Internal Tests", () => {
     expect(
       scaffold.getScaffoldModelNameForRoute("/api/Model/1?params=true")
     ).toBe("Model");
-    expect(scaffold.getScaffoldModelNameForRoute("/api/Model")).toBe("Model");
+
+    await scaffold.orm.close();
+  });
+
+  it("should test return false for unknown model names in url", async () => {
+    const scaffold = new Scaffold([Model], { prefix: "/api" });
 
     // Test expected bad paths
     expect(scaffold.getScaffoldModelNameForRoute("/api/Unknown")).toBe(false);
