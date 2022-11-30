@@ -348,8 +348,10 @@ export class Scaffold {
   getScaffoldModelNameForRoute(path: string): false | string {
     const result = this.getScaffoldURLParamsForRoute(path);
     if (result.model) {
-      if (this._sequelizeModelNames.includes(result.model)) {
-        return result.model;
+      const pathModelName = result.model;
+      const matchedModelName = this._sequelizeModelNames.find((name) => name.toLowerCase() === pathModelName.toLowerCase());
+      if (matchedModelName) {
+        return matchedModelName;
       }
     }
     return false;

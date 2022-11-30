@@ -1,4 +1,4 @@
-import { Scaffold } from "../../exports";
+import { Scaffold, Op } from "../../exports";
 import Koa, { Context } from "koa";
 import signale from "signale";
 import KoaRouter from "@koa/router";
@@ -8,6 +8,7 @@ import { Employee } from "./models/Employee";
 import { Project } from "./models/Project";
 import { Role } from "./models/Role";
 import { Skill } from "./models/Skill";
+import { Model } from "sequelize";
 
 export function createStaffingAppInstance(): [Koa, Scaffold] {
   // Create a basic Koa application
@@ -52,6 +53,56 @@ export function createStaffingAppInstance(): [Koa, Scaffold] {
   );
 
   router.get("/test-special-thing/:model", scaffold.middleware.allModels.crud);
+
+  router.post('/Assignment', async (ctx) => {
+
+    // Run a parse first to do a general check that all the required 
+    // information is there, before we start the transactions and everything
+    // If this doesnt pass we can fail fast and just bail out.
+    const createOptions = await scaffold.parse.Assignment.create<Assignment>(ctx.body);
+
+    const { start_date, end_date, employee_id } = ctx.body;
+
+    // Get a transaction
+    const check_overlap = await scaffold.orm.transaction();
+
+    let assignmentsForEmployee: Model[] = [];
+    assignmentsForEmployee = await scaffold.model.Assignment.findAll({
+      where: {
+        employee_id: employee_id
+      },
+      transaction: check_overlap
+    });
+
+    assignmentsForEmployee = await scaffold.model.Assignment.findAll({
+      where: {
+        employee_id: employee_id,
+        [Op.and]: {
+          start_date: {
+            [Op.gt]: start_date
+          },
+          end_date: {
+            [Op.lt]: end_date
+          }
+        }
+      },
+      transaction: check_overlap
+
+    })
+
+    if (assignmentsForEmployee.length > 0) {
+      await check_overlap.rollback()
+      ctx.throw(409, "EMPLOYEE_ALREADY_ASSIGNED");
+    }
+
+    const assignment = await scaffold.model.Assignment.create(createOptions.body, { ...createOptions.ops, transaction: check_overlap })
+    const result = await scaffold.serialize.Assignment.create(assignment)
+    await check_overlap.commit();
+
+    ctx.body = result
+    ctx.status = 201;
+  })
+
 
   // Hook up the router
   app.use(router.routes());

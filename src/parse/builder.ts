@@ -7,7 +7,7 @@ import {
   UpdateOptions,
   WhereOptions,
 } from "sequelize";
-import { SequelizeModelInstance } from "../types";
+import { ScaffoldModel, SequelizeModelInstance } from "../types";
 import querystringParser from "@bitovi/sequelize-querystring-parser";
 
 interface QSP<T> {
@@ -17,7 +17,7 @@ interface QSP<T> {
 }
 
 export function buildFindOptions(
-  model: SequelizeModelInstance,
+  model: ScaffoldModel,
   querystring: string,
   id?: Identifier
 ): QSP<FindOptions> {
@@ -31,7 +31,7 @@ export function buildFindOptions(
   // Perform additional checks if needed...
   if (ops.data && ops.data.attributes && Array.isArray(ops.data.attributes)) {
     ops.data.attributes.forEach((attr: string) => {
-      if (!model.rawAttributes[attr]) {
+      if (!model.attributes[attr]) {
         ops.errors.push("Unknown attribute " + attr);
       }
     });

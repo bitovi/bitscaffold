@@ -15,6 +15,8 @@ export const Assignment: ScaffoldModel = {
     },
     end_date: DataTypes.DATE,
   },
+  validation: {
+  },
   belongsTo: [
     {
       target: "Role",
