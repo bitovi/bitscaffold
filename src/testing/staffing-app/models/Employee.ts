@@ -18,9 +18,9 @@ export const Employee: ScaffoldModel = {
     age: {
       type: DataTypes.INTEGER,
       validate: {
-        min: 18
-      }
-    }
+        min: 18,
+      },
+    },
   },
   validation: {
     startDateBeforeEndDate() {

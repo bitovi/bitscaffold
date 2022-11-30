@@ -19,9 +19,23 @@ describe("Default Tests", () => {
   };
 
   it("should handle global parse behavior", async () => {
-    const findOptions = await Parse(Model).findAll("?attributes=badAttribute");
-    console.error(findOptions);
-    expect(findOptions).toEqual(null);
+    let err = null;
+    try {
+      await Parse(Model).findAll("fields[model]=badAttribute");
+    } catch (error) {
+      err = error;
+    }
+
+    expect(err).toBeTruthy();
+
+    const findOptions1 = await Parse(Model).findAll(
+      "fields[model]=firstName&include=assignments"
+    );
+    expect(findOptions1).toStrictEqual({
+      attributes: ["firstName"],
+      include: ["assignments"],
+      where: {},
+    });
   });
 
   it("should handle global serialize behavior", async () => {

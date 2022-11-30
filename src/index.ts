@@ -349,7 +349,9 @@ export class Scaffold {
     const result = this.getScaffoldURLParamsForRoute(path);
     if (result.model) {
       const pathModelName = result.model;
-      const matchedModelName = this._sequelizeModelNames.find((name) => name.toLowerCase() === pathModelName.toLowerCase());
+      const matchedModelName = this._sequelizeModelNames.find(
+        (name) => name.toLowerCase() === pathModelName.toLowerCase()
+      );
       if (matchedModelName) {
         return matchedModelName;
       }

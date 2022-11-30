@@ -63,12 +63,11 @@ describe("Staffing App Example", () => {
     const assignment = await POST(server, "/api/Assignment", {
       employee_id: 1,
       start_date: new Date(),
-      end_date: new Date()
+      end_date: new Date(),
     });
 
     expect(assignment).toBeTruthy();
   });
-
 
   afterAll(async () => {
     await scaffold.orm.close();

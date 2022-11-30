@@ -13,10 +13,7 @@ import {
   buildFindOptions,
   buildUpdateOptions,
 } from "./builder";
-import {
-  buildDeserializerForModel,
-  buildDeserializerForModelStandalone,
-} from "../deserialize";
+import { buildDeserializerForModelStandalone } from "../deserialize";
 import { JSONObject, ScaffoldModel } from "../types";
 
 /**
@@ -36,7 +33,9 @@ export interface ParseFunctions {
   findAll: (querystring: string) => Promise<FindOptions>;
   findOne: (querystring: string, id: Identifier) => Promise<FindOptions>;
   findAndCountAll: (querystring: string) => Promise<FindOptions>;
-  create: <T extends ScaffoldModel = ScaffoldModel>(body: unknown) => Promise<{ body: JSONObject; ops: CreateOptions }>;
+  create: <T extends ScaffoldModel = ScaffoldModel>(
+    body: unknown
+  ) => Promise<{ body: JSONObject; ops: CreateOptions }>;
   update: (
     body: unknown,
     id?: Identifier
@@ -47,6 +46,7 @@ export interface ParseFunctions {
 async function findAllImpl(model: ScaffoldModel, querystring: string) {
   const { data, errors } = buildFindOptions(model, querystring);
   if (errors.length > 0) {
+    console.error(errors);
     throw new Error("Bad Request, Invalid Query String");
   }
   return data;
@@ -55,6 +55,7 @@ async function findAllImpl(model: ScaffoldModel, querystring: string) {
 async function findOneImpl(model: ScaffoldModel, querystring: string, id) {
   const { data, errors } = buildFindOptions(model, querystring, id);
   if (errors.length > 0) {
+    console.error(errors);
     throw new Error("Bad Request, Invalid Query String");
   }
   return data;
@@ -63,15 +64,20 @@ async function findOneImpl(model: ScaffoldModel, querystring: string, id) {
 async function findAndCountAllImpl(model: ScaffoldModel, querystring: string) {
   const { data, errors } = buildFindOptions(model, querystring);
   if (errors.length > 0) {
+    console.error(errors);
     throw new Error("Bad Request, Invalid Query String");
   }
   return data;
 }
 
-async function createImpl<T extends ScaffoldModel = ScaffoldModel>(model: T, body: unknown) {
+async function createImpl<T extends ScaffoldModel = ScaffoldModel>(
+  model: T,
+  body: unknown
+) {
   const deserializer = buildDeserializerForModelStandalone();
   const { data, errors } = buildCreateOptions("");
   if (errors.length > 0) {
+    console.error(errors);
     throw new Error("Bad Request, Invalid Query String");
   }
 
@@ -87,6 +93,7 @@ async function updateImpl(model: ScaffoldModel, body: unknown, id) {
   const deserializer = buildDeserializerForModelStandalone();
   const { data, errors } = buildUpdateOptions("", id);
   if (errors.length > 0) {
+    console.error(errors);
     throw new Error("Bad Request, Invalid Query String");
   }
 
@@ -101,6 +108,7 @@ async function updateImpl(model: ScaffoldModel, body: unknown, id) {
 async function destroyImpl(model: ScaffoldModel, querystring: string, id) {
   const { data, errors } = buildDestroyOptions(querystring, id);
   if (errors.length > 0) {
+    console.error(errors);
     throw new Error("Bad Request, Invalid Query String");
   }
 
