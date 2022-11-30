@@ -12,6 +12,10 @@ type InferModel<T extends Model<any, any>> = Model<InferAttributes<T>, InferCrea
 interface ScaffoldModel<T extends InferModel<T>> extends ScaffoldModelDefinition {
     // eslint-disable-next-line @typescript-eslint/ban-types
     findAll: ModelCtor<T>['findAll'];
+    findOne: ModelCtor<T>['findOne'];
+    create: ModelCtor<T>['create'];
+    update: ModelCtor<T>['update'];
+    destroy: ModelCtor<T>['destroy'];
 }
 
 export const Skill: ScaffoldModelDefinition = {
@@ -48,7 +52,11 @@ function createModel<Q extends Model<any, any>, T extends ScaffoldModelDefinitio
     const model: ScaffoldModel<Q> = {
         name: modeldef.name,
         attributes: modeldef.attributes,
-        findAll: temp.findAll
+        findAll: temp.findAll,
+        findOne: temp.findOne,
+        create: temp.create,
+        update: temp.update,
+        destroy: temp.destroy
     }
 
     return model;
