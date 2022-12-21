@@ -3,6 +3,7 @@ import Koa from "koa";
 import signale from "signale";
 
 import { App, User, Host } from "./models";
+import { Model, FindOptions } from "sequelize";
 
 export async function createDashboardAppInstance() {
     // Create a basic Koa application
@@ -15,6 +16,32 @@ export async function createDashboardAppInstance() {
             dialect: 'oracle'
         }
     });
+
+    scaffold.model.App.beforeFind('calc-healthy-hosts-before', (options: FindOptions<any>) => {
+        // Do something here to check if the user wants healthy hosts
+        if (options.attributes) {
+            const fields = Object.keys(options.attributes)
+            if (fields.includes('hosts')) {
+                // Add to the FindOptions to do the join in the hosts
+                if (!options.include) {
+                    options.include = [];
+                }
+
+                if (!Array.isArray(options.include)) {
+                    options.include = [options.include]
+                }
+
+                if (options.include)
+                    options.include.push()
+            }
+        }
+    })
+    scaffold.model.App.afterFind('calc-healthy-hosts-after', (instance: Model<{ hosts }>, options) => {
+        // Do something to check the host status and calculate numbers based on that
+        if (instance.getDataValue('hosts')) {
+
+        }
+    })
 
     // Set up your Koa app as normal, for example, a logging middleware
     app.use(async (ctx, next) => {
