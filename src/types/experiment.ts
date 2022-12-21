@@ -5,32 +5,15 @@ import {
   Sequelize,
   InferAttributes,
   InferCreationAttributes,
-  ModelStatic,
-  ModelCtor,
+  CreationOptional,
 } from "sequelize";
-const _seqModelSymbol = Symbol("underlying-sequelize-model");
 
-interface ScaffoldModelDefinition {
+interface ScaffoldModel {
   attributes: ModelAttributes;
   name: string;
 }
 
-type InferModel<T extends Model<any, any>> = Model<
-  InferAttributes<T>,
-  InferCreationAttributes<T>
->;
-
-interface ScaffoldModel<T extends InferModel<T>>
-  extends ScaffoldModelDefinition {
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  findAll: ModelCtor<T>["findAll"];
-  findOne: ModelCtor<T>["findOne"];
-  create: ModelCtor<T>["create"];
-  update: ModelCtor<T>["update"];
-  destroy: ModelCtor<T>["destroy"];
-}
-
-export const Skill: ScaffoldModelDefinition = {
+export const Skill: ScaffoldModel = {
   name: "Skill",
   attributes: {
     id: {
@@ -47,57 +30,61 @@ export const Skill: ScaffoldModelDefinition = {
   },
 };
 
-// I dont really want to have to define this interface.
-// I want it to figure these properties out via the Definition only...
-interface SkillModel extends InferModel<SkillModel> {
-  id: string;
-  name: string;
-}
-
 const sequelize = new Sequelize("sqlite::memory:", {
   logging: false,
 });
 
-function createModel<
-  Q extends Model<any, any>,
-  T extends ScaffoldModelDefinition = ScaffoldModelDefinition
->(modeldef: T): ScaffoldModel<Q> {
-  const temp = sequelize.define<Q>(modeldef.name, modeldef.attributes);
-
-  const model: ScaffoldModel<Q> = {
-    name: modeldef.name,
-    attributes: modeldef.attributes,
-    findAll: temp.findAll,
-    findOne: temp.findOne,
-    create: temp.create,
-    update: temp.update,
-    destroy: temp.destroy,
-  };
-
-  return model;
+class Employee1 extends Model<
+  InferAttributes<Employee1>,
+  InferCreationAttributes<Employee1>
+> {
+  declare firstName: string;
+  declare lastName: string;
+  declare id: CreationOptional<string>;
 }
 
-const TestSkillModel = createModel<SkillModel>(Skill);
+Employee1.init(
+  {
+    id: {
+      type: DataTypes.UUID,
+      primaryKey: true,
+      defaultValue: DataTypes.UUIDV4,
+      allowNull: false,
+    },
+    firstName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    lastName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+  },
+  { sequelize: sequelize }
+);
 
-// These attributes, I assume, should be typechecked based on the actual property names in SkillModel or Skill definitions
-const result = null; // TestSkillModel.findAll({ attributes: ["name", "id", "fish"] });
-console.log(result);
+// const result3 = await Employee1.create({
+//   firstName: "Mark",
+//   lastName: "Repka",
+//   badProp: true,
+// });
+// console.log(result3);
 
-function pickObjectKeys<T, K extends keyof T>(obj: T, keys: K[]) {
-  const result = {} as Pick<T, K>;
-  for (const key of keys) {
-    if (key in obj) {
-      result[key] = obj[key];
-    }
-  }
-  return result;
-}
+// function pickObjectKeys<T, K extends keyof T>(obj: T, keys: K[]) {
+//   const result = {} as Pick<T, K>;
+//   for (const key of keys) {
+//     if (key in obj) {
+//       result[key] = obj[key];
+//     }
+//   }
+//   return result;
+// }
 
-const language = {
-  name: "TypeScript",
-  age: 8,
-  extensions: ["ts", "tsx"],
-};
+// const language = {
+//   name: "TypeScript",
+//   age: 8,
+//   extensions: ["ts", "tsx"],
+// };
 
-const ageAndExtensions = pickObjectKeys(language, ["age", "extensions"]);
-console.log(ageAndExtensions);
+// const ageAndExtensions = pickObjectKeys(language, ["age", "extensions"]);
+// console.log(ageAndExtensions);
