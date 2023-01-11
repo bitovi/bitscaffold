@@ -1,6 +1,17 @@
-import { ScaffoldModel, DataTypes } from "../../../types";
+import { Optional } from "sequelize";
+import { ScaffoldModel, DataTypes, Model } from "../../../types";
 
-export const App: ScaffoldModel = {
+type AppAttributes = {
+    id: string;
+    status: 'UP'|'DOWN'|'MAINTENANCE';
+    healthyHosts: unknown;
+    port: 'CLOUD'|'LOCAL';
+    endpoint: string;
+    environment: string;
+}
+type AppCreationAttributes = Optional<AppAttributes, 'id'>;
+
+export const App: ScaffoldModel<Model<AppAttributes, AppCreationAttributes>> = {
     name: "App",
     attributes: {
         id: {
@@ -11,6 +22,13 @@ export const App: ScaffoldModel = {
         },
         status: {
             type: DataTypes.ENUM('UP', 'DOWN', 'MAINTENANCE')
+        },
+        healthyHosts: {
+            type: DataTypes.VIRTUAL,
+            get() {
+                // Can we tell it to get Hosts from the App Model (this?)
+                return this.Hosts.status
+            },
         },
         port: {
             type: DataTypes.ENUM('CLOUD', 'LOCAL'),
@@ -66,6 +84,10 @@ export const Host: ScaffoldModel = {
             type: DataTypes.STRING,
             allowNull: false,
         },
+        status: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false
+        }
     },
     belongsTo: [{ target: 'App' }]
 };

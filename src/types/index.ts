@@ -14,7 +14,7 @@ import {
 } from "sequelize";
 import { Scaffold } from "..";
 
-export { DataTypes, ModelValidateOptions, ModelAttributes } from "sequelize";
+export { DataTypes, ModelValidateOptions, ModelAttributes, Model } from "sequelize";
 
 export type KoaMiddleware = Middleware;
 export type ExpressMiddleware = (
@@ -140,7 +140,7 @@ export interface HasManyResult {
  * functions provided by your Scaffold instance
  *
  */
-export interface ScaffoldModel {
+export interface ScaffoldModel<T extends Model = Model<never,never>> {
   /**
    * Model Attributes define the fields that are associated with this model and
    * also reflect, generally, on the associated columns in your underlying database
@@ -155,7 +155,7 @@ export interface ScaffoldModel {
    * }
    * ```
    */
-  attributes: ModelAttributes;
+  attributes: ModelAttributes<T>;
 
   /**
    * The Model `name` dictates the underlying database table name as well
