@@ -1,12 +1,4 @@
-import {
-  DataTypes,
-  ModelAttributes,
-  Model,
-  Sequelize,
-  InferAttributes,
-  InferCreationAttributes,
-  CreationOptional,
-} from "sequelize";
+import { DataTypes, ModelAttributes } from "@sequelize/core";
 
 interface ScaffoldModel {
   attributes: ModelAttributes;
@@ -30,38 +22,38 @@ export const Skill: ScaffoldModel = {
   },
 };
 
-const sequelize = new Sequelize("sqlite::memory:", {
-  logging: false,
-});
+// const sequelize = new Sequelize("sqlite::memory:", {
+//   logging: false,
+// });
 
-class Employee1 extends Model<
-  InferAttributes<Employee1>,
-  InferCreationAttributes<Employee1>
-> {
-  declare firstName: string;
-  declare lastName: string;
-  declare id: CreationOptional<string>;
-}
+// class Employee1 extends Model<
+//   InferAttributes<Employee1>,
+//   InferCreationAttributes<Employee1>
+// > {
+//   declare firstName: string;
+//   declare lastName: string;
+//   declare id: CreationOptional<string>;
+// }
 
-Employee1.init(
-  {
-    id: {
-      type: DataTypes.UUID,
-      primaryKey: true,
-      defaultValue: DataTypes.UUIDV4,
-      allowNull: false,
-    },
-    firstName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    lastName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-  },
-  { sequelize: sequelize }
-);
+// Employee1.init(
+//   {
+//     id: {
+//       type: DataTypes.UUID,
+//       primaryKey: true,
+//       defaultValue: DataTypes.UUIDV4,
+//       allowNull: false,
+//     },
+//     firstName: {
+//       type: DataTypes.STRING,
+//       allowNull: false,
+//     },
+//     lastName: {
+//       type: DataTypes.STRING,
+//       allowNull: false,
+//     },
+//   },
+//   { sequelize: sequelize }
+// );
 
 // const result3 = await Employee1.create({
 //   firstName: "Mark",

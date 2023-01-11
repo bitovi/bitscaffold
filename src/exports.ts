@@ -25,4 +25,4 @@ export { ParseFunctions } from "./parse";
 
 export { SerializeFunctions } from "./serialize";
 
-export { Op } from "sequelize";
+export { Op } from "@sequelize/core";

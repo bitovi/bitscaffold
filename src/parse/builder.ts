@@ -6,7 +6,7 @@ import {
   Identifier,
   UpdateOptions,
   WhereOptions,
-} from "sequelize";
+} from "@sequelize/core";
 import { ScaffoldModel, SequelizeModelInstance } from "../types";
 import querystringParser from "@bitovi/sequelize-querystring-parser";
 

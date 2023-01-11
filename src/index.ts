@@ -1,4 +1,4 @@
-import { Identifier, Sequelize } from "sequelize";
+import { Identifier, Sequelize } from "@sequelize/core";
 import { match } from "path-to-regexp";
 import {
   Error as SerializedError,

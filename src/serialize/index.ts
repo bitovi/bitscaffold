@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { Model } from "sequelize";
+import { Model } from "@sequelize/core";
 import { Serializer, SerializerOptions } from "jsonapi-serializer";
 import { Scaffold } from "..";
 import { JSONObject, ScaffoldModel } from "../types";

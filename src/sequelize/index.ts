@@ -1,4 +1,4 @@
-import { Model, Sequelize, Options } from "sequelize";
+import { Model, Sequelize, Options } from "@sequelize/core";
 import {
   ScaffoldModel,
   SequelizeModelsCollection,

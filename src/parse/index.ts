@@ -5,7 +5,7 @@ import {
   Identifier,
   CreateOptions,
   FindOptions,
-} from "sequelize";
+} from "@sequelize/core";
 import { Scaffold } from "..";
 import {
   buildCreateOptions,

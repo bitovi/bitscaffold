@@ -15,6 +15,6 @@
    - Uses TypeDoc to generate the documentation pages, this also happens on a push to `main` and the generated documentation can be found here: https://bitovi.github.io/bitscaffold/
    - This is configured via the `.github/typedoc.yml` file
 
-
 Recommendations:
-* `npm run build` will run prettier in addition to doing a typescript build. This is really useful for cleaning up before a commit as well as type checking. 
+
+- `npm run build` will run prettier in addition to doing a typescript build. This is really useful for cleaning up before a commit as well as type checking.

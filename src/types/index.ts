@@ -11,10 +11,16 @@ import {
   HasManyOptions,
   Options,
   ModelCtor,
-} from "sequelize";
+} from "@sequelize/core";
 import { Scaffold } from "..";
 
-export { DataTypes, ModelValidateOptions, ModelAttributes, Model } from "sequelize";
+export {
+  DataTypes,
+  ModelValidateOptions,
+  ModelAttributes,
+  Model,
+  Optional,
+} from "@sequelize/core";
 
 export type KoaMiddleware = Middleware;
 export type ExpressMiddleware = (
@@ -141,7 +147,7 @@ export interface HasManyResult {
  *
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface ScaffoldModel<T extends Model = Model<any,any>> {
+export interface ScaffoldModel<T extends Model = Model<any, any>> {
   /**
    * Model Attributes define the fields that are associated with this model and
    * also reflect, generally, on the associated columns in your underlying database
@@ -156,7 +162,7 @@ export interface ScaffoldModel<T extends Model = Model<any,any>> {
    * }
    * ```
    */
-  attributes: ModelAttributes<T,T['_attributes']>;
+  attributes: ModelAttributes<T, T["_attributes"]>;
 
   /**
    * The Model `name` dictates the underlying database table name as well

@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { Scaffold } from "..";
-import { Identifier } from "sequelize";
+import { Identifier } from "@sequelize/core";
 import { JSONObject } from "../types";
 
 export interface EverythingFunctions {
