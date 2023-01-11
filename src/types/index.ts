@@ -140,7 +140,8 @@ export interface HasManyResult {
  * functions provided by your Scaffold instance
  *
  */
-export interface ScaffoldModel<T extends Model = Model<never,never>> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface ScaffoldModel<T extends Model = Model<any,any>> {
   /**
    * Model Attributes define the fields that are associated with this model and
    * also reflect, generally, on the associated columns in your underlying database
@@ -155,7 +156,7 @@ export interface ScaffoldModel<T extends Model = Model<never,never>> {
    * }
    * ```
    */
-  attributes: ModelAttributes<T>;
+  attributes: ModelAttributes<T,T['_attributes']>;
 
   /**
    * The Model `name` dictates the underlying database table name as well

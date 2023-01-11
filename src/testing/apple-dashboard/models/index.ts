@@ -47,7 +47,16 @@ export const App: ScaffoldModel<Model<AppAttributes, AppCreationAttributes>> = {
     hasMany: [{ target: "Host", options: { as: "hosts" } }],
 };
 
-export const User: ScaffoldModel = {
+
+type UserAttributes = {
+    id: string;
+    firstName: string;
+    lastName: string;
+    fullName: string;
+}
+type UserCreationAttributes = Optional<UserAttributes, 'id'>;
+
+export const User: ScaffoldModel<Model<UserAttributes, UserCreationAttributes>> = {
     name: "User",
     attributes: {
         id: {
@@ -63,7 +72,13 @@ export const User: ScaffoldModel = {
         lastName: {
             type: DataTypes.STRING,
             allowNull: false,
-        }
+        },
+        fullName: {
+            type: DataTypes.VIRTUAL(DataTypes.STRING, ['firstName', 'lastName']),
+            get() {
+                return `${this.firstName} ${this.lastName}`
+            }
+        },
     }
 };
 
