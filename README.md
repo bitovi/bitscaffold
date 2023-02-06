@@ -1,9 +1,3 @@
-# Note: Work In Progress
-
-Not everything here is totally functional or usable for real. Much of the work described below is in-progress and not available publically yet!
-
-[![Join our Slack](https://img.shields.io/badge/slack-join%20chat-611f69.svg)](https://www.bitovi.com/community/slack?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
 # About Scaffold
 
 Scaffold is a web application framework designed to accelerate the development of new, or enhancement of existing, CRUD applications. If all you need is a simple CRUD application Scaffold can provide you with a fully functional system straight from your database schema. If you have more specialized requirements Scaffold makes it easy to customize every part of the application to meet your needs.
@@ -78,6 +72,10 @@ To check that things are working correctly you can try the following URLs:
   - You should see 'Hello From Koa' as this endpoint hits the default non-CRUD handler
 
 Thats it! You have a basic CRUD application up and running. For more examples and detailed usage of what you can do with Scaffold, take a look at the more complete 'Getting Started Tutorial' below.
+
+Have more questions? Check out our Slack!
+
+[![Join our Slack](https://img.shields.io/badge/slack-join%20chat-611f69.svg)](https://www.bitovi.com/community/slack?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 # How It Works
 
@@ -209,37 +207,14 @@ Next we can start up the Scaffold to see everything in action.
 node index.js
 ```
 
-Once you see `Started on port 3000` you can open your browser to http://localhost:3000/ to see things in action. The default homepage will show you a list of the current loaded models with a link to their respective page.
+You can use a REST Client to experiment with some of the following endpoints to see them in action:
 
-<img src="media/Screen Shot 2022-11-04 at 1.02.36 PM.png" alt="list of resources" />
+- GET http://localhost:3000/api/Players
+- POST http://localhost:3000/api/Players
 
-Navigate to [http://localhost:3000/Players](http://localhost:3000/Players) and you will see a page containing a list of all the Players in our database. Because we have not yet created any, this list will be empty.
+Now that we have our basic application up and running we can start looking at how to make changes and further develop our example
 
-<img src="media/Screen Shot 2022-11-04 at 1.03.18 PM.png" alt="empty list of players" />
-
-Navigate to [http://localhost:3000/Players/new](http://localhost:3000/Players/new) by clicking on the provided 'Create Player' button at the bottom of the page. From here, fill in the first name and last name fields, and click "Save":
-
-<img src="media/Screen Shot 2022-11-04 at 1.04.13 PM.png" alt="Create a new player" />
-
-Navigate to [http://localhost:3000/Players](http://localhost:3000/Players), and you will see the user that you just created has been fetched from the database and displayed for you!
-
-<img src="media/Screen Shot 2022-11-04 at 1.05.33 PM.png" alt="populated list of players" />
-
-Just like that we created an example Player within the database! A lot of things happened under the hood here, with Scaffold handling all of the frontend forms as well as backend default behavior for creating these records.
-
-Lets try one more thing using the Scaffold defaults before we move on to customizing things.
-
-Navigate to [http://localhost:3000/Team/new](http://localhost:3000/Team/new), fill out the 'Name' field. Because a Team can have many players assigned to it, you can select your existing users from the dropdown, and click "Save" to create the new team:
-
-<img src="media/Screen Shot 2022-11-04 at 1.11.15 PM.png" alt="Create a new team" />
-
-Just like the player list, if you navigate to Navigate to [http://localhost:3000/Teams](http://localhost:3000/Teams), you can see the Team you just created.
-
-<img src="media/Screen Shot 2022-11-04 at 1.13.31 PM.png" alt="populated list of teams" />
-
-Now that we have our basic application up and running we can start looking at how to make changed and rapidly develop
-
-One of the first things that we might want to explore is how we can add (or remove) fields from our Models and see how this is reflected in the user interface automatically.
+One of the first things that we might want to explore is how we can add (or remove) fields from our Models and see how this is reflected in the CRUD endpoints.
 
 Taking the same models as before, now we want to add a new field for the Players. Maybe now we also want to include their position on the team. If we use these models to describe a Football team we could create an ENUM field of positions:
 
@@ -279,15 +254,10 @@ Now that we have this new field defined within our model we can start the Scaffo
 node index.js
 ```
 
-Once you see `Started on port 3000` you can open your browser to http://localhost:3000/ to see things in action. The default homepage will show you a list of the current loaded models with a link to their respective page as before.
+You can use a REST Client to experiment with some of the following endpoints to see them in action:
 
-Navigate to http://localhost:3000/Players/new by clicking ‘Players’ on the left side menu and then on the provided 'Create Player' button at the bottom of the page. From here, fill in the first name and last name fields, along with our new position field in a dropdown, and click "Save":
-
-<img src="media/placeholder.png" alt="Player create with position dropdown" />
-
-Just like that we have updated our Player CRUD, both frontend and backend, to support a new field! There are many more things you can do with Scaffold but this is the end of the getting started tutorial.
-
-The remainder of the documentation contains further details about how Scaffold can help you enhance your CRUD applications and REST services.
+- GET http://localhost:3000/api/Players
+- POST http://localhost:3000/api/Players
 
 # Project Customization
 
@@ -711,22 +681,9 @@ For more information on these relationships and the options available check the 
 
 # Need help or have questions?
 
-This project is supported by [Bitovi, a Nodejs consultancy](https://www.bitovi.com/backend-consulting/nodejs-consulting). You can get help or ask questions on our:
+This project is supported by [Bitovi](https://www.bitovi.com/backend-consulting/nodejs-consulting) a Nodejs consultancy. You can get help or ask questions on our:
 
 - [Slack Community](https://www.bitovi.com/community/slack)
 - [Twitter](https://twitter.com/bitovi)
 
 Or, you can hire us for training, consulting, or development. [Set up a free consultation.](https://www.bitovi.com/backend-consulting/nodejs-consulting)
-
-# Local Development
-
-Are you a developer looking to work on the Scaffold library itself within a local project? You can connect a local cloned copy of Scaffold to your project using `npm link`.
-
-1. Clone this repository: `git@github.com:bitovi/bitscaffold.git`
-2. Change into the bitscaffold directory: `cd bitscaffold`
-3. Run `npm install` to pull in the build dependencies
-4. Run `npm run build` to create the JavaScript exports needed for external projects
-5. Run `npm link`. This will create a link from the global `node_modules` folder to your bitscaffold directory
-6. Switch over to your existing Scaffold project directory, `cd my-scaffold-project`
-7. Create the link to this project with `npm link bitscaffold`
-8. You may need to re-run `npm link bitscaffold` if you run other `npm install` like commands in your project repository
