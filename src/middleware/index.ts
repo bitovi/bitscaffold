@@ -217,6 +217,12 @@ export function handleAllMiddleware(scaffold: Scaffold) {
 
       case "PUT": {
         const body = await parseScaffoldBody(ctx, ctx.request.type);
+        if (!params.id) {
+          throw scaffold.createError({
+            code: "400",
+            title: "Invalid ID Provided",
+          });
+        }
         ctx.body = await scaffold.everything[params.model].update(
           body,
           ctx.querystring,
@@ -226,6 +232,12 @@ export function handleAllMiddleware(scaffold: Scaffold) {
       }
 
       case "DELETE": {
+        if (!params.id) {
+          throw scaffold.createError({
+            code: "400",
+            title: "Invalid ID Provided",
+          });
+        }
         ctx.body = await scaffold.everything[params.model].destroy(
           ctx.querystring,
           params.id

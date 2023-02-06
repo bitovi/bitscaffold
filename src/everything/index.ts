@@ -34,9 +34,11 @@ export function findAllEverything(scaffold: Scaffold, modelName: string) {
   return async function findAllImpl(querystring: string) {
     const params = await scaffold.parse[modelName].findAll(querystring);
     const result = await scaffold.model[modelName].findAll(params);
+    const attributes = (params.attributes ??
+      Object.keys(result[0]?.toJSON() ?? {})) as string[];
     const response = await scaffold.serialize[modelName].findAll(result, {
       keyForAttribute: "camelCase",
-      attributes: params.attributes as string[],
+      attributes,
     });
     return response;
   };
@@ -53,9 +55,11 @@ export function findOneEverything(scaffold: Scaffold, modelName: string) {
         detail: modelName + " with id " + id + " was not found",
       });
     }
+    const attributes = (params.attributes ??
+      Object.keys(result[0]?.toJSON())) as string[];
     const response = await scaffold.serialize[modelName].findOne(result, {
       keyForAttribute: "camelCase",
-      attributes: params.attributes as string[],
+      attributes,
     });
     return response;
   };
