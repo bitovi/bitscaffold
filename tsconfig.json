@@ -8,6 +8,7 @@
     "allowJs": true,
     "strictNullChecks": true,
     "sourceMap": true,
+    "declaration": true,
     "resolveJsonModule": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
