@@ -56,7 +56,7 @@ export function findOneEverything(scaffold: Scaffold, modelName: string) {
       });
     }
     const attributes = (params.attributes ??
-      Object.keys(result[0]?.toJSON())) as string[];
+      Object.keys(result?.toJSON()) ?? {}) as string[];
     const response = await scaffold.serialize[modelName].findOne(result, {
       keyForAttribute: "camelCase",
       attributes,

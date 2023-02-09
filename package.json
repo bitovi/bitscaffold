@@ -5,6 +5,7 @@
   "main": "dist/exports.js",
   "scripts": {
     "prebuild": "npm run pretty:fix",
+    "prepare": "npm run build",
     "build": "tsc",
     "build:watch": "tsc --watch",
     "test": "jest",
