@@ -43,8 +43,8 @@ describe("Attribute Tests", () => {
     expect(find1).toBeTruthy();
     expect(find1.status).toBe(200);
     expect(find1.serialized.data).toBeTruthy();
-    expect(find1.deserialized).toHaveProperty("firstName");
-    expect(find1.deserialized).not.toHaveProperty("lastName");
+    expect(find1.deserialized).toHaveProperty("first_name");
+    expect(find1.deserialized).not.toHaveProperty("last_name");
 
     const find2 = await GET(
       server,
@@ -54,8 +54,8 @@ describe("Attribute Tests", () => {
     expect(find2).toBeTruthy();
     expect(find2.status).toBe(200);
     expect(find2.serialized.data).toBeTruthy();
-    expect(find2.deserialized).not.toHaveProperty("firstName");
-    expect(find2.deserialized).toHaveProperty("lastName");
+    expect(find2.deserialized).not.toHaveProperty("first_name");
+    expect(find2.deserialized).toHaveProperty("last_name");
 
     await scaffold.orm.close();
   });
@@ -119,8 +119,8 @@ describe("Attribute Tests", () => {
     expect(find1.deserialized.length).toBe(3);
 
     find1.deserialized.forEach((entry) => {
-      expect(entry).toHaveProperty("firstName");
-      expect(entry).not.toHaveProperty("lastName");
+      expect(entry).toHaveProperty("first_name");
+      expect(entry).not.toHaveProperty("last_name");
     });
 
     const find2 = await GET(server, "/api/Model/?fields[Model]=lastName");
@@ -131,8 +131,8 @@ describe("Attribute Tests", () => {
     expect(find2.deserialized.length).toBe(3);
 
     find2.deserialized.forEach((entry) => {
-      expect(entry).toHaveProperty("lastName");
-      expect(entry).not.toHaveProperty("firstName");
+      expect(entry).toHaveProperty("last_name");
+      expect(entry).not.toHaveProperty("first_name");
     });
 
     await scaffold.orm.close();
