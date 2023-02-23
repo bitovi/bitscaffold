@@ -32,7 +32,7 @@ async function parse(result) {
     }
 
     try {
-      const deserializer = new Deserializer({ keyForAttribute: "camelCase" });
+      const deserializer = new Deserializer({ keyForAttribute: "snake_case" });
       const temp = await deserializer.deserialize(serialized);
       deserialized = temp;
     } catch (err) {

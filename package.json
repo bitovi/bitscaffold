@@ -3,6 +3,7 @@
   "version": "0.0.8",
   "description": "Fullstack CRUD Application Solution",
   "main": "dist/exports.js",
+  "types": "dist/exports.d.ts",
   "scripts": {
     "prebuild": "npm run pretty:fix",
     "prepare": "npm run build",

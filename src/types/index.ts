@@ -12,6 +12,7 @@ import {
   Options,
   ModelCtor,
 } from "sequelize";
+import { ModelHooks } from "sequelize/types/hooks";
 import { Scaffold } from "..";
 
 export { DataTypes, ModelValidateOptions, ModelAttributes } from "sequelize";
@@ -185,4 +186,6 @@ export interface ScaffoldModel {
    * Relationship Documentation hasMany
    */
   hasMany?: HasManyResult[];
+
+  hooks?: Partial<ModelHooks>
 }

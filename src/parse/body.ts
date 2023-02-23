@@ -5,7 +5,7 @@ export async function parseScaffoldBody(ctx: Context, type: string) {
   const parsed = await coBody(ctx);
 
   if (type === "application/vnd.api+json") {
-    const deserializer = new Deserializer({ keyForAttribute: "camelCase" });
+    const deserializer = new Deserializer({ keyForAttribute: "snake_case" });
     const result = await deserializer.deserialize(parsed);
     return result;
   }

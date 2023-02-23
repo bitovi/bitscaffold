@@ -8,11 +8,11 @@ describe("JSON:API Tests", () => {
   const Model: ScaffoldModel = {
     name: "Model",
     attributes: {
-      firstName: {
+      first_name: {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      lastName: {
+      last_name: {
         type: DataTypes.STRING,
         allowNull: false,
       },
@@ -21,7 +21,7 @@ describe("JSON:API Tests", () => {
 
   function serialize(data) {
     const serializer = new Serializer("Model", {
-      keyForAttribute: "camelCase",
+      keyForAttribute: "snake_case",
       attributes: Object.keys(data),
     });
     const serial = serializer.serialize(data);
@@ -40,8 +40,8 @@ describe("JSON:API Tests", () => {
       server,
       "/api/Model",
       serialize({
-        firstName: "firstName",
-        lastName: "lastName",
+        first_name: "firstName",
+        last_name: "lastName",
       }),
       "application/vnd.api+json"
     );
@@ -50,8 +50,8 @@ describe("JSON:API Tests", () => {
       server,
       "/api/Model",
       serialize({
-        firstName: "firstName2",
-        lastName: "lastName2",
+        first_name: "firstName2",
+        last_name: "lastName2",
       }),
       "application/vnd.api+json"
     );
@@ -60,8 +60,8 @@ describe("JSON:API Tests", () => {
       server,
       "/api/Model",
       serialize({
-        firstName: "firstName3",
-        lastName: "lastName3",
+        first_name: "firstName3",
+        last_name: "lastName3",
       }),
       "application/vnd.api+json"
     );
