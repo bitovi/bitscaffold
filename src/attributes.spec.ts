@@ -26,7 +26,7 @@ describe("Attribute Tests", () => {
     const server = createServer(app);
     await scaffold.createDatabase();
 
-    const create = await POST(server, "/api/Model", {
+    const create = await POST(server, "/api/models", {
       firstName: "firstName",
       lastName: "lastName",
     });
@@ -37,7 +37,7 @@ describe("Attribute Tests", () => {
 
     const find1 = await GET(
       server,
-      "/api/Model/" + create.deserialized.id + "?fields[Model]=firstName"
+      "/api/models/" + create.deserialized.id + "?fields[Model]=firstName"
     );
 
     expect(find1).toBeTruthy();
@@ -48,7 +48,7 @@ describe("Attribute Tests", () => {
 
     const find2 = await GET(
       server,
-      "/api/Model/" + create.deserialized.id + "?fields[Model]=lastName"
+      "/api/models/" + create.deserialized.id + "?fields[Model]=lastName"
     );
 
     expect(find2).toBeTruthy();
@@ -68,7 +68,7 @@ describe("Attribute Tests", () => {
     const server = createServer(app);
     await scaffold.createDatabase();
 
-    const create = await POST(server, "/api/Model", {
+    const create = await POST(server, "/api/models", {
       firstName: "firstName",
       lastName: "lastName",
     });
@@ -79,7 +79,7 @@ describe("Attribute Tests", () => {
 
     const find1 = await GET(
       server,
-      "/api/Model/" + create.deserialized.id + "?fields[Model]=badAttribute"
+      "/api/models/" + create.deserialized.id + "?fields[Model]=badAttribute"
     );
 
     expect(find1).toBeTruthy();
@@ -96,22 +96,22 @@ describe("Attribute Tests", () => {
     const server = createServer(app);
     await scaffold.createDatabase();
 
-    await POST(server, "/api/Model", {
+    await POST(server, "/api/models", {
       firstName: "firstName1",
       lastName: "lastName1",
     });
 
-    await POST(server, "/api/Model", {
+    await POST(server, "/api/models", {
       firstName: "firstName2",
       lastName: "lastName2",
     });
 
-    await POST(server, "/api/Model", {
+    await POST(server, "/api/models", {
       firstName: "firstName3",
       lastName: "lastName3",
     });
 
-    const find1 = await GET(server, "/api/Model/?fields[Model]=firstName");
+    const find1 = await GET(server, "/api/models/?fields[Model]=firstName");
 
     expect(find1).toBeTruthy();
     expect(find1.status).toBe(200);
@@ -123,7 +123,7 @@ describe("Attribute Tests", () => {
       expect(entry).not.toHaveProperty("last_name");
     });
 
-    const find2 = await GET(server, "/api/Model/?fields[Model]=lastName");
+    const find2 = await GET(server, "/api/models/?fields[Model]=lastName");
 
     expect(find2).toBeTruthy();
     expect(find2.status).toBe(200);

@@ -107,7 +107,7 @@ describe("Internal Tests", () => {
     const server = createServer(app);
     await scaffold.createDatabase();
 
-    router.get("/Model3", scaffold.middleware.allModels.findAll);
+    router.get("/model3s", scaffold.middleware.allModels.findAll);
 
     app.use(router.routes());
     app.use(router.allowedMethods());
@@ -119,7 +119,7 @@ describe("Internal Tests", () => {
       ctx.status = 404;
     });
 
-    const req6 = await GET(server, "/Model3");
+    const req6 = await GET(server, "/model3s");
     expect(req6).toBeTruthy();
     expect(req6.status).toBe(200);
     expect(req6.deserialized).toHaveProperty("length");

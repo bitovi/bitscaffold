@@ -5,6 +5,7 @@ import {
   JSONAPIErrorOptions,
 } from "jsonapi-serializer";
 import createHttpError from "http-errors";
+import { capitalize, singularize } from "inflection";
 
 import {
   ScaffoldModel,
@@ -282,6 +283,7 @@ export class Scaffold {
     }
 
     const model = this.getScaffoldModelNameForRoute(path);
+
     if (model) {
       return true;
     } else {
@@ -315,7 +317,19 @@ export class Scaffold {
 
     const isPathWithModelIdResult = isPathWithModelId(path);
     if (isPathWithModelIdResult) {
-      return isPathWithModelIdResult.params;
+      const endpointName = isPathWithModelIdResult.params.model;
+
+      // Validate if endpoint name is lowercase
+      if (endpointName === endpointName.toLowerCase()) {
+        const singular = singularize(endpointName);
+
+        // Validate if endpoint name is plural
+        if (endpointName !== singular) {
+          isPathWithModelIdResult.params.model = capitalize(singular);
+
+          return isPathWithModelIdResult.params;
+        }
+      }
     }
 
     const isPathWithModel = match<{ model: string }>(this._prefix + "/:model", {
@@ -327,7 +341,19 @@ export class Scaffold {
 
     const isPathWithModelResult = isPathWithModel(path);
     if (isPathWithModelResult) {
-      return isPathWithModelResult.params;
+      const endpointName = isPathWithModelResult.params.model;
+
+      // Validate if endpoint is lowercase
+      if (endpointName === endpointName.toLowerCase()) {
+        const singular = singularize(endpointName);
+
+        // Validate if endpoint name is plural
+        if (endpointName !== singular) {
+          isPathWithModelResult.params.model = capitalize(singular);
+
+          return isPathWithModelResult.params;
+        }
+      }
     }
 
     return {};
@@ -347,6 +373,7 @@ export class Scaffold {
    */
   getScaffoldModelNameForRoute(path: string): false | string {
     const result = this.getScaffoldURLParamsForRoute(path);
+
     if (result.model) {
       const pathModelName = result.model;
       const matchedModelName = this._sequelizeModelNames.find(
@@ -360,7 +387,7 @@ export class Scaffold {
   }
 
   /**
-   * Note: This function should primarially be used for test cases.
+   * Note: This function should primarily be used for test cases.
    *
    * The `createDatabase` function is a destructive operation that will
    * sync your defined models to the configured database.

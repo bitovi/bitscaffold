@@ -38,7 +38,7 @@ describe("JSON:API Tests", () => {
 
     await POST(
       server,
-      "/api/Model",
+      "/api/models",
       serialize({
         first_name: "firstName",
         last_name: "lastName",
@@ -48,7 +48,7 @@ describe("JSON:API Tests", () => {
 
     const create = await POST(
       server,
-      "/api/Model",
+      "/api/models",
       serialize({
         first_name: "firstName2",
         last_name: "lastName2",
@@ -58,7 +58,7 @@ describe("JSON:API Tests", () => {
 
     await POST(
       server,
-      "/api/Model",
+      "/api/models",
       serialize({
         first_name: "firstName3",
         last_name: "lastName3",
@@ -71,7 +71,7 @@ describe("JSON:API Tests", () => {
     expect(create.deserialized).toHaveProperty("id");
     expect(create.deserialized.id).toBeTruthy();
 
-    const find = await GET(server, "/api/Model/" + create.deserialized.id);
+    const find = await GET(server, "/api/models/" + create.deserialized.id);
 
     expect(find).toBeTruthy();
     expect(find.status).toBe(200);
