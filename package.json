@@ -44,6 +44,8 @@
     "documentjs": "^0.5.5",
     "esdoc": "^1.1.0",
     "esdoc-standard-plugin": "^1.0.0",
+    "inflection": "^2.0.1",
+    "irregular-plurals": "^3.4.1",
     "jsonapi-serializer": "^3.6.7",
     "koa": "^2.13.4",
     "koa-body": "^6.0.1",

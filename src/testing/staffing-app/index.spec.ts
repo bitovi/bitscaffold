@@ -7,50 +7,50 @@ describe("Staffing App Example", () => {
     await scaffold.createDatabase();
   });
 
-  it("should handle get Assignments", async () => {
+  it("should handle get assignments", async () => {
     const server = createServer(app);
 
-    const findall = await GET(server, "/api/Assignment");
+    const findall = await GET(server, "/api/assignments");
     expect(findall).toBeTruthy();
     expect(findall.status).toBe(200);
     expect(findall.deserialized).toHaveProperty("length");
     expect(findall.deserialized.length).toBe(0);
   });
 
-  it("should handle get Employee", async () => {
+  it("should handle get employees", async () => {
     const server = createServer(app);
 
-    const findall = await GET(server, "/api/Employee");
+    const findall = await GET(server, "/api/employees");
     expect(findall).toBeTruthy();
     expect(findall.status).toBe(200);
     expect(findall.deserialized).toHaveProperty("length");
     expect(findall.deserialized.length).toBe(0);
   });
 
-  it("should handle get Project", async () => {
+  it("should handle get projects", async () => {
     const server = createServer(app);
 
-    const findall = await GET(server, "/api/Project");
+    const findall = await GET(server, "/api/projects");
     expect(findall).toBeTruthy();
     expect(findall.status).toBe(200);
     expect(findall.deserialized).toHaveProperty("length");
     expect(findall.deserialized.length).toBe(0);
   });
 
-  it("should handle get Role", async () => {
+  it("should handle get roles", async () => {
     const server = createServer(app);
 
-    const findall = await GET(server, "/api/Role");
+    const findall = await GET(server, "/api/roles");
     expect(findall).toBeTruthy();
     expect(findall.status).toBe(200);
     expect(findall.deserialized).toHaveProperty("length");
     expect(findall.deserialized.length).toBe(0);
   });
 
-  it("should handle get Skill", async () => {
+  it("should handle get skills", async () => {
     const server = createServer(app);
 
-    const findall = await GET(server, "/api/Skill");
+    const findall = await GET(server, "/api/skills");
     expect(findall).toBeTruthy();
     expect(findall.status).toBe(200);
     expect(findall.deserialized).toHaveProperty("length");
@@ -60,7 +60,7 @@ describe("Staffing App Example", () => {
   it("should handle complex validation", async () => {
     const server = createServer(app);
 
-    const assignment = await POST(server, "/api/Assignment", {
+    const assignment = await POST(server, "/api/assignments", {
       employee_id: 1,
       start_date: new Date(),
       end_date: new Date(),

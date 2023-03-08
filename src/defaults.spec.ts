@@ -51,7 +51,7 @@ describe("Default Tests", () => {
     const server = createServer(app);
     await scaffold.createDatabase();
 
-    const findall = await GET(server, "/api/Model");
+    const findall = await GET(server, "/api/models");
 
     expect(findall).toBeTruthy();
     expect(findall.status).toBe(200);
@@ -68,7 +68,7 @@ describe("Default Tests", () => {
 
     const server = createServer(app);
     await scaffold.createDatabase();
-    const find = await GET(server, "/api/Model/1");
+    const find = await GET(server, "/api/models/1");
 
     expect(find).toBeTruthy();
     expect(find.status).toBe(404);
@@ -86,17 +86,17 @@ describe("Default Tests", () => {
     const server = createServer(app);
     await scaffold.createDatabase();
 
-    await POST(server, "/api/Model", {
+    await POST(server, "/api/models", {
       firstName: "firstName",
       lastName: "lastName",
     });
 
-    const create = await POST(server, "/api/Model", {
+    const create = await POST(server, "/api/models", {
       firstName: "firstName2",
       lastName: "lastName2",
     });
 
-    await POST(server, "/api/Model", {
+    await POST(server, "/api/models", {
       firstName: "firstName3",
       lastName: "lastName3",
     });
@@ -106,7 +106,7 @@ describe("Default Tests", () => {
     expect(create.deserialized).toHaveProperty("id");
     expect(create.deserialized.id).toBeTruthy();
 
-    const find = await GET(server, "/api/Model/" + create.deserialized.id);
+    const find = await GET(server, "/api/models/" + create.deserialized.id);
 
     expect(find).toBeTruthy();
     expect(find.status).toBe(200);
@@ -124,7 +124,7 @@ describe("Default Tests", () => {
     const server = createServer(app);
     await scaffold.createDatabase();
 
-    const create = await POST(server, "/api/Model", {
+    const create = await POST(server, "/api/models", {
       firstName: "firstName",
       lastName: "lastName",
     });
@@ -133,7 +133,7 @@ describe("Default Tests", () => {
     expect(create.status).toBe(200);
     expect(create.deserialized).toHaveProperty("id");
 
-    const findall = await GET(server, "/api/Model");
+    const findall = await GET(server, "/api/models");
 
     expect(findall).toBeTruthy();
     expect(findall.status).toBe(200);
@@ -151,7 +151,7 @@ describe("Default Tests", () => {
     const server = createServer(app);
     await scaffold.createDatabase();
 
-    const create = await POST(server, "/api/Model", {
+    const create = await POST(server, "/api/models", {
       firstName: "firstName",
       lastName: "lastName",
     });
@@ -159,14 +159,14 @@ describe("Default Tests", () => {
     expect(create.status).toBe(200);
     expect(create.deserialized).toHaveProperty("id");
 
-    const update = await PUT(server, "/api/Model/" + create.deserialized.id, {
+    const update = await PUT(server, "/api/models/" + create.deserialized.id, {
       firstName: "newFirstName",
       lastName: "newLastName",
     });
     expect(update).toBeTruthy();
     expect(update.status).toBe(200);
 
-    const findall = await GET(server, "/api/Model");
+    const findall = await GET(server, "/api/models");
 
     expect(findall).toBeTruthy();
     expect(findall.status).toBe(200);
@@ -184,7 +184,7 @@ describe("Default Tests", () => {
     const server = createServer(app);
     await scaffold.createDatabase();
 
-    const create = await POST(server, "/api/Model", {
+    const create = await POST(server, "/api/models", {
       firstName: "firstName",
       lastName: "lastName",
     });
@@ -192,18 +192,18 @@ describe("Default Tests", () => {
     expect(create.status).toBe(200);
     expect(create.deserialized).toHaveProperty("id");
 
-    const findall1 = await GET(server, "/api/Model");
+    const findall1 = await GET(server, "/api/models");
 
     expect(findall1).toBeTruthy();
     expect(findall1.status).toBe(200);
     expect(findall1.deserialized).toHaveProperty("length");
     expect(findall1.deserialized.length).toBe(1);
 
-    const del = await DELETE(server, "/api/Model/" + create.deserialized.id);
+    const del = await DELETE(server, "/api/models/" + create.deserialized.id);
     expect(del).toBeTruthy();
     expect(del.status).toBe(200);
 
-    const findall2 = await GET(server, "/api/Model");
+    const findall2 = await GET(server, "/api/models");
 
     expect(findall2).toBeTruthy();
     expect(findall2.status).toBe(200);
