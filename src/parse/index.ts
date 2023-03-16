@@ -81,7 +81,9 @@ async function createImpl<T extends ScaffoldModel = ScaffoldModel>(
     throw new Error("Bad Request, Invalid Query String");
   }
 
-  const parsed = await deserializer.create(body, { keyForAttribute: 'snake_case' });
+  const parsed = await deserializer.create(body, {
+    keyForAttribute: "snake_case",
+  });
 
   return {
     body: parsed,

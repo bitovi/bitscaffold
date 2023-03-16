@@ -1,10 +1,14 @@
 import { Model, Sequelize, Options } from "sequelize";
+import inflection from "inflection";
 import {
   ScaffoldModel,
   SequelizeModelsCollection,
   ScaffoldSymbolModel,
   ScaffoldModelCollection,
 } from "../types";
+import { extendSequelize } from "./extended";
+import { Scaffold } from "..";
+import { IAssociation, ICreateScaffoldModel } from "./types";
 
 export function buildScaffoldModelObject(
   models: SequelizeModelsCollection
@@ -18,21 +22,29 @@ export function buildScaffoldModelObject(
   return result;
 }
 
-export function createSequelizeInstance(options?: Options): Sequelize {
+export function createSequelizeInstance(
+  scaffold: Scaffold,
+  options?: Options
+): Sequelize {
+  const ScaffoldSequelize = extendSequelize(Sequelize, scaffold);
+
   if (!options) {
-    return new Sequelize("sqlite::memory:", {
+    // return new Sequelize("sqlite::memory:", {
+    //   logging: false,
+    // });
+    return new ScaffoldSequelize("sqlite::memory:", {
       logging: false,
     });
   }
 
-  const sequelize = new Sequelize(options);
+  const sequelize = new ScaffoldSequelize(options);
   return sequelize;
 }
 
 export function convertScaffoldModels(
   sequelize: Sequelize,
   models: ScaffoldModel[]
-): SequelizeModelsCollection {
+): ICreateScaffoldModel {
   models.forEach((model) => {
     const temp = sequelize.define<Model<ScaffoldModel["attributes"]>>(
       model.name,
@@ -47,6 +59,8 @@ export function convertScaffoldModels(
 
     temp[ScaffoldSymbolModel] = model;
   });
+
+  const associationsLookup: Record<string, Record<string, IAssociation>> = {};
 
   models.forEach((model) => {
     const relationships = [
@@ -76,10 +90,32 @@ export function convertScaffoldModels(
 
           // Create the relationship
           current[relationship](associated, options);
+
+          //Get association name for lookup
+          let associationName = options.as;
+          if (!associationName) {
+            associationName = target.toLowerCase();
+            if (relationship !== "hasOne" && relationship !== "belongsTo") {
+              associationName = inflection.pluralize("target");
+            }
+          }
+
+          // Add association details to a lookup for each model
+          associationsLookup[model.name] = {
+            ...associationsLookup[model.name],
+            [associationName]: {
+              type: relationship,
+              model: target,
+              joinTable:
+                relationship === "manyToMany" ? options.through : undefined,
+            },
+          };
         });
       }
     });
   });
-
-  return sequelize.models as SequelizeModelsCollection;
+  return {
+    associationsLookup,
+    models: sequelize.models as SequelizeModelsCollection,
+  };
 }

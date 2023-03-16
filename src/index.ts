@@ -34,6 +34,7 @@ import {
 import { buildMiddlewareForModel, MiddlewareFunctionsKoa } from "./middleware";
 import { buildEverythingForModel, EverythingFunctions } from "./everything";
 import { buildSchemaForModel } from "./schema";
+import { IAssociation } from "./sequelize/types";
 
 /**
  * Parse can be imported from the `@bitovi/scaffold` package
@@ -83,6 +84,9 @@ export class Scaffold {
   private _prefix: string;
   private _exposeErrors: boolean;
 
+  // this is a lookup that shows all associations for each model.
+  associationsLookup: Record<string, Record<string, IAssociation>>;
+
   /**
    * Creates a new Scaffold instance
    *
@@ -93,8 +97,13 @@ export class Scaffold {
    */
   constructor(models: ScaffoldModel[], options: ScaffoldOptions = {}) {
     // Prepare the ORM instance and keep references to the different Models
-    this._sequelize = createSequelizeInstance(options.database);
-    this._sequelizeModels = convertScaffoldModels(this._sequelize, models);
+    this._sequelize = createSequelizeInstance(this, options.database);
+
+    // Fetch the scaffold models and associations look up
+    const { associationsLookup, models: sequelizeModels } =
+      convertScaffoldModels(this._sequelize, models);
+    this.associationsLookup = associationsLookup;
+    this._sequelizeModels = sequelizeModels;
 
     // Types of requests that Scaffold should attempt to process
     this._allowedMethods = ["GET", "POST", "PUT", "DELETE"];

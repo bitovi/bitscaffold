@@ -187,5 +187,5 @@ export interface ScaffoldModel {
    */
   hasMany?: HasManyResult[];
 
-  hooks?: Partial<ModelHooks>
+  hooks?: Partial<ModelHooks>;
 }
