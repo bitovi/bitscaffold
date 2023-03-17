@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Scaffold } from "..";
+// import { Scaffold } from "..";
 import { sequelizeCreateWithAssociations } from "./associations/sequelize.post";
 
 /**
@@ -8,9 +8,8 @@ import { sequelizeCreateWithAssociations } from "./associations/sequelize.post";
  * original Scaffold Model that was used to generate it.
  *
  */
-export function extendSequelize(Sequelize, scaffold: Scaffold) {
+export function extendSequelize(Sequelize) {
   this.origCreate = Sequelize.Model.Create;
-  this.scaffold = scaffold;
 
   // this will include the Create
   Sequelize.Model.create = sequelizeCreateWithAssociations.bind(this);

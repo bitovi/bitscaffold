@@ -33,7 +33,7 @@ export const Assignment: ScaffoldModel = {
   belongsToMany: [
     {
       target: "Project",
-      options: { as: "projects", through: { model: "Role" } },
+      options: { as: "projects", through: "Role" },
     },
   ],
 };

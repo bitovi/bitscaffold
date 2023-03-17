@@ -7,55 +7,65 @@ export const sequelizeCreateWithAssociations = async function (
 ) {
   const associations = this.scaffold.associationsLookup[this.name];
   const associationsKeys = Object.keys(associations);
-  const validAssociationsInRequest: Array<any> = [];
-  const requestKeys = Object.keys(attributes);
-  let dataAttributes: any = attributes;
-  let modelId: string | undefined;
+  const validAssociationsInAttributes: Array<any> = [];
+
+  const attributeKeys = Object.keys(attributes);
+
+  let currentModelAttributes = attributes;
+  let modelId: string | undefined; // Id of the current model when created
 
   // Details on Belongs
-  const isBelong = ["belongsTo", "belongsToMany"];
-  let noBelongsTo = 0;
+  let noBelongsTo = 0; // the total no of associations that the current model Belongs to
 
   // GET ALL ASSOCIATION ATTRIBUTES AND SEPARATE THEM FROM DATA LEFT
   associationsKeys.forEach((association) => {
-    if (requestKeys.includes(association)) {
-      validAssociationsInRequest.push(association);
-      const { [association]: _, ...data } = dataAttributes;
-      dataAttributes = data;
+    if (attributeKeys.includes(association)) {
+      validAssociationsInAttributes.push(association);
+      const { [association]: _, ...data } = currentModelAttributes;
+      currentModelAttributes = data;
       const associationDetails = associations[association];
-      if (isBelong.includes(associationDetails.type)) {
+      if (associationDetails.type === "belongsTo") {
         noBelongsTo++;
       }
     }
   });
 
-  if (validAssociationsInRequest.length === 0) {
+  // If there are no associations, create the model with all attributes.
+  if (validAssociationsInAttributes.length === 0) {
     return this.origCreate.apply(this, [attributes]);
   }
 
+  console.log(
+    "validAssociationsInAttributes =>",
+    validAssociationsInAttributes
+  );
+
   // CREATE THE OTHER ASSOCIATIONS
-  for (const association of validAssociationsInRequest) {
+  for (const association of validAssociationsInAttributes) {
     const associationDetails = associations[association];
     const associationAttribute = attributes[association];
 
     const associationName = associationDetails.model.toLowerCase();
     const modelName = this.name.toLowerCase();
 
-    const isBelong = ["belongsTo", "belongstoMany"];
-
-    if (isBelong.includes(associationDetails.type)) {
-      dataAttributes = {
-        ...dataAttributes,
+    if (associationDetails.type === "belongsTo") {
+      currentModelAttributes = {
+        ...currentModelAttributes,
         [`${associationName}_id`]: associationAttribute?.id,
       };
       noBelongsTo--;
+      // only create a model when all belongs to has been converted.
       if (noBelongsTo === 0) {
-        const modelData = await this.origCreate.apply(this, [dataAttributes]);
+        const modelData = await this.origCreate.apply(this, [
+          currentModelAttributes,
+        ]);
         modelId = modelData.id;
       }
     } else {
       if (!modelId) {
-        const modelData = await this.origCreate.apply(this, [dataAttributes]);
+        const modelData = await this.origCreate.apply(this, [
+          currentModelAttributes,
+        ]);
         modelId = modelData.id;
       }
       switch (associationDetails.type) {

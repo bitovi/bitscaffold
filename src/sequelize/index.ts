@@ -26,7 +26,7 @@ export function createSequelizeInstance(
   scaffold: Scaffold,
   options?: Options
 ): Sequelize {
-  const ScaffoldSequelize = extendSequelize(Sequelize, scaffold);
+  const ScaffoldSequelize = extendSequelize.call(scaffold, Sequelize);
 
   if (!options) {
     // return new Sequelize("sqlite::memory:", {
@@ -104,10 +104,14 @@ export function convertScaffoldModels(
           associationsLookup[model.name] = {
             ...associationsLookup[model.name],
             [associationName]: {
-              type: relationship,
+              relationship,
               model: target,
               joinTable:
-                relationship === "manyToMany" ? options.through : undefined,
+                relationship === "belongsToMany"
+                  ? typeof options.through === "string"
+                    ? options.through
+                    : options.through.model
+                  : undefined,
             },
           };
         });
