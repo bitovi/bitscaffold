@@ -408,7 +408,7 @@ export class Scaffold {
    * @category Testing Use
    */
   async createDatabase(): Promise<Sequelize> {
-    return this._sequelize.sync({ force: true });
+    return this._sequelize.sync({});
   }
 }
 
