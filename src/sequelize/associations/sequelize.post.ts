@@ -1,3 +1,5 @@
+import * as inflection from "inflection";
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Scaffold } from "../..";
 import { IAssociationBody } from "../types";
@@ -14,19 +16,19 @@ export const handleHasOne = async (
   return await scaffold.model[association.details.model].create(data);
 };
 
-export const handleHasMany = async (
-  scaffold: Scaffold,
-  association: IAssociationBody<Array<Record<string, any>>>,
-  model: { name: string; id?: string }
-) => {
-  const data = association.attributes.map((attribute) => ({
-    ...attribute,
-    [`${model.name.toLowerCase()}_id`]: model.id,
-  }));
-  return await scaffold.model[association.details.model].bulkCreate(data);
-};
+// export const handleHasMany = async (
+//   scaffold: Scaffold,
+//   association: IAssociationBody<Array<Record<string, any>>>,
+//   model: { name: string; id?: string }
+// ) => {
+//   const data = association.attributes.map((attribute) => ({
+//     ...attribute,
+//     [`${model.name.toLowerCase()}_id`]: model.id,
+//   }));
+//   return await scaffold.model[association.details.model].bulkCreate(data);
+// };
 
-export const handleManyToMany = async (
+export const handleMany = async (
   scaffold: Scaffold,
   association: IAssociationBody<Array<Record<string, any>>>,
   model: { name: string; id?: string }
@@ -37,16 +39,17 @@ export const handleManyToMany = async (
     return;
   }
   const isCreate = !association.attributes[0].id;
-  let joinData: Array<any> = [];
+  let joinIds: Array<string> = [];
   if (isCreate) {
-    // Create the models first if the id is not present
+    // Create the models first and add their ids to the joinIds.
     const associationData = await scaffold.model[
       association.details.model
     ].bulkCreate(association.attributes);
-    joinData = associationData.map((data) => data.getDataValue("id"));
+    joinIds = associationData.map((data) => data.getDataValue("id"));
   } else {
     // Assign the ids to the through table if the model is present
-    joinData = association.attributes.map((data) => data.id);
+    joinIds = association.attributes.map((data) => data.id);
   }
-  return await modelInstance[`add${association.details.model}s`](joinData);
+  const modelNameInPlural = inflection.pluralize(association.details.model);
+  return await modelInstance[`add${modelNameInPlural}`](joinIds);
 };

@@ -64,13 +64,7 @@ export function convertScaffoldModels(
   const associationsLookup: Record<string, Record<string, IAssociation>> = {};
 
   models.forEach((model) => {
-    const relationships = [
-      "belongsTo",
-      "belongsToMany",
-      "hasOne",
-      "hasMany",
-      "manyToMany",
-    ];
+    const relationships = ["belongsTo", "belongsToMany", "hasOne", "hasMany"];
     relationships.forEach((relationship) => {
       // For each relationship type, check if we have definitions for it:
       if (model[relationship]) {

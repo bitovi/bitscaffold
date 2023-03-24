@@ -1,32 +1,36 @@
-// export const sequelizeUpdateWithAssociations = async function( attributes: Record<string, any> ) {
-//   const associations = this.scaffold.associationsLookup[this.name];
-//   const associationsKeys = Object.keys(associations);
-//   const validAssociationsInAttributes: Array<any> = [];
+import * as inflection from "inflection";
 
-//   const attributeKeys = Object.keys(attributes);
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Scaffold } from "../..";
+import { IAssociationBody } from "../types";
 
-//   let currentModelAttributes = attributes;
-//   let modelId: string | undefined; // Id of the current model when created
+export const handleUpdateOne = async (
+  scaffold: Scaffold,
+  association: IAssociationBody<Array<Record<string, any>>>,
+  model: { name: string; id: string }
+) => {
+  await scaffold.model[association.details.model].update(
+    association.attributes,
+    {
+      where: {
+        [`${model.name}_id`]: model.id,
+      },
+    }
+  );
+};
 
-//   // Details on Belongs
-//   let noBelongsTo = 0; // the total no of associations that the current model Belongs to
-
-//   // GET ALL ASSOCIATION ATTRIBUTES AND SEPARATE THEM FROM DATA LEFT
-//   associationsKeys.forEach((association) => {
-//     if (attributeKeys.includes(association)) {
-//       validAssociationsInAttributes.push(association);
-//       const { [association]: _, ...data } = currentModelAttributes;
-//       currentModelAttributes = data;
-//       const associationDetails = associations[association];
-//     if (associationDetails.type === 'belongsTo') {
-//         noBelongsTo++;
-//       }
-//     }
-//   });
-
-//   // If there are no associations, create the model with all attributes.
-//   if (validAssociationsInAttributes.length === 0) {
-//     return this.origCreate.apply(this, [attributes]);
-//   }
-
-// }
+export const handleUpdateToMany = async (
+  scaffold: Scaffold,
+  association: IAssociationBody<Array<Record<string, any>>>,
+  model: { name: string; id: string }
+) => {
+  const modelInstance = await scaffold.model[model.name].findByPk(model.id);
+  console.log("model=>", model);
+  if (!modelInstance) {
+    return;
+  }
+  const joinIds: Array<string> = association.attributes.map((data) => data.id);
+  if (joinIds.length === 0) return;
+  const modelNameInPlural = inflection.pluralize(association.details.model);
+  return await modelInstance[`set${modelNameInPlural}`](joinIds);
+};
