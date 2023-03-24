@@ -1,152 +1,163 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import Chance from 'chance'
-import { Scaffold } from '../../index'
-import { DataTypes, ScaffoldModel } from '../../types'
-import { Assignment } from './models/Assignment'
-import { Employee } from './models/Employee'
-import { Project } from './models/Project'
-import { Role } from './models/Role'
-import { Skill } from './models/Skill'
+import Chance from "chance";
+import { Scaffold } from "../../index";
+import { DataTypes, ScaffoldModel } from "../../types";
+import { Assignment } from "./models/Assignment";
+import { Employee } from "./models/Employee";
+import { Project } from "./models/Project";
+import { Role } from "./models/Role";
+import { Skill } from "./models/Skill";
 
-const chance = new Chance()
+const chance = new Chance();
 
-describe('Virtuals Tests', () => {
-  it('should return scaffold virtuals', () => {
+describe("Virtuals Tests", () => {
+  it("should return scaffold virtuals", () => {
     const Sample: ScaffoldModel = {
-      name: 'Sample',
+      name: "Sample",
       attributes: {
         name: {
           type: DataTypes.STRING,
-          allowNull: false
+          allowNull: false,
         },
         noOfRoles: {
           type: DataTypes.VIRTUAL(DataTypes.INTEGER),
-          include: 'roles',
+          include: "roles",
           get() {
-            return this.roles.length
-          }
-        }
-      }
-    }
+            return this.roles.length;
+          },
+        },
+      },
+    };
 
-    const scaffold = new Scaffold([Sample])
+    const scaffold = new Scaffold([Sample]);
 
-    expect(scaffold.virtuals).toStrictEqual({ Sample: { noOfRoles: 'roles' } })
-  })
+    expect(scaffold.virtuals).toStrictEqual({ Sample: { noOfRoles: "roles" } });
+  });
 
-  it('should return scaffold virtuals without include', () => {
+  it("should return scaffold virtuals without include", () => {
     const Sample: ScaffoldModel = {
-      name: 'Sample',
+      name: "Sample",
       attributes: {
         name: {
           type: DataTypes.STRING,
-          allowNull: false
+          allowNull: false,
         },
         nameInCaps: {
           type: DataTypes.VIRTUAL(DataTypes.STRING),
           get() {
-            return this.name.toUpperCase()
-          }
-        }
-      }
-    }
+            return this.name.toUpperCase();
+          },
+        },
+      },
+    };
 
-    const scaffold = new Scaffold([Sample])
+    const scaffold = new Scaffold([Sample]);
 
-    expect(scaffold.virtuals).toStrictEqual({ Sample: { nameInCaps: '' } })
-  })
+    expect(scaffold.virtuals).toStrictEqual({ Sample: { nameInCaps: "" } });
+  });
 
-  it('should return virtual field with include in query options', async () => {
-    const scaffold = new Scaffold([Project, Role, Assignment, Skill, Employee])
+  it("should return virtual field with include in query options", async () => {
+    const scaffold = new Scaffold([Project, Role, Assignment, Skill, Employee]);
 
-    await scaffold.createDatabase()
+    await scaffold.createDatabase();
 
     const project: any = await scaffold.model.Project.create({
-      name: chance.word()
-    })
+      name: chance.word(),
+    });
 
     await scaffold.model.Role.bulkCreate([
       {
         name: chance.word(),
         project_id: project.id,
         start_date: new Date(),
-        start_confidence: chance.floating({ min: 0, max: 1 })
+        start_confidence: chance.floating({ min: 0, max: 1 }),
       },
       {
         name: chance.word(),
         project_id: project.id,
         start_date: new Date(),
-        start_confidence: chance.floating({ min: 0, max: 1 })
-      }
-    ])
+        start_confidence: chance.floating({ min: 0, max: 1 }),
+      },
+    ]);
 
     const projectFindAll: any[] = await scaffold.model.Project.findAll({
-      include: ['roles']
-    })
+      include: ["roles"],
+    });
 
     const projectFindOne: any = await scaffold.model.Project.findOne({
       where: {
-        id: project.id
+        id: project.id,
       },
-      include: 'roles'
-    })
+      include: "roles",
+    });
+
+    const projectFindByPk: any = await scaffold.model.Project.findByPk(
+      project.id,
+      { include: "roles" }
+    );
 
     const projectFindOrCreate: any = await scaffold.model.Project.findOne({
       where: {
-        id: project.id
+        id: project.id,
       },
-      include: ['roles']
-    })
+      include: ["roles"],
+    });
 
-    expect(projectFindAll[0].noOfRoles).toBe(2)
-    expect(projectFindOne.noOfRoles).toBe(2)
-    expect(projectFindOrCreate.noOfRoles).toBe(2)
+    expect(projectFindAll[0].noOfRoles).toBe(2);
+    expect(projectFindOne.noOfRoles).toBe(2);
+    expect(projectFindByPk.noOfRoles).toBe(2);
+    expect(projectFindOrCreate.noOfRoles).toBe(2);
 
-    await scaffold.orm.close()
-  })
+    await scaffold.orm.close();
+  });
 
-  it('should return virtual fields without query options', async () => {
-    const scaffold = new Scaffold([Project, Role, Assignment, Skill, Employee])
+  it("should return virtual fields without query options", async () => {
+    const scaffold = new Scaffold([Project, Role, Assignment, Skill, Employee]);
 
-    await scaffold.createDatabase()
+    await scaffold.createDatabase();
 
     const project: any = await scaffold.model.Project.create({
-      name: chance.word()
-    })
+      name: chance.word(),
+    });
 
     await scaffold.model.Role.bulkCreate([
       {
         name: chance.word(),
         project_id: project.id,
         start_date: new Date(),
-        start_confidence: chance.floating({ min: 0, max: 1 })
+        start_confidence: chance.floating({ min: 0, max: 1 }),
       },
       {
         name: chance.word(),
         project_id: project.id,
         start_date: new Date(),
-        start_confidence: chance.floating({ min: 0, max: 1 })
-      }
-    ])
+        start_confidence: chance.floating({ min: 0, max: 1 }),
+      },
+    ]);
 
-    const projectFindAll: any[] = await scaffold.model.Project.findAll()
+    const projectFindAll: any[] = await scaffold.model.Project.findAll();
 
     const projectFindOne: any = await scaffold.model.Project.findOne({
       where: {
-        id: project.id
-      }
-    })
+        id: project.id,
+      },
+    });
+
+    const projectFindByPk: any = await scaffold.model.Project.findByPk(
+      project.id
+    );
 
     const projectFindOrCreate: any = await scaffold.model.Project.findOne({
       where: {
-        id: project.id
-      }
-    })
+        id: project.id,
+      },
+    });
 
-    expect(projectFindAll[0].noOfRoles).toBe(2)
-    expect(projectFindOne.noOfRoles).toBe(2)
-    expect(projectFindOrCreate.noOfRoles).toBe(2)
+    expect(projectFindAll[0].noOfRoles).toBe(2);
+    expect(projectFindOne.noOfRoles).toBe(2);
+    expect(projectFindByPk.noOfRoles).toBe(2);
+    expect(projectFindOrCreate.noOfRoles).toBe(2);
 
-    await scaffold.orm.close()
-  })
-})
+    await scaffold.orm.close();
+  });
+});

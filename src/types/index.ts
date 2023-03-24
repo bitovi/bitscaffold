@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
-import { NextFunction, Request, Response } from 'express'
-import Koa, { DefaultState, DefaultContext, Middleware } from 'koa'
+import { NextFunction, Request, Response } from "express";
+import Koa, { DefaultState, DefaultContext, Middleware } from "koa";
 import {
   Model,
   BelongsToManyOptions,
@@ -10,20 +10,20 @@ import {
   HasManyOptions,
   Options,
   ModelCtor,
+  DataType,
   ModelAttributeColumnOptions,
-  DataType
-} from 'sequelize'
-import { ModelHooks } from 'sequelize/types/hooks'
-import { Scaffold } from '..'
+} from "sequelize";
+import { ModelHooks } from "sequelize/types/hooks";
+import { Scaffold } from "..";
 
-export { DataTypes, ModelValidateOptions, ModelAttributes } from 'sequelize'
+export { DataTypes, ModelValidateOptions, ModelAttributes } from "sequelize";
 
-export type KoaMiddleware = Middleware
+export type KoaMiddleware = Middleware;
 export type ExpressMiddleware = (
   req: Request,
   res: Response,
   next: NextFunction
-) => void
+) => void;
 
 /**
  * Scaffold Configuration
@@ -35,28 +35,28 @@ export interface ScaffoldOptions {
    *
    * This is used internally for regex path matching
    */
-  prefix?: string
+  prefix?: string;
 
   /**
    * This flag will configure error behavior. If true error details
    * will be exposed to the client. If false only the error code and
    * high level message will be exposed.
    */
-  expose?: boolean
+  expose?: boolean;
 
   /**
    * This flag should mostly be used for development and will
    * force your Models onto the database schema at startup.
    */
-  sync?: boolean
+  sync?: boolean;
 
   /**
    * Notes about Sequelize connections
    */
-  database?: Options
+  database?: Options;
 }
 
-export const ScaffoldSymbolModel = Symbol('scaffold')
+export const ScaffoldSymbolModel = Symbol("scaffold");
 
 /**
  * Sequelize Models used internally within Scaffold contain an
@@ -68,40 +68,40 @@ export const ScaffoldSymbolModel = Symbol('scaffold')
  * Sequelize model itself.
  */
 export type SequelizeModelInstance = ModelCtor<Model<any, any>> & {
-  [ScaffoldSymbolModel]: ScaffoldModel
-}
+  [ScaffoldSymbolModel]: ScaffoldModel;
+};
 
 export type SequelizeModelsCollection = {
-  [key: string]: SequelizeModelInstance
-}
+  [key: string]: SequelizeModelInstance;
+};
 
 export type ScaffoldModelCollection = {
-  [key: string]: ScaffoldModel
-}
+  [key: string]: ScaffoldModel;
+};
 
-export type JSONObject = Record<string, unknown>
+export type JSONObject = Record<string, unknown>;
 
 export interface ModelFunctionsCollection<T> {
-  [modelName: string]: T
-  '*': T
-  allModels: T
+  [modelName: string]: T;
+  "*": T;
+  allModels: T;
 }
 
 export type FunctionsHandler<T> = (
   scaffold: Scaffold,
   name: string | symbol
-) => T
+) => T;
 
-export type ScaffoldAttributes = ModelAttributes<Model>
-export type ScaffoldApplication = Koa<DefaultState, DefaultContext>
+export type ScaffoldAttributes = ModelAttributes<Model>;
+export type ScaffoldApplication = Koa<DefaultState, DefaultContext>;
 
 /**
  * Used when defining a Scaffold Model relationship
  * to bridge Scaffold Models and Sequelize Model options
  */
 export interface BelongsToManyResult {
-  target: string
-  options: BelongsToManyOptions
+  target: string;
+  options: BelongsToManyOptions;
 }
 
 /**
@@ -109,8 +109,8 @@ export interface BelongsToManyResult {
  * to bridge Scaffold Models and Sequelize Model options
  */
 export interface BelongsToResult {
-  target: string
-  options?: BelongsToOptions
+  target: string;
+  options?: BelongsToOptions;
 }
 
 /**
@@ -118,8 +118,8 @@ export interface BelongsToResult {
  * to bridge Scaffold Models and Sequelize Model options
  */
 export interface HasOneResult {
-  target: string
-  options?: HasOneOptions
+  target: string;
+  options?: HasOneOptions;
 }
 
 /**
@@ -127,23 +127,30 @@ export interface HasOneResult {
  * to bridge Scaffold Models and Sequelize Model options
  */
 export interface HasManyResult {
-  target: string
-  options?: HasManyOptions
+  target: string;
+  options?: HasManyOptions;
 }
 
+/**
+ * Extend sequelize ModelAttributeColumnOptions to include 'include'
+ * in the model attribute column options.
+ */
 interface ModelAttributeColumnOptionsWithInclude<M extends Model = Model>
   extends ModelAttributeColumnOptions<M> {
-  include?: string
+  include?: string;
 }
 
+/**
+ * Redefine sequelize ModelAttributes
+ */
 type ModelAttributes<M extends Model = Model, TAttributes = unknown> = {
   /**
    * The description of a database column
    */
   [name in keyof TAttributes]:
     | DataType
-    | ModelAttributeColumnOptionsWithInclude<M>
-}
+    | ModelAttributeColumnOptionsWithInclude<M>;
+};
 
 /**
  * Models can be defined in Scaffold by creating a `[name].ts` file containing
@@ -171,42 +178,42 @@ export interface ScaffoldModel {
    * }
    * ```
    */
-  attributes: ModelAttributes
+  attributes: ModelAttributes;
 
   /**
    * The Model `name` dictates the underlying database table name as well
    * as how your model can be accessed later through your Scaffold instance
    */
-  name: string
+  name: string;
 
   /**
    * Validation in Scaffold is directly tied to features within the Sequelize ORM
    * See the Sequelize [documentation for more information](https://sequelize.org/docs/v6/core-concepts/validations-and-constraints/#model-wide-validations)
    */
-  validation?: ModelValidateOptions
+  validation?: ModelValidateOptions;
 
   /**
    * Relationship Documentation belongsTo
    */
-  belongsTo?: BelongsToResult[]
+  belongsTo?: BelongsToResult[];
   /**
    * Relationship Documentation belongsToMany
    */
-  belongsToMany?: BelongsToManyResult[]
+  belongsToMany?: BelongsToManyResult[];
   /**
    * Relationship Documentation hasOne
    */
-  hasOne?: HasOneResult[]
+  hasOne?: HasOneResult[];
   /**
    * Relationship Documentation hasMany
    */
-  hasMany?: HasManyResult[]
+  hasMany?: HasManyResult[];
 
-  hooks?: Partial<ModelHooks>
+  hooks?: Partial<ModelHooks>;
 }
 
 export interface Virtuals {
   [model: string]: {
-    [attribute: string]: string
-  }
+    [attribute: string]: string;
+  };
 }
