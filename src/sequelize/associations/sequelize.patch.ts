@@ -7,7 +7,8 @@ import { IAssociationBody } from "../types";
 export const handleUpdateOne = async (
   scaffold: Scaffold,
   association: IAssociationBody<Array<Record<string, any>>>,
-  model: { name: string; id: string }
+  model: { name: string; id: string },
+  transaction: any
 ) => {
   await scaffold.model[association.details.model].update(
     association.attributes,
@@ -15,6 +16,7 @@ export const handleUpdateOne = async (
       where: {
         [`${model.name}_id`]: model.id,
       },
+      transaction,
     }
   );
 };
@@ -22,15 +24,17 @@ export const handleUpdateOne = async (
 export const handleUpdateToMany = async (
   scaffold: Scaffold,
   association: IAssociationBody<Array<Record<string, any>>>,
-  model: { name: string; id: string }
+  model: { name: string; id: string },
+  transaction: any
 ) => {
   const modelInstance = await scaffold.model[model.name].findByPk(model.id);
-  console.log("model=>", model);
   if (!modelInstance) {
     return;
   }
   const joinIds: Array<string> = association.attributes.map((data) => data.id);
   if (joinIds.length === 0) return;
   const modelNameInPlural = inflection.pluralize(association.details.model);
-  return await modelInstance[`set${modelNameInPlural}`](joinIds);
+  return await modelInstance[`set${modelNameInPlural}`](joinIds, {
+    transaction,
+  });
 };

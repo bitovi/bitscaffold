@@ -2,7 +2,10 @@
 
 import { Scaffold } from "..";
 import { getValidAttributesAndNoBelongs } from "./associations";
-import { handleUpdateToMany } from "./associations/sequelize.patch";
+import {
+  handleUpdateOne,
+  handleUpdateToMany,
+} from "./associations/sequelize.patch";
 import { handleHasOne, handleMany } from "./associations/sequelize.post";
 
 /**
@@ -31,55 +34,72 @@ export function extendSequelize(Sequelize, scaffold: Scaffold) {
       return origCreate.apply(this, [attributes]);
     }
 
-    // CREATE THE OTHER ASSOCIATIONS
-    for (const association of validAssociationsInAttributes) {
-      const associationDetails = associations[association];
-      const associationAttribute = attributes[association];
+    const transaction = await scaffold.orm.transaction();
 
-      const associationName = associationDetails.model.toLowerCase();
-      const modelName = this.name;
+    try {
+      // CREATE THE OTHER ASSOCIATIONS
+      for (const association of validAssociationsInAttributes) {
+        const associationDetails = associations[association];
+        const associationAttribute = attributes[association];
 
-      if (associationDetails.type === "belongsTo") {
-        currentModelAttributes = {
-          ...currentModelAttributes,
-          [`${associationName}_id`]: associationAttribute?.id,
-        };
-        noBelongsTo--;
-        // only create a model when all belongs to has been converted.
-        if (noBelongsTo === 0) {
-          modelData = await origCreate.apply(this, [currentModelAttributes]);
-        }
-      } else {
-        // Create a model data if one has not been created
-        if (!modelData) {
-          modelData = await origCreate.apply(this, [currentModelAttributes]);
-        }
-        switch (associationDetails.type) {
-          case "hasOne":
-            await handleHasOne(
-              scaffold,
-              {
-                details: associationDetails,
-                attributes: associationAttribute,
-              },
-              { name: modelName, id: modelData.id }
-            );
-            break;
-          case "hasMany":
-          case "belongsToMany":
-            await handleMany(
-              scaffold,
-              {
-                details: associationDetails,
-                attributes: associationAttribute,
-              },
-              { name: modelName, id: modelData.id }
-            );
-            break;
-          default:
-            break;
+        const associationName = associationDetails.model.toLowerCase();
+        const modelName = this.name;
+
+        if (associationDetails.type === "belongsTo") {
+          currentModelAttributes = {
+            ...currentModelAttributes,
+            [`${associationName}_id`]: associationAttribute?.id,
+          };
+          noBelongsTo--;
+          // only create a model when all belongs to has been converted.
+          if (noBelongsTo === 0) {
+            modelData = await origCreate.apply(this, [
+              currentModelAttributes,
+              { transaction },
+            ]);
+          }
+        } else {
+          // Create a model data if one has not been created
+          if (!modelData) {
+            modelData = await origCreate.apply(this, [
+              currentModelAttributes,
+              { transaction },
+            ]);
+          }
+          switch (associationDetails.type) {
+            case "hasOne":
+              await handleHasOne(
+                scaffold,
+                {
+                  details: associationDetails,
+                  attributes: associationAttribute,
+                },
+                { name: modelName, id: modelData.id },
+                transaction
+              );
+              break;
+            case "hasMany":
+            case "belongsToMany":
+              await handleMany(
+                scaffold,
+                {
+                  details: associationDetails,
+                  attributes: associationAttribute,
+                },
+                { name: modelName, id: modelData.id },
+                transaction
+              );
+              break;
+            default:
+              break;
+          }
         }
       }
+      await transaction.commit();
+    } catch (error) {
+      console.log("error =>", error);
+      await transaction.rollback();
+      throw new Error(error);
     }
 
     return modelData;
@@ -102,65 +122,75 @@ export function extendSequelize(Sequelize, scaffold: Scaffold) {
       return origUpdate.apply(this, [attributes, ops]);
     }
 
-    for (const association of validAssociationsInAttributes) {
-      const associationDetails = associations[association];
-      const associationAttribute = attributes[association];
+    const transaction = await scaffold.orm.transaction();
 
-      const associationName = associationDetails.model.toLowerCase();
-      const modelName = this.name;
+    try {
+      for (const association of validAssociationsInAttributes) {
+        const associationDetails = associations[association];
+        const associationAttribute = attributes[association];
 
-      if (associationDetails.type === "belongsTo") {
-        currentModelAttributes = {
-          ...currentModelAttributes,
-          [`${associationName}_id`]: associationAttribute?.id,
-        };
-        noBelongsTo--;
-        // only create a model when all belongs to has been converted.
-        if (noBelongsTo === 0) {
-          modelUpdateData = await origUpdate.apply(this, [
-            currentModelAttributes,
-            ops,
-          ]);
-        }
-      } else {
-        if (!modelUpdateData) {
-          modelUpdateData = await origUpdate.apply(this, [
-            currentModelAttributes,
-            ops,
-          ]);
-        }
-        switch (associationDetails.type) {
-          case "hasOne":
-            await handleUpdateToMany(
-              scaffold,
-              {
-                details: associationDetails,
-                attributes: associationAttribute,
-              },
-              {
-                name: modelName,
-                id: modelId,
-              }
-            );
-            break;
-          case "hasMany":
-          case "belongsToMany":
-            await handleUpdateToMany(
-              scaffold,
-              {
-                details: associationDetails,
-                attributes: associationAttribute,
-              },
-              {
-                name: modelName,
-                id: modelId,
-              }
-            );
-            break;
-          default:
-            break;
+        const associationName = associationDetails.model.toLowerCase();
+        const modelName = this.name;
+
+        if (associationDetails.type === "belongsTo") {
+          currentModelAttributes = {
+            ...currentModelAttributes,
+            [`${associationName}_id`]: associationAttribute?.id,
+          };
+          noBelongsTo--;
+          // only create a model when all belongs to has been converted.
+          if (noBelongsTo === 0) {
+            modelUpdateData = await origUpdate.apply(this, [
+              currentModelAttributes,
+              ops,
+            ]);
+          }
+        } else {
+          if (!modelUpdateData) {
+            modelUpdateData = await origUpdate.apply(this, [
+              currentModelAttributes,
+              ops,
+            ]);
+          }
+          switch (associationDetails.type) {
+            case "hasOne":
+              await handleUpdateOne(
+                scaffold,
+                {
+                  details: associationDetails,
+                  attributes: associationAttribute,
+                },
+                {
+                  name: modelName,
+                  id: modelId,
+                },
+                transaction
+              );
+              break;
+            case "hasMany":
+            case "belongsToMany":
+              await handleUpdateToMany(
+                scaffold,
+                {
+                  details: associationDetails,
+                  attributes: associationAttribute,
+                },
+                {
+                  name: modelName,
+                  id: modelId,
+                },
+                transaction
+              );
+              break;
+            default:
+              break;
+          }
         }
       }
+      await transaction.commit();
+    } catch (error) {
+      await transaction.rollback();
+      throw new Error(error);
     }
 
     return modelUpdateData;
