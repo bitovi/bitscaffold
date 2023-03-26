@@ -8,9 +8,7 @@ export const getValidAttributesAndAssociations = (
   associations: any
 ) => {
   const associationsKeys = Object.keys(associations);
-
   const attributeKeys = Object.keys(attributes);
-
   let currentModelAttributes = attributes;
 
   // Details on Belongs
@@ -20,7 +18,7 @@ export const getValidAttributesAndAssociations = (
   // GET ALL ASSOCIATION ATTRIBUTES AND SEPARATE THEM FROM DATA LEFT
   associationsKeys.forEach((association) => {
     if (attributeKeys.includes(association)) {
-      // validAssociationsInAttributes.push(association);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { [association]: _, ...data } = currentModelAttributes;
       currentModelAttributes = data;
       const associationDetails = associations[association];

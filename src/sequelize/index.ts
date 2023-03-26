@@ -101,6 +101,7 @@ export function convertScaffoldModels(
             [associationName]: {
               type: relationship,
               model: target,
+              key: options.foreignKey ?? `${model.name.toLowerCase()}_id`,
               joinTable:
                 relationship === "belongsToMany"
                   ? typeof options.through === "string"

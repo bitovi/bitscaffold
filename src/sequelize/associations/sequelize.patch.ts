@@ -14,15 +14,12 @@ export const handleUpdateBelongs = async (
   attributes: any,
   transaction: any
 ) => {
-  const updatedModelAttributes = belongsAssociation.map((association) => {
+  const updatedModelAttributes = currentModelAttributes;
+  belongsAssociation.forEach((association) => {
     const associationDetails = associations[association];
     const associationAttribute = attributes[association];
-    const associationName = associationDetails.model.toLowerCase();
-    const key = `${associationName}_id`;
-    return {
-      ...currentModelAttributes,
-      [key]: associationAttribute?.id,
-    };
+    const key = associationDetails.key;
+    updatedModelAttributes[key] = associationAttribute?.id;
   });
   const modelData = await origUpdate.apply(model, [
     updatedModelAttributes,
@@ -39,11 +36,13 @@ export const handleUpdateOne = async (
   model: { name: string; id: string },
   transaction: any
 ) => {
+  const key = association.details.key;
+
   await scaffold.model[association.details.model].update(
     association.attributes,
     {
       where: {
-        [`${model.name}_id`]: model.id,
+        [key]: model.id,
       },
       transaction,
     }

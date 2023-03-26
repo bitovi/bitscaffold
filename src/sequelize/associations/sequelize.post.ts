@@ -14,16 +14,14 @@ export const handleCreateBelongs = async (
   attributes: any,
   transaction: Transaction
 ) => {
-  const updatedModelAttributes = belongsAssociation.map((association) => {
+  const updatedModelAttributes = currentModelAttributes;
+  belongsAssociation.forEach((association) => {
     const associationDetails = associations[association];
     const associationAttribute = attributes[association];
-    const associationName = associationDetails.model.toLowerCase();
-    const key = `${associationName}_id`;
-    return {
-      ...currentModelAttributes,
-      [key]: associationAttribute?.id,
-    };
+    const key = associationDetails.key;
+    updatedModelAttributes[key] = associationAttribute?.id;
   });
+
   const modelData = await origCreate.apply(model, [
     updatedModelAttributes,
     { transaction },
@@ -39,9 +37,10 @@ export const handleCreateHasOne = async (
   model: { name: string; id?: string },
   transaction: any
 ) => {
+  const key = association.details.key;
   const data = {
     ...association.attributes,
-    [`${model.name.toLowerCase()}_id`]: model.id,
+    [key]: model.id,
   };
   return await scaffold.model[association.details.model].create(data, {
     transaction,

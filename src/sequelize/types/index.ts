@@ -2,7 +2,7 @@ import { SequelizeModelsCollection } from "../../types";
 
 export interface IAssociation {
   type: string;
-  key?: Array<string> | string;
+  key: string;
   model: string;
   joinTable?: string;
 }
