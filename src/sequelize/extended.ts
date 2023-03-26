@@ -1,17 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Scaffold } from "..";
-import { getValidAttributesAndNoBelongs } from "./associations";
 import {
-  handleUpdatebelongs,
-  handleUpdateOne,
-  handleUpdateToMany,
-} from "./associations/sequelize.patch";
-import {
-  handleBelongs,
-  handleHasOne,
-  handleMany,
-} from "./associations/sequelize.post";
+  getValidAttributesAndAssociations,
+  handleCreateAssociations,
+  handleUpdateAssociations,
+} from "./associations";
+import { handleUpdateBelongs } from "./associations/sequelize.patch";
+import { handleCreateBelongs } from "./associations/sequelize.post";
 
 /**
  * ExtendSequelize is a function that replaces some model functions
@@ -23,19 +19,27 @@ export function extendSequelize(Sequelize, scaffold: Scaffold) {
   const origCreate = Sequelize.Model.create;
   const origUpdate = Sequelize.Model.update;
 
+  // associationKey => Has
+  // Sequence => ForeignKey ?? underscored/camelCase/ ?? Nothingness
+
   Sequelize.Model.create = async function (attributes: Record<string, any>) {
     const associations = scaffold.associationsLookup[this.name];
+
     let modelData: any;
     let currentModelAttributes = attributes;
-    let noBelongsTo = 0;
 
     const {
-      validAssociationsInAttributes,
-      noBelongsTo: _n,
+      // validAssociationsInAttributes,
+      externalAssociations,
+      belongsAssociation,
       currentModelAttributes: _attributes,
-    } = getValidAttributesAndNoBelongs(attributes, associations);
+    } = getValidAttributesAndAssociations(attributes, associations);
     currentModelAttributes = _attributes;
-    noBelongsTo = _n;
+    // All associations
+    const validAssociationsInAttributes = [
+      ...externalAssociations,
+      ...belongsAssociation,
+    ];
 
     // If there are no associations, create the model with all attributes.
     if (validAssociationsInAttributes.length === 0) {
@@ -45,67 +49,36 @@ export function extendSequelize(Sequelize, scaffold: Scaffold) {
     const transaction = await scaffold.orm.transaction();
 
     try {
-      // CREATE THE OTHER ASSOCIATIONS
-      for (const association of validAssociationsInAttributes) {
-        const associationDetails = associations[association];
-        const associationAttribute = attributes[association];
+      if (belongsAssociation.length > 0) {
+        const { modelData: _model } = await handleCreateBelongs(
+          this,
+          origCreate,
+          currentModelAttributes,
+          belongsAssociation,
+          associations,
+          attributes,
+          transaction
+        );
+        modelData = _model;
+      }
 
-        const modelName = this.name;
-
-        if (associationDetails.type === "belongsTo") {
-          const {
-            updatedModelAttributes,
-            modelCreated,
-            noBelongsTo: n,
-          } = await handleBelongs(
+      if (externalAssociations.length > 0) {
+        // create the model first if it does not exist
+        if (!modelData) {
+          modelData = await origCreate.apply(this, [
             currentModelAttributes,
-            associationDetails,
-            associationAttribute,
-            origCreate,
-            this,
-            transaction,
-            noBelongsTo
-          );
-
-          currentModelAttributes = updatedModelAttributes;
-          modelData = modelCreated;
-          noBelongsTo = n;
-        } else {
-          // Create a model data if one has not been created
-          if (!modelData) {
-            modelData = await origCreate.apply(this, [
-              currentModelAttributes,
-              { transaction },
-            ]);
-          }
-          switch (associationDetails.type) {
-            case "hasOne":
-              await handleHasOne(
-                scaffold,
-                {
-                  details: associationDetails,
-                  attributes: associationAttribute,
-                },
-                { name: modelName, id: modelData.id },
-                transaction
-              );
-              break;
-            case "hasMany":
-            case "belongsToMany":
-              await handleMany(
-                scaffold,
-                {
-                  details: associationDetails,
-                  attributes: associationAttribute,
-                },
-                { name: modelName, id: modelData.id },
-                transaction
-              );
-              break;
-            default:
-              break;
-          }
+            { transaction },
+          ]);
         }
+        await handleCreateAssociations(
+          scaffold,
+          this,
+          externalAssociations,
+          associations,
+          attributes,
+          transaction,
+          modelData.id
+        );
       }
       await transaction.commit();
     } catch (error) {
@@ -122,15 +95,18 @@ export function extendSequelize(Sequelize, scaffold: Scaffold) {
     const modelId = ops.where?.id;
     let modelUpdateData: any;
     let currentModelAttributes = attributes;
-    let noBelongsTo = 0;
 
     const {
-      validAssociationsInAttributes,
-      noBelongsTo: _n,
+      externalAssociations,
+      belongsAssociation,
       currentModelAttributes: _attributes,
-    } = getValidAttributesAndNoBelongs(attributes, associations);
+    } = getValidAttributesAndAssociations(attributes, associations);
     currentModelAttributes = _attributes;
-    noBelongsTo = _n;
+
+    const validAssociationsInAttributes = [
+      ...externalAssociations,
+      ...belongsAssociation,
+    ];
 
     // If there are no associations, create the model with all attributes.
     if (validAssociationsInAttributes.length === 0) {
@@ -140,75 +116,40 @@ export function extendSequelize(Sequelize, scaffold: Scaffold) {
     const transaction = await scaffold.orm.transaction();
 
     try {
-      for (const association of validAssociationsInAttributes) {
-        const associationDetails = associations[association];
-        const associationAttribute = attributes[association];
-
-        const modelName = this.name;
-
-        if (associationDetails.type === "belongsTo") {
-          const {
-            modelUpdated,
-            updatedModelAttributes,
-            noBelongsTo: n,
-          } = await handleUpdatebelongs(
-            currentModelAttributes,
-            associationDetails,
-            associationAttribute,
-            ops,
-            origUpdate,
-            this,
-            transaction,
-            noBelongsTo
-          );
-          noBelongsTo = n;
-          modelUpdateData = modelUpdated;
-          currentModelAttributes = updatedModelAttributes;
-        } else {
-          if (!modelUpdateData) {
-            modelUpdateData = await origUpdate.apply(this, [
-              currentModelAttributes,
-              {
-                ...ops,
-                transaction,
-              },
-            ]);
-          }
-          switch (associationDetails.type) {
-            case "hasOne":
-              await handleUpdateOne(
-                scaffold,
-                {
-                  details: associationDetails,
-                  attributes: associationAttribute,
-                },
-                {
-                  name: modelName,
-                  id: modelId,
-                },
-                transaction
-              );
-              break;
-            case "hasMany":
-            case "belongsToMany":
-              await handleUpdateToMany(
-                scaffold,
-                {
-                  details: associationDetails,
-                  attributes: associationAttribute,
-                },
-                {
-                  name: modelName,
-                  id: modelId,
-                },
-                transaction
-              );
-              break;
-            default:
-              break;
-          }
-        }
+      if (belongsAssociation.length > 0) {
+        const { modelData: _model } = await handleUpdateBelongs(
+          this,
+          ops,
+          origUpdate,
+          currentModelAttributes,
+          belongsAssociation,
+          associations,
+          attributes,
+          transaction
+        );
+        modelUpdateData = _model;
       }
+      if (externalAssociations.length > 0) {
+        if (!modelUpdateData) {
+          modelUpdateData = await origUpdate.apply(this, [
+            currentModelAttributes,
+            {
+              ...ops,
+              transaction,
+            },
+          ]);
+        }
+        await handleUpdateAssociations(
+          scaffold,
+          this,
+          externalAssociations,
+          associations,
+          attributes,
+          transaction,
+          modelId
+        );
+      }
+
       await transaction.commit();
     } catch (error) {
       await transaction.rollback();

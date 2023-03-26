@@ -4,42 +4,32 @@ import * as inflection from "inflection";
 import { Scaffold } from "../..";
 import { IAssociationBody } from "../types";
 
-export const handleUpdatebelongs = async (
-  currentModelAttributes: any,
-  associationDetails: any,
-  associationAttribute: any,
+export const handleUpdateBelongs = async (
+  model: any,
   ops: any,
   origUpdate: any,
-  model: any,
-  transaction: any,
-  noBelongsTo: number
+  currentModelAttributes: any,
+  belongsAssociation: Array<string>,
+  associations: any,
+  attributes: any,
+  transaction: any
 ) => {
-  const associationName = associationDetails.model.toLowerCase();
-  const updatedModelAttributes = {
-    ...currentModelAttributes,
-    [`${associationName}_id`]: associationAttribute?.id,
-  };
-  let modelUpdated: any;
-  currentModelAttributes = {
-    ...currentModelAttributes,
-    [`${associationName}_id`]: associationAttribute?.id,
-  };
-  noBelongsTo--;
-  // only create a model when all belongs to has been converted.
-  if (noBelongsTo === 0) {
-    modelUpdated = await origUpdate.apply(model, [
-      currentModelAttributes,
-      {
-        ...ops,
-        transaction,
-      },
-    ]);
-  }
-
-  return {
+  const updatedModelAttributes = belongsAssociation.map((association) => {
+    const associationDetails = associations[association];
+    const associationAttribute = attributes[association];
+    const associationName = associationDetails.model.toLowerCase();
+    const key = `${associationName}_id`;
+    return {
+      ...currentModelAttributes,
+      [key]: associationAttribute?.id,
+    };
+  });
+  const modelData = await origUpdate.apply(model, [
     updatedModelAttributes,
-    modelUpdated,
-    noBelongsTo,
+    { ...ops, transaction },
+  ]);
+  return {
+    modelData,
   };
 };
 
@@ -60,7 +50,7 @@ export const handleUpdateOne = async (
   );
 };
 
-export const handleUpdateToMany = async (
+export const handleUpdateMany = async (
   scaffold: Scaffold,
   association: IAssociationBody<Array<Record<string, any>>>,
   model: { name: string; id: string },

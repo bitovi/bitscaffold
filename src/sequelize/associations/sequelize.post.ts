@@ -5,37 +5,35 @@ import { Transaction } from "sequelize";
 import { Scaffold } from "../..";
 import { IAssociationBody } from "../types";
 
-export const handleBelongs = async (
-  currentModelAttributes: any,
-  associationDetails: any,
-  associationAttribute: any,
-  origCreate: any,
+export const handleCreateBelongs = async (
   model: any,
-  transaction: Transaction,
-  noBelongsTo: number
+  origCreate: any,
+  currentModelAttributes: any,
+  belongsAssociation: Array<string>,
+  associations: any,
+  attributes: any,
+  transaction: Transaction
 ) => {
-  const associationName = associationDetails.model.toLowerCase();
-  const updatedModelAttributes = {
-    ...currentModelAttributes,
-    [`${associationName}_id`]: associationAttribute?.id,
-  };
-  let modelCreated: any;
-  noBelongsTo--;
-  // only create a model when all belongs to has been converted.
-  if (noBelongsTo === 0) {
-    modelCreated = await origCreate.apply(model, [
-      updatedModelAttributes,
-      { transaction },
-    ]);
-  }
-  return {
-    modelCreated,
+  const updatedModelAttributes = belongsAssociation.map((association) => {
+    const associationDetails = associations[association];
+    const associationAttribute = attributes[association];
+    const associationName = associationDetails.model.toLowerCase();
+    const key = `${associationName}_id`;
+    return {
+      ...currentModelAttributes,
+      [key]: associationAttribute?.id,
+    };
+  });
+  const modelData = await origCreate.apply(model, [
     updatedModelAttributes,
-    noBelongsTo,
+    { transaction },
+  ]);
+  return {
+    modelData,
   };
 };
 
-export const handleHasOne = async (
+export const handleCreateHasOne = async (
   scaffold: Scaffold,
   association: IAssociationBody<Record<string, any>>,
   model: { name: string; id?: string },
@@ -50,7 +48,7 @@ export const handleHasOne = async (
   });
 };
 
-export const handleMany = async (
+export const handleCreateMany = async (
   scaffold: Scaffold,
   association: IAssociationBody<Array<Record<string, any>>>,
   model: { name: string; id?: string },
