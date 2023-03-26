@@ -1,18 +1,24 @@
 import * as inflection from "inflection";
+import { Attributes, ModelStatic, Transaction, UpdateOptions } from "sequelize";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Scaffold } from "../..";
-import { IAssociationBody } from "../types";
+import { IAssociation, IAssociationBody } from "../types";
 
 export const handleUpdateBelongs = async (
-  model: any,
-  ops: any,
+  model: ModelStatic<any>,
+  ops: Omit<UpdateOptions<Attributes<any>>, "returning"> & {
+    returning: Exclude<
+      UpdateOptions<Attributes<any>>["returning"],
+      undefined | false
+    >;
+  },
   origUpdate: any,
-  currentModelAttributes: any,
+  currentModelAttributes: Attributes<any>,
   belongsAssociation: Array<string>,
-  associations: any,
-  attributes: any,
-  transaction: any
+  associations: Record<string, IAssociation>,
+  attributes: Attributes<any>,
+  transaction: Transaction
 ) => {
   const updatedModelAttributes = currentModelAttributes;
   belongsAssociation.forEach((association) => {
@@ -34,7 +40,7 @@ export const handleUpdateOne = async (
   scaffold: Scaffold,
   association: IAssociationBody<Array<Record<string, any>>>,
   model: { name: string; id: string },
-  transaction: any
+  transaction: Transaction
 ) => {
   const key = association.details.key;
 
@@ -53,7 +59,7 @@ export const handleUpdateMany = async (
   scaffold: Scaffold,
   association: IAssociationBody<Array<Record<string, any>>>,
   model: { name: string; id: string },
-  transaction: any
+  transaction: Transaction
 ) => {
   const modelInstance = await scaffold.model[model.name].findByPk(model.id);
   if (!modelInstance) {

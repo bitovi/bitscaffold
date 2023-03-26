@@ -1,19 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Attributes, ModelStatic, Transaction } from "sequelize";
 import { Scaffold } from "../..";
+import { IAssociation } from "../types";
 import { handleUpdateMany, handleUpdateOne } from "./sequelize.patch";
 import { handleCreateHasOne, handleCreateMany } from "./sequelize.post";
 
 export const getValidAttributesAndAssociations = (
-  attributes: any,
-  associations: any
+  attributes: Attributes<any>,
+  associations: Record<string, IAssociation>
 ) => {
   const associationsKeys = Object.keys(associations);
   const attributeKeys = Object.keys(attributes);
   let currentModelAttributes = attributes;
 
-  // Details on Belongs
   const belongsAssociation: Array<string> = []; // the total no of associations that the current model Belongs to
-  const externalAssociations: Array<any> = []; // this associations do not belong in the current model.
+  const externalAssociations: Array<string> = []; // this associations do not belong in the current model.
 
   // GET ALL ASSOCIATION ATTRIBUTES AND SEPARATE THEM FROM DATA LEFT
   associationsKeys.forEach((association) => {
@@ -40,11 +41,11 @@ export const getValidAttributesAndAssociations = (
 
 export const handleCreateAssociations = async (
   scaffold: Scaffold,
-  model: any,
+  model: ModelStatic<any>,
   validAssociations: Array<string>,
-  associations: any,
-  attributes: any,
-  transaction: any,
+  associations: Record<string, IAssociation>,
+  attributes: Attributes<any>,
+  transaction: Transaction,
   modelId: string
 ) => {
   for (const association of validAssociations) {
@@ -83,11 +84,11 @@ export const handleCreateAssociations = async (
 
 export const handleUpdateAssociations = async (
   scaffold: Scaffold,
-  model: any,
+  model: ModelStatic<any>,
   validAssociations: Array<string>,
-  associations: any,
-  attributes: any,
-  transaction: any,
+  associations: Record<string, IAssociation>,
+  attributes: Attributes<any>,
+  transaction: Transaction,
   modelId: string
 ) => {
   for (const association of validAssociations) {

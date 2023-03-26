@@ -6,7 +6,7 @@ import {
   ScaffoldSymbolModel,
   ScaffoldModelCollection,
 } from "../types";
-import { extendSequelize } from "./extended";
+import { extendedSequelize } from "./extended";
 import { Scaffold } from "..";
 import { IAssociation, ICreateScaffoldModel } from "./types";
 
@@ -26,18 +26,15 @@ export function createSequelizeInstance(
   scaffold: Scaffold,
   options?: Options
 ): Sequelize {
-  const ScaffoldSequelize = extendSequelize(Sequelize, scaffold);
+  const ScaffoldSequelize = extendedSequelize(scaffold);
 
   if (!options) {
-    // return new Sequelize("sqlite::memory:", {
-    //   logging: false,
-    // });
     return new ScaffoldSequelize("sqlite::memory:", {
       logging: false,
     });
   }
 
-  const sequelize = new ScaffoldSequelize(options);
+  const sequelize: Sequelize = new ScaffoldSequelize(options);
   return sequelize;
 }
 

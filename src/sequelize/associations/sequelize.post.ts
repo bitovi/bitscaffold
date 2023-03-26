@@ -1,17 +1,17 @@
 import * as inflection from "inflection";
-import { Transaction } from "sequelize";
+import { Attributes, ModelStatic, Transaction } from "sequelize";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Scaffold } from "../..";
-import { IAssociationBody } from "../types";
+import { IAssociation, IAssociationBody } from "../types";
 
 export const handleCreateBelongs = async (
-  model: any,
+  model: ModelStatic<any>,
   origCreate: any,
-  currentModelAttributes: any,
+  currentModelAttributes: Attributes<any>,
   belongsAssociation: Array<string>,
-  associations: any,
-  attributes: any,
+  associations: Record<string, IAssociation>,
+  attributes: Attributes<any>,
   transaction: Transaction
 ) => {
   const updatedModelAttributes = currentModelAttributes;
@@ -35,7 +35,7 @@ export const handleCreateHasOne = async (
   scaffold: Scaffold,
   association: IAssociationBody<Record<string, any>>,
   model: { name: string; id?: string },
-  transaction: any
+  transaction: Transaction
 ) => {
   const key = association.details.key;
   const data = {
@@ -51,7 +51,7 @@ export const handleCreateMany = async (
   scaffold: Scaffold,
   association: IAssociationBody<Array<Record<string, any>>>,
   model: { name: string; id?: string },
-  transaction: any
+  transaction: Transaction
 ) => {
   // Create an instance of the model using the id
   const modelInstance = await scaffold.model[model.name].findByPk(model.id, {

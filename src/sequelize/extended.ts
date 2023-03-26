@@ -1,5 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import {
+  Sequelize,
+  Model,
+  CreateOptions,
+  ModelStatic,
+  Attributes,
+  UpdateOptions,
+} from "sequelize";
+import { Col, Fn, Literal, MakeNullishOptional } from "sequelize/types/utils";
 import { Scaffold } from "..";
 import {
   getValidAttributesAndAssociations,
@@ -15,17 +24,27 @@ import { handleCreateBelongs } from "./associations/sequelize.post";
  * original Scaffold Model that was used to generate it.
  *
  */
-export function extendSequelize(Sequelize, scaffold: Scaffold) {
-  const origCreate = Sequelize.Model.create;
-  const origUpdate = Sequelize.Model.update;
 
-  // associationKey => Has
-  // Sequence => ForeignKey ?? underscored/camelCase/ ?? Nothingness
+export function extendedSequelize(scaffold: Scaffold) {
+  const origCreate = Model.create;
+  const origUpdate = Model.update;
 
-  Sequelize.Model.create = async function (attributes: Record<string, any>) {
+  Model.create = async function <
+    M extends Model,
+    O extends CreateOptions<Attributes<M>> = CreateOptions<Attributes<M>>
+  >(
+    this: ModelStatic<M>,
+    attributes: MakeNullishOptional<M["_creationAttributes"]> | undefined,
+    options?: O
+  ) {
     const associations = scaffold.associationsLookup[this.name];
+    const modelPrimaryKey = this.primaryKeyAttribute;
 
-    let modelData: any;
+    let modelData:
+      | undefined
+      | (O extends { returning: false } | { ignoreDuplicates: true }
+          ? void
+          : M);
     let currentModelAttributes = attributes;
 
     const {
@@ -34,6 +53,7 @@ export function extendSequelize(Sequelize, scaffold: Scaffold) {
       belongsAssociation,
       currentModelAttributes: _attributes,
     } = getValidAttributesAndAssociations(attributes, associations);
+
     currentModelAttributes = _attributes;
     // All associations
     const validAssociationsInAttributes = [
@@ -43,7 +63,7 @@ export function extendSequelize(Sequelize, scaffold: Scaffold) {
 
     // If there are no associations, create the model with all attributes.
     if (validAssociationsInAttributes.length === 0) {
-      return origCreate.apply(this, [attributes]);
+      return origCreate.apply(this, [attributes, options]);
     }
 
     const transaction = await scaffold.orm.transaction();
@@ -77,7 +97,7 @@ export function extendSequelize(Sequelize, scaffold: Scaffold) {
           associations,
           attributes,
           transaction,
-          modelData.id
+          modelData?.[modelPrimaryKey]
         );
       }
       await transaction.commit();
@@ -90,10 +110,31 @@ export function extendSequelize(Sequelize, scaffold: Scaffold) {
     return modelData;
   };
 
-  Sequelize.Model.update = async function (attributes: any, ops: any) {
+  Model.update = async function <M extends Model<any, any>>(
+    this: ModelStatic<M>,
+    attributes: {
+      [key in keyof Attributes<M>]?:
+        | Fn
+        | Col
+        | Literal
+        | Attributes<M>[key]
+        | undefined;
+    },
+    ops: Omit<UpdateOptions<Attributes<M>>, "returning"> & {
+      returning: Exclude<
+        UpdateOptions<Attributes<M>>["returning"],
+        undefined | false
+      >;
+    }
+  ) {
     const associations = scaffold.associationsLookup[this.name];
-    const modelId = ops.where?.id;
-    let modelUpdateData: any;
+    const modelPrimaryKey = this.primaryKeyAttribute;
+
+    if (!ops.where?.[modelPrimaryKey]) {
+      throw new Error("Primary key does not exist");
+    }
+    const modelId = ops.where[modelPrimaryKey];
+    let modelUpdateData: [affectedCount: number, affectedRows: M[]] | undefined;
     let currentModelAttributes = attributes;
 
     const {
