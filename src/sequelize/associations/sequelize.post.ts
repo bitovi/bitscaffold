@@ -1,8 +1,39 @@
 import * as inflection from "inflection";
+import { Transaction } from "sequelize";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Scaffold } from "../..";
 import { IAssociationBody } from "../types";
+
+export const handleBelongs = async (
+  currentModelAttributes: any,
+  associationDetails: any,
+  associationAttribute: any,
+  origCreate: any,
+  model: any,
+  transaction: Transaction,
+  noBelongsTo: number
+) => {
+  const associationName = associationDetails.model.toLowerCase();
+  const updatedModelAttributes = {
+    ...currentModelAttributes,
+    [`${associationName}_id`]: associationAttribute?.id,
+  };
+  let modelCreated: any;
+  noBelongsTo--;
+  // only create a model when all belongs to has been converted.
+  if (noBelongsTo === 0) {
+    modelCreated = await origCreate.apply(model, [
+      updatedModelAttributes,
+      { transaction },
+    ]);
+  }
+  return {
+    modelCreated,
+    updatedModelAttributes,
+    noBelongsTo,
+  };
+};
 
 export const handleHasOne = async (
   scaffold: Scaffold,
