@@ -4,3 +4,4 @@ coverage
 dist
 docs
 .DS_Store
+*.sqlite

@@ -1,10 +1,14 @@
 import { Model, Sequelize, Options } from "sequelize";
+import inflection from "inflection";
 import {
   ScaffoldModel,
   SequelizeModelsCollection,
   ScaffoldSymbolModel,
   ScaffoldModelCollection,
 } from "../types";
+import { extendedSequelize } from "./extended";
+import { Scaffold } from "..";
+import { IAssociation, ICreateScaffoldModel } from "./types";
 
 export function buildScaffoldModelObject(
   models: SequelizeModelsCollection
@@ -18,27 +22,33 @@ export function buildScaffoldModelObject(
   return result;
 }
 
-export function createSequelizeInstance(options?: Options): Sequelize {
+export function createSequelizeInstance(
+  scaffold: Scaffold,
+  options?: Options
+): Sequelize {
+  const ScaffoldSequelize = extendedSequelize(scaffold);
+
   if (!options) {
-    return new Sequelize("sqlite::memory:", {
+    return new ScaffoldSequelize("sqlite::memory:", {
       logging: false,
     });
   }
 
-  const sequelize = new Sequelize(options);
+  const sequelize: Sequelize = new ScaffoldSequelize(options);
   return sequelize;
 }
 
 export function convertScaffoldModels(
   sequelize: Sequelize,
   models: ScaffoldModel[]
-): SequelizeModelsCollection {
+): ICreateScaffoldModel {
   models.forEach((model) => {
     const temp = sequelize.define<Model<ScaffoldModel["attributes"]>>(
       model.name,
       model.attributes,
       {
         validate: model.validation || {},
+        underscored: true,
         createdAt: false,
         updatedAt: false,
         freezeTableName: true,
@@ -48,14 +58,10 @@ export function convertScaffoldModels(
     temp[ScaffoldSymbolModel] = model;
   });
 
+  const associationsLookup: Record<string, Record<string, IAssociation>> = {};
+
   models.forEach((model) => {
-    const relationships = [
-      "belongsTo",
-      "belongsToMany",
-      "hasOne",
-      "hasMany",
-      "manyToMany",
-    ];
+    const relationships = ["belongsTo", "belongsToMany", "hasOne", "hasMany"];
     relationships.forEach((relationship) => {
       // For each relationship type, check if we have definitions for it:
       if (model[relationship]) {
@@ -76,10 +82,37 @@ export function convertScaffoldModels(
 
           // Create the relationship
           current[relationship](associated, options);
+
+          //Get association name for lookup
+          let associationName = options.as;
+          if (!associationName) {
+            associationName = target.toLowerCase();
+            if (relationship !== "hasOne" && relationship !== "belongsTo") {
+              associationName = inflection.pluralize("target");
+            }
+          }
+
+          // Add association details to a lookup for each model
+          associationsLookup[model.name] = {
+            ...associationsLookup[model.name],
+            [associationName]: {
+              type: relationship,
+              model: target,
+              key: options.foreignKey ?? `${model.name.toLowerCase()}_id`,
+              joinTable:
+                relationship === "belongsToMany"
+                  ? typeof options.through === "string"
+                    ? options.through
+                    : options.through.model
+                  : undefined,
+            },
+          };
         });
       }
     });
   });
-
-  return sequelize.models as SequelizeModelsCollection;
+  return {
+    associationsLookup,
+    models: sequelize.models as SequelizeModelsCollection,
+  };
 }
