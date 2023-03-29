@@ -7,29 +7,31 @@ import { handleCreateHasOne, handleCreateMany } from "./sequelize.post";
 
 export const getValidAttributesAndAssociations = (
   attributes: Attributes<any>,
-  associations: Record<string, IAssociation>
+  associations: Record<string, IAssociation> | undefined
 ) => {
-  const associationsKeys = Object.keys(associations);
-  const attributeKeys = Object.keys(attributes);
-  let currentModelAttributes = attributes;
-
   const belongsAssociation: Array<string> = []; // the total no of associations that the current model Belongs to
   const externalAssociations: Array<string> = []; // this associations do not belong in the current model.
+  let currentModelAttributes = attributes;
 
-  // GET ALL ASSOCIATION ATTRIBUTES AND SEPARATE THEM FROM DATA LEFT
-  associationsKeys.forEach((association) => {
-    if (attributeKeys.includes(association)) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { [association]: _, ...data } = currentModelAttributes;
-      currentModelAttributes = data;
-      const associationDetails = associations[association];
-      if (associationDetails.type === "belongsTo") {
-        belongsAssociation.push(association);
-      } else {
-        externalAssociations.push(association);
+  if (associations) {
+    const associationsKeys = Object.keys(associations);
+    const attributeKeys = Object.keys(attributes);
+
+    // GET ALL ASSOCIATION ATTRIBUTES AND SEPARATE THEM FROM DATA LEFT
+    associationsKeys.forEach((association) => {
+      if (attributeKeys.includes(association)) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { [association]: _, ...data } = currentModelAttributes;
+        currentModelAttributes = data;
+        const associationDetails = associations[association];
+        if (associationDetails.type === "belongsTo") {
+          belongsAssociation.push(association);
+        } else {
+          externalAssociations.push(association);
+        }
       }
-    }
-  });
+    });
+  }
 
   return {
     // validAssociationsInAttributes,
