@@ -14,6 +14,7 @@ import {
   SequelizeModelsCollection,
   FunctionsHandler,
   ModelFunctionsCollection,
+  Virtuals,
 } from "./types";
 import {
   convertScaffoldModels,
@@ -84,6 +85,8 @@ export class Scaffold {
   private _prefix: string;
   private _exposeErrors: boolean;
 
+  virtuals: Virtuals;
+
   // this is a lookup that shows all associations for each model.
   associationsLookup: Record<string, Record<string, IAssociation> | undefined>;
 
@@ -100,8 +103,13 @@ export class Scaffold {
     this._sequelize = createSequelizeInstance(this, options.database);
 
     // Fetch the scaffold models and associations look up
-    const { associationsLookup, models: sequelizeModels } =
-      convertScaffoldModels(this._sequelize, models);
+    const {
+      associationsLookup,
+      models: sequelizeModels,
+      virtuals,
+    } = convertScaffoldModels(this._sequelize, models);
+
+    this.virtuals = virtuals;
     this.associationsLookup = associationsLookup;
     this._sequelizeModels = sequelizeModels;
 

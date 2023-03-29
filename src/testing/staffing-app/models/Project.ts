@@ -17,6 +17,13 @@ export const Project: ScaffoldModel = {
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    noOfRoles: {
+      type: DataTypes.VIRTUAL(DataTypes.INTEGER),
+      include: "roles",
+      get() {
+        return this.roles.length;
+      },
+    },
   },
   hasMany: [{ target: "Role", options: { as: "roles" } }],
   belongsToMany: [

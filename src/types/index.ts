@@ -5,12 +5,13 @@ import {
   Model,
   BelongsToManyOptions,
   ModelValidateOptions,
-  ModelAttributes,
   BelongsToOptions,
   HasOneOptions,
   HasManyOptions,
   Options,
   ModelCtor,
+  DataType,
+  ModelAttributeColumnOptions,
 } from "sequelize";
 import { ModelHooks } from "sequelize/types/hooks";
 import { Scaffold } from "..";
@@ -131,6 +132,27 @@ export interface HasManyResult {
 }
 
 /**
+ * Extend sequelize ModelAttributeColumnOptions to include 'include'
+ * in the model attribute column options.
+ */
+interface ModelAttributeColumnOptionsWithInclude<M extends Model = Model>
+  extends ModelAttributeColumnOptions<M> {
+  include?: string;
+}
+
+/**
+ * Redefine sequelize ModelAttributes
+ */
+type ModelAttributes<M extends Model = Model, TAttributes = unknown> = {
+  /**
+   * The description of a database column
+   */
+  [name in keyof TAttributes]:
+    | DataType
+    | ModelAttributeColumnOptionsWithInclude<M>;
+};
+
+/**
  * Models can be defined in Scaffold by creating a `[name].ts` file containing
  * the following required (and optional) fields shown here.
  *
@@ -188,4 +210,10 @@ export interface ScaffoldModel {
   hasMany?: HasManyResult[];
 
   hooks?: Partial<ModelHooks>;
+}
+
+export interface Virtuals {
+  [model: string]: {
+    [attribute: string]: string;
+  };
 }

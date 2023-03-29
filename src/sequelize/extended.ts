@@ -18,6 +18,7 @@ import {
 import { handleUpdateBelongs } from "./associations/sequelize.patch";
 import { handleCreateBelongs } from "./associations/sequelize.post";
 import { IAssociation } from "./types";
+import { addVirtuals } from "./virtuals";
 
 /**
  * ExtendSequelize is a function that replaces some model functions
@@ -27,6 +28,10 @@ import { IAssociation } from "./types";
  */
 
 export function extendedSequelize(scaffold: Scaffold) {
+  const origFindAll = Model.findAll;
+  const origFindOne = Model.findOne;
+  const origFindByPk = Model.findByPk;
+  const origFindOrCreate = Model.findOrCreate;
   const origCreate = Model.create;
   const origUpdate = Model.update;
 
@@ -199,6 +204,46 @@ export function extendedSequelize(scaffold: Scaffold) {
     }
 
     return modelUpdateData;
+  };
+
+  Model.findAll = async function (queryOptions) {
+    const options = addVirtuals({
+      queryOptions,
+      scaffold,
+      modelName: this.name,
+    });
+
+    return await origFindAll.apply(this, [options]);
+  };
+
+  Model.findOne = async function (queryOptions) {
+    const options = addVirtuals({
+      queryOptions,
+      scaffold,
+      modelName: this.name,
+    });
+
+    return await origFindOne.apply(this, [options]);
+  };
+
+  Model.findByPk = async function (id, queryOptions) {
+    const options = addVirtuals({
+      queryOptions,
+      scaffold,
+      modelName: this.name,
+    });
+
+    return await origFindByPk.apply(this, [id, options]);
+  };
+
+  Model.findOrCreate = async function (queryOptions) {
+    const options = addVirtuals({
+      queryOptions,
+      scaffold,
+      modelName: this.name,
+    });
+
+    return await origFindOrCreate.apply(this, [options]);
   };
 
   return Sequelize;

@@ -1,10 +1,11 @@
-import { Model, Sequelize, Options } from "sequelize";
+import { Model, Sequelize, Options, DataTypes } from "sequelize";
 import inflection from "inflection";
 import {
   ScaffoldModel,
   SequelizeModelsCollection,
   ScaffoldSymbolModel,
   ScaffoldModelCollection,
+  Virtuals,
 } from "../types";
 import { extendedSequelize } from "./extended";
 import { Scaffold } from "..";
@@ -42,7 +43,27 @@ export function convertScaffoldModels(
   sequelize: Sequelize,
   models: ScaffoldModel[]
 ): ICreateScaffoldModel {
+  const virtuals: Virtuals = {};
+
   models.forEach((model) => {
+    for (const attributeKey in model.attributes) {
+      const attribute = model.attributes[attributeKey];
+
+      const { type, include } = attribute;
+
+      if (type instanceof DataTypes.VIRTUAL) {
+        if (virtuals[model.name]) {
+          virtuals[model.name][attributeKey] = include || "";
+        } else {
+          virtuals[model.name] = {
+            [attributeKey]: include || "",
+          };
+        }
+
+        include && delete attribute.include;
+      }
+    }
+
     const temp = sequelize.define<Model<ScaffoldModel["attributes"]>>(
       model.name,
       model.attributes,
@@ -62,6 +83,7 @@ export function convertScaffoldModels(
 
   models.forEach((model) => {
     const relationships = ["belongsTo", "belongsToMany", "hasOne", "hasMany"];
+
     relationships.forEach((relationship) => {
       // For each relationship type, check if we have definitions for it:
       if (model[relationship]) {
@@ -111,8 +133,10 @@ export function convertScaffoldModels(
       }
     });
   });
+
   return {
     associationsLookup,
     models: sequelize.models as SequelizeModelsCollection,
+    virtuals,
   };
 }

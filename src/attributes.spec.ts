@@ -14,6 +14,7 @@ describe("Attribute Tests", () => {
       lastName: {
         type: DataTypes.STRING,
         allowNull: false,
+        include: "names",
       },
     },
   };

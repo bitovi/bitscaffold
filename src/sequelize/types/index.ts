@@ -1,4 +1,4 @@
-import { SequelizeModelsCollection } from "../../types";
+import { SequelizeModelsCollection, Virtuals } from "../../types";
 
 export interface IAssociation {
   type: string;
@@ -10,6 +10,7 @@ export interface IAssociation {
 export interface ICreateScaffoldModel {
   models: SequelizeModelsCollection;
   associationsLookup: Record<string, Record<string, IAssociation>>;
+  virtuals: Virtuals;
 }
 
 export interface IAssociationBody<T> {
