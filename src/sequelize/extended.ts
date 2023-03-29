@@ -17,6 +17,7 @@ import {
 } from "./associations";
 import { handleUpdateBelongs } from "./associations/sequelize.patch";
 import { handleCreateBelongs } from "./associations/sequelize.post";
+import { IAssociation } from "./types";
 
 /**
  * ExtendSequelize is a function that replaces some model functions
@@ -75,7 +76,7 @@ export function extendedSequelize(scaffold: Scaffold) {
           origCreate,
           currentModelAttributes,
           belongsAssociation,
-          associations,
+          associations as Record<string, IAssociation>,
           attributes,
           transaction
         );
@@ -94,7 +95,7 @@ export function extendedSequelize(scaffold: Scaffold) {
           scaffold,
           this,
           externalAssociations,
-          associations,
+          associations as Record<string, IAssociation>,
           attributes,
           transaction,
           modelData?.[modelPrimaryKey]
@@ -164,7 +165,7 @@ export function extendedSequelize(scaffold: Scaffold) {
           origUpdate,
           currentModelAttributes,
           belongsAssociation,
-          associations,
+          associations as Record<string, IAssociation>,
           attributes,
           transaction
         );
@@ -184,7 +185,7 @@ export function extendedSequelize(scaffold: Scaffold) {
           scaffold,
           this,
           externalAssociations,
-          associations,
+          associations as Record<string, IAssociation>,
           attributes,
           transaction,
           modelId

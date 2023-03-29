@@ -19,10 +19,6 @@ export function createStaffingAppInstance(): [Koa, Scaffold] {
   const scaffold = new Scaffold([Assignment, Employee, Project, Role, Skill], {
     prefix: "/api",
     expose: true,
-    database: {
-      dialect: "sqlite",
-      storage: "test.sqlite",
-    },
   });
 
   // Set up your Koa app as normal, for example, a logging middleware

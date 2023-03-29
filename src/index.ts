@@ -85,7 +85,7 @@ export class Scaffold {
   private _exposeErrors: boolean;
 
   // this is a lookup that shows all associations for each model.
-  associationsLookup: Record<string, Record<string, IAssociation>>;
+  associationsLookup: Record<string, Record<string, IAssociation> | undefined>;
 
   /**
    * Creates a new Scaffold instance
