@@ -6,17 +6,19 @@ import {
   CreateOptions,
   ModelStatic,
   Attributes,
-  UpdateOptions,
-} from "sequelize";
-import { Col, Fn, Literal, MakeNullishOptional } from "sequelize/types/utils";
-import { Scaffold } from "..";
+  UpdateOptions
+} from 'sequelize'
+import { Col, Fn, Literal, MakeNullishOptional } from 'sequelize/types/utils'
+import { Scaffold } from '..'
 import {
   getValidAttributesAndAssociations,
   handleCreateAssociations,
-  handleUpdateAssociations,
-} from "./associations";
-import { handleUpdateBelongs } from "./associations/sequelize.patch";
-import { handleCreateBelongs } from "./associations/sequelize.post";
+  handleUpdateAssociations
+} from './associations'
+import { handleUpdateBelongs } from './associations/sequelize.patch'
+import { handleCreateBelongs } from './associations/sequelize.post'
+import { IAssociation } from './types'
+import { addVirtuals } from './virtuals'
 
 /**
  * ExtendSequelize is a function that replaces some model functions
@@ -26,47 +28,48 @@ import { handleCreateBelongs } from "./associations/sequelize.post";
  */
 
 export function extendedSequelize(scaffold: Scaffold) {
-  const origCreate = Model.create;
-  const origUpdate = Model.update;
+  const origFindAll = Model.findAll
+  const origFindOne = Model.findOne
+  const origFindOrCreate = Model.findOrCreate
+  const origCreate = Model.create
+  const origUpdate = Model.update
 
   Model.create = async function <
     M extends Model,
     O extends CreateOptions<Attributes<M>> = CreateOptions<Attributes<M>>
   >(
     this: ModelStatic<M>,
-    attributes: MakeNullishOptional<M["_creationAttributes"]> | undefined,
+    attributes: MakeNullishOptional<M['_creationAttributes']> | undefined,
     options?: O
   ) {
-    const associations = scaffold.associationsLookup[this.name];
-    const modelPrimaryKey = this.primaryKeyAttribute;
+    const associations = scaffold.associationsLookup[this.name]
+    const modelPrimaryKey = this.primaryKeyAttribute
 
     let modelData:
       | undefined
-      | (O extends { returning: false } | { ignoreDuplicates: true }
-          ? void
-          : M);
-    let currentModelAttributes = attributes;
+      | (O extends { returning: false } | { ignoreDuplicates: true } ? void : M)
+    let currentModelAttributes = attributes
 
     const {
       // validAssociationsInAttributes,
       externalAssociations,
       belongsAssociation,
-      currentModelAttributes: _attributes,
-    } = getValidAttributesAndAssociations(attributes, associations);
+      currentModelAttributes: _attributes
+    } = getValidAttributesAndAssociations(attributes, associations)
 
-    currentModelAttributes = _attributes;
+    currentModelAttributes = _attributes
     // All associations
     const validAssociationsInAttributes = [
       ...externalAssociations,
-      ...belongsAssociation,
-    ];
+      ...belongsAssociation
+    ]
 
     // If there are no associations, create the model with all attributes.
     if (validAssociationsInAttributes.length === 0) {
-      return origCreate.apply(this, [attributes, options]);
+      return origCreate.apply(this, [attributes, options])
     }
 
-    const transaction = await scaffold.orm.transaction();
+    const transaction = await scaffold.orm.transaction()
 
     try {
       if (belongsAssociation.length > 0) {
@@ -75,11 +78,11 @@ export function extendedSequelize(scaffold: Scaffold) {
           origCreate,
           currentModelAttributes,
           belongsAssociation,
-          associations,
+          associations as Record<string, IAssociation>,
           attributes,
           transaction
-        );
-        modelData = _model;
+        )
+        modelData = _model
       }
 
       if (externalAssociations.length > 0) {
@@ -87,28 +90,28 @@ export function extendedSequelize(scaffold: Scaffold) {
         if (!modelData) {
           modelData = await origCreate.apply(this, [
             currentModelAttributes,
-            { transaction },
-          ]);
+            { transaction }
+          ])
         }
         await handleCreateAssociations(
           scaffold,
           this,
           externalAssociations,
-          associations,
+          associations as Record<string, IAssociation>,
           attributes,
           transaction,
           modelData?.[modelPrimaryKey]
-        );
+        )
       }
-      await transaction.commit();
+      await transaction.commit()
     } catch (error) {
-      console.log("error =>", error);
-      await transaction.rollback();
-      throw new Error(error);
+      console.log('error =>', error)
+      await transaction.rollback()
+      throw new Error(error)
     }
 
-    return modelData;
-  };
+    return modelData
+  }
 
   Model.update = async function <M extends Model<any, any>>(
     this: ModelStatic<M>,
@@ -118,43 +121,43 @@ export function extendedSequelize(scaffold: Scaffold) {
         | Col
         | Literal
         | Attributes<M>[key]
-        | undefined;
+        | undefined
     },
-    ops: Omit<UpdateOptions<Attributes<M>>, "returning"> & {
+    ops: Omit<UpdateOptions<Attributes<M>>, 'returning'> & {
       returning: Exclude<
-        UpdateOptions<Attributes<M>>["returning"],
+        UpdateOptions<Attributes<M>>['returning'],
         undefined | false
-      >;
+      >
     }
   ) {
-    const associations = scaffold.associationsLookup[this.name];
-    const modelPrimaryKey = this.primaryKeyAttribute;
+    const associations = scaffold.associationsLookup[this.name]
+    const modelPrimaryKey = this.primaryKeyAttribute
 
     if (!ops.where?.[modelPrimaryKey]) {
-      throw new Error("Primary key does not exist");
+      throw new Error('Primary key does not exist')
     }
-    const modelId = ops.where[modelPrimaryKey];
-    let modelUpdateData: [affectedCount: number, affectedRows: M[]] | undefined;
-    let currentModelAttributes = attributes;
+    const modelId = ops.where[modelPrimaryKey]
+    let modelUpdateData: [affectedCount: number, affectedRows: M[]] | undefined
+    let currentModelAttributes = attributes
 
     const {
       externalAssociations,
       belongsAssociation,
-      currentModelAttributes: _attributes,
-    } = getValidAttributesAndAssociations(attributes, associations);
-    currentModelAttributes = _attributes;
+      currentModelAttributes: _attributes
+    } = getValidAttributesAndAssociations(attributes, associations)
+    currentModelAttributes = _attributes
 
     const validAssociationsInAttributes = [
       ...externalAssociations,
-      ...belongsAssociation,
-    ];
+      ...belongsAssociation
+    ]
 
     // If there are no associations, create the model with all attributes.
     if (validAssociationsInAttributes.length === 0) {
-      return origUpdate.apply(this, [attributes, ops]);
+      return origUpdate.apply(this, [attributes, ops])
     }
 
-    const transaction = await scaffold.orm.transaction();
+    const transaction = await scaffold.orm.transaction()
 
     try {
       if (belongsAssociation.length > 0) {
@@ -164,11 +167,11 @@ export function extendedSequelize(scaffold: Scaffold) {
           origUpdate,
           currentModelAttributes,
           belongsAssociation,
-          associations,
+          associations as Record<string, IAssociation>,
           attributes,
           transaction
-        );
-        modelUpdateData = _model;
+        )
+        modelUpdateData = _model
       }
       if (externalAssociations.length > 0) {
         if (!modelUpdateData) {
@@ -176,29 +179,59 @@ export function extendedSequelize(scaffold: Scaffold) {
             currentModelAttributes,
             {
               ...ops,
-              transaction,
-            },
-          ]);
+              transaction
+            }
+          ])
         }
         await handleUpdateAssociations(
           scaffold,
           this,
           externalAssociations,
-          associations,
+          associations as Record<string, IAssociation>,
           attributes,
           transaction,
           modelId
-        );
+        )
       }
 
-      await transaction.commit();
+      await transaction.commit()
     } catch (error) {
-      await transaction.rollback();
-      throw new Error(error);
+      await transaction.rollback()
+      throw new Error(error)
     }
 
-    return modelUpdateData;
-  };
+    return modelUpdateData
+  }
 
-  return Sequelize;
+  Model.findOrCreate = async function (queryOptions) {
+    const options = addVirtuals({
+      queryOptions,
+      scaffold,
+      modelName: this.name
+    })
+
+    return await origFindOrCreate.apply(this, [options])
+  }
+
+  Model.findOne = async function (queryOptions) {
+    const options = addVirtuals({
+      queryOptions,
+      scaffold,
+      modelName: this.name
+    })
+
+    return await origFindOne.apply(this, [options])
+  }
+
+  Model.findAll = async function (queryOptions) {
+    const options = addVirtuals({
+      queryOptions,
+      scaffold,
+      modelName: this.name
+    })
+
+    return await origFindAll.apply(this, [options])
+  }
+
+  return Sequelize
 }
