@@ -115,7 +115,7 @@ export function extendedSequelize(scaffold: Scaffold) {
       }
       await transaction.commit();
     } catch (error) {
-      console.log("error =>", error);
+      console.error("error =>", error);
       await transaction.rollback();
       throw new Error(error);
     }
@@ -147,8 +147,6 @@ export function extendedSequelize(scaffold: Scaffold) {
       belongsAssociation,
       currentModelAttributes: _attributes,
     } = getValidAttributesAndAssociations(attributes, associations);
-
-    console.log(otherAssociationAttributes);
 
     currentModelAttributes = _attributes;
     // All associations
@@ -203,7 +201,7 @@ export function extendedSequelize(scaffold: Scaffold) {
       }
       await transaction.commit();
     } catch (error) {
-      console.log("error =>", error);
+      console.error("error =>", error);
       await transaction.rollback();
       throw new Error(error);
     }
@@ -294,6 +292,7 @@ export function extendedSequelize(scaffold: Scaffold) {
 
       await transaction.commit();
     } catch (error) {
+      console.error(error);
       await transaction.rollback();
       throw new Error(error);
     }
