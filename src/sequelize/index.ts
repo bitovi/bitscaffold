@@ -46,8 +46,8 @@ export function convertScaffoldModels(
   serializer: JSONAPISerializer,
   models: ScaffoldModel[]
 ): ICreateScaffoldModel {
-  const virtuals: Virtuals = {}
-  const primaryKeys: Record<string, string> = {}
+  const virtuals: Virtuals = {};
+  const primaryKeys: Record<string, string> = {};
   models.forEach((model) => {
     for (const attributeKey in model.attributes) {
       const attribute = model.attributes[attributeKey]
@@ -80,7 +80,10 @@ export function convertScaffoldModels(
     )
 
     // GET THE PRIMARY KEY
-    primaryKeys[model.name] = temp.primaryKeyAttribute
+    primaryKeys[model.name] = temp.primaryKeyAttribute;
+
+    temp[ScaffoldSymbolModel] = model;
+  });
 
     temp[ScaffoldSymbolModel] = model
   })
@@ -140,7 +143,12 @@ export function convertScaffoldModels(
           associations[associationName] = modelAssociation
         })
         // Create the serializer schema for the model
-        registerSchema(serializer, model.name, associations)
+        registerSchema(
+          serializer,
+          model,
+          associations,
+          primaryKeys[model.name]
+        );
       }
     })
   })

@@ -75,7 +75,6 @@ async function createImpl<T extends ScaffoldModel = ScaffoldModel>(
   model: T,
   body: unknown
 ) {
-  // const serializer = buildDeserializerForModelStandalone();
   const serializer = scaffold.serializer
   const { data, errors } = buildCreateOptions('')
   if (errors.length > 0) {
@@ -106,6 +105,8 @@ async function updateImpl(
   }
 
   const parsed = await serializer.deserialize(model.name, body as any)
+  // FOR NON-JSON Compliant, it returns an empty object
+  const parsedBody = Object.keys(parsed).length === 0 ? body : parsed
 
   return {
     body: parsedBody,
