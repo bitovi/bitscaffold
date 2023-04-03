@@ -33,15 +33,10 @@ import {
   // buildSerializerForModelStandalone,
   SerializeFunctions
 } from './serialize'
-import {
-  buildMiddlewareForModel,
-  errorMiddleware,
-  MiddlewareFunctionsKoa
-} from './middleware'
+import { buildMiddlewareForModel, MiddlewareFunctionsKoa } from './middleware'
 import { buildEverythingForModel, EverythingFunctions } from './everything'
 import { buildSchemaForModel } from './schema'
 import { IAssociation } from './sequelize/types'
-import { ScaffoldError } from './error/errors'
 
 /**
  * Parse can be imported from the `@bitovi/scaffold` package
