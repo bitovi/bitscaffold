@@ -53,9 +53,6 @@ export function findOneEverything(scaffold: Scaffold, modelName: string) {
         detail: modelName + " with id " + id + " was not found",
       });
     }
-    const attributes = (params.attributes ??
-      Object.keys(result?.toJSON()) ??
-      {}) as string[];
     const response = await scaffold.serialize[modelName].findOne(result);
     return response;
   };
@@ -80,7 +77,9 @@ export function createEverything(scaffold: Scaffold, modelName: string) {
     try {
       const { body, ops } = await scaffold.parse[modelName].create(rawbody);
       const result = await scaffold.model[modelName].create(body, ops);
-      const response = await scaffold.serialize[modelName].create(result.toJSON());
+      const response = await scaffold.serialize[modelName].create(
+        result.toJSON()
+      );
       return response;
     } catch (error) {
       console.error(error);
@@ -96,7 +95,9 @@ export function updateEverything(scaffold: Scaffold, modelName: string) {
     id?: Identifier
   ) {
     const { body, ops } = await scaffold.parse[modelName].update(rawbody, id);
+    console.log(body);
     const result = await scaffold.model[modelName].update(body, ops);
+    console.log(result);
     const response = await scaffold.serialize[modelName].update(result[0]);
     return response;
   };

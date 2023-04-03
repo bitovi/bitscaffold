@@ -75,7 +75,6 @@ async function createImpl<T extends ScaffoldModel = ScaffoldModel>(
   model: T,
   body: unknown
 ) {
-  // const serializer = buildDeserializerForModelStandalone();
   const serializer = scaffold.serializer;
   const { data, errors } = buildCreateOptions("");
   if (errors.length > 0) {
@@ -83,7 +82,6 @@ async function createImpl<T extends ScaffoldModel = ScaffoldModel>(
     throw new Error("Bad Request, Invalid Query String");
   }
   const parsed = await serializer.deserialize(model.name, body as any);
-
   // FOR NON-JSON Compliant, it returns an empty object
   const parsedBody = Object.keys(parsed).length === 0 ? body : parsed;
 
@@ -107,9 +105,11 @@ async function updateImpl(
   }
 
   const parsed = await serializer.deserialize(model.name, body as any);
+  // FOR NON-JSON Compliant, it returns an empty object
+  const parsedBody = Object.keys(parsed).length === 0 ? body : parsed;
 
   return {
-    body: parsed,
+    body: parsedBody,
     ops: data,
   };
 }

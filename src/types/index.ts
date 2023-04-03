@@ -81,6 +81,8 @@ export type ScaffoldModelCollection = {
 
 export type JSONObject = Record<string, unknown>;
 
+export type JSONAnyObject = Record<string, any>;
+
 export interface ModelFunctionsCollection<T> {
   [modelName: string]: T;
   "*": T;

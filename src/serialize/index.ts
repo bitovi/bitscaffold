@@ -6,6 +6,7 @@ import * as inflection from "inflection";
 import JSONAPISerializer from "json-api-serializer";
 import { JSONAPIDocument } from "json-api-serializer";
 import { IAssociation } from "../sequelize/types";
+import { ScaffoldModel } from "../types";
 
 /**
  * Provides a set of exported functions, per Model, that
@@ -101,19 +102,19 @@ export function buildSerializerForModel(
   };
 }
 
-
 const deserialize = (data: any) => {
   if (data) {
-    const { id } = data
-    return { id }
+    const { id } = data;
+    return { id };
   }
-  return data
-}
+  return data;
+};
 
 export function registerSchema(
   serializer: JSONAPISerializer,
-  modelName: string,
-  associations: Record<string, IAssociation>
+  model: ScaffoldModel,
+  associations: Record<string, IAssociation>,
+  primaryKey: string
 ) {
   const relationships: { [key: string]: any } = {};
   const associationsKeys = Object.keys(associations);
@@ -122,13 +123,14 @@ export function registerSchema(
     const associationType = inflection.pluralize(
       association.model.toLowerCase()
     );
-    relationships[associationsKey] = {
-      type: associationType,
-      deserialize
+    relationships[associationType] = {
+      type: association.model,
+      deserialize,
     };
   });
-  serializer.register(modelName, {
-    id: "id",
+  serializer.register(model.name, {
+    id: primaryKey,
+    whitelist: Object.keys(model.attributes),
     relationships,
   });
 }

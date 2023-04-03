@@ -47,7 +47,7 @@ export function convertScaffoldModels(
   models: ScaffoldModel[]
 ): ICreateScaffoldModel {
   const virtuals: Virtuals = {};
-
+  const primaryKeys: Record<string, string> = {};
   models.forEach((model) => {
     for (const attributeKey in model.attributes) {
       const attribute = model.attributes[attributeKey];
@@ -78,6 +78,9 @@ export function convertScaffoldModels(
         freezeTableName: true,
       }
     );
+
+    // GET THE PRIMARY KEY
+    primaryKeys[model.name] = temp.primaryKeyAttribute;
 
     temp[ScaffoldSymbolModel] = model;
   });
@@ -137,7 +140,12 @@ export function convertScaffoldModels(
           associations[associationName] = modelAssociation;
         });
         // Create the serializer schema for the model
-        registerSchema(serializer, model.name, associations);
+        registerSchema(
+          serializer,
+          model,
+          associations,
+          primaryKeys[model.name]
+        );
       }
     });
   });
