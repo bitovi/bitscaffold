@@ -139,7 +139,7 @@ export function createMiddleware(scaffold: Scaffold, modelName: string) {
       modelName = resolveWildcard(scaffold, ctx.path);
     }
 
-    const body = await parseScaffoldBody(ctx, ctx.request.type);
+    const body = await parseScaffoldBody(ctx);
     ctx.body = await scaffold.everything[modelName].create(
       body,
       ctx.querystring
@@ -154,7 +154,7 @@ export function updateMiddleware(scaffold: Scaffold, modelName: string) {
       modelName = resolveWildcard(scaffold, ctx.path);
     }
 
-    const body = await parseScaffoldBody(ctx, ctx.request.type);
+    const body = await parseScaffoldBody(ctx);
     const params = scaffold.getScaffoldURLParamsForRoute(ctx.path);
     ctx.body = await scaffold.everything[modelName].update(
       body,
@@ -207,7 +207,7 @@ export function handleAllMiddleware(scaffold: Scaffold) {
       }
 
       case "POST": {
-        const body = await parseScaffoldBody(ctx, ctx.request.type);
+        const body = await parseScaffoldBody(ctx);
         ctx.body = await scaffold.everything[params.model].create(
           body,
           ctx.querystring
@@ -216,7 +216,7 @@ export function handleAllMiddleware(scaffold: Scaffold) {
       }
 
       case "PUT": {
-        const body = await parseScaffoldBody(ctx, ctx.request.type);
+        const body = await parseScaffoldBody(ctx);
         if (!params.id) {
           throw scaffold.createError({
             code: "400",

@@ -1,4 +1,5 @@
 import { Identifier, Sequelize } from "sequelize";
+import JSONAPISerializer from "json-api-serializer";
 import { match } from "path-to-regexp";
 import {
   Error as SerializedError,
@@ -23,13 +24,13 @@ import {
 } from "./sequelize";
 import {
   buildParserForModel,
-  buildParserForModelStandalone,
+  // buildParserForModelStandalone,
   ParseFunctions,
 } from "./parse";
 
 import {
   buildSerializerForModel,
-  buildSerializerForModelStandalone,
+  // buildSerializerForModelStandalone,
   SerializeFunctions,
 } from "./serialize";
 import { buildMiddlewareForModel, MiddlewareFunctionsKoa } from "./middleware";
@@ -47,9 +48,9 @@ import { IAssociation } from "./sequelize/types";
  * @param {ScaffoldModel} model The Scaffold Model to use for validation, attributes, relationships, etc
  * @returns {ModelFunctionsCollection<ParseFunctions>}
  */
-export function Parse(model: ScaffoldModel) {
-  return buildParserForModelStandalone(model);
-}
+// export function Parse(model: ScaffoldModel) {
+//   return buildParserForModelStandalone(model);
+// }
 
 /**
  * Serialize can be imported from the `@bitovi/scaffold` package
@@ -61,9 +62,9 @@ export function Parse(model: ScaffoldModel) {
  * @param {ScaffoldModel} model The Scaffold Model to use for validation, attributes, relationships, etc
  * @returns {ModelFunctionsCollection<SerializeFunctions>}
  */
-export function Serialize(model: ScaffoldModel) {
-  return buildSerializerForModelStandalone(model);
-}
+// export function Serialize(model: ScaffoldModel) {
+//   return buildSerializerForModelStandalone(model);
+// }
 
 /**
  * Scaffold can be imported from the `@bitovi/scaffold` package
@@ -80,6 +81,7 @@ export function Serialize(model: ScaffoldModel) {
 export class Scaffold {
   private _sequelizeModels: SequelizeModelsCollection;
   private _sequelize: Sequelize;
+  private _serializer: JSONAPISerializer;
   private _allowedMethods: ["GET", "POST", "PUT", "DELETE"];
   private _sequelizeModelNames: string[];
   private _prefix: string;
@@ -102,12 +104,14 @@ export class Scaffold {
     // Prepare the ORM instance and keep references to the different Models
     this._sequelize = createSequelizeInstance(this, options.database);
 
+    this._serializer = new JSONAPISerializer();
+
     // Fetch the scaffold models and associations look up
     const {
       associationsLookup,
       models: sequelizeModels,
       virtuals,
-    } = convertScaffoldModels(this._sequelize, models);
+    } = convertScaffoldModels(this._sequelize, this._serializer, models);
 
     this.virtuals = virtuals;
     this.associationsLookup = associationsLookup;
@@ -136,6 +140,14 @@ export class Scaffold {
    */
   get orm(): Sequelize {
     return this._sequelize;
+  }
+
+  /**
+   * Returns the raw Serializer
+   * @hidden
+   */
+  get serializer(): JSONAPISerializer {
+    return this._serializer;
   }
 
   /**

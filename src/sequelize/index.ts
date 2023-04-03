@@ -1,4 +1,5 @@
 import { Model, Sequelize, Options, DataTypes } from "sequelize";
+import JSONAPISerializer from "json-api-serializer";
 import inflection from "inflection";
 import {
   ScaffoldModel,
@@ -10,6 +11,7 @@ import {
 import { extendedSequelize } from "./extended";
 import { Scaffold } from "..";
 import { IAssociation, ICreateScaffoldModel } from "./types";
+import { registerSchema } from "../serialize";
 
 export function buildScaffoldModelObject(
   models: SequelizeModelsCollection
@@ -41,6 +43,7 @@ export function createSequelizeInstance(
 
 export function convertScaffoldModels(
   sequelize: Sequelize,
+  serializer: JSONAPISerializer,
   models: ScaffoldModel[]
 ): ICreateScaffoldModel {
   const virtuals: Virtuals = {};
@@ -83,6 +86,7 @@ export function convertScaffoldModels(
 
   models.forEach((model) => {
     const relationships = ["belongsTo", "belongsToMany", "hasOne", "hasMany"];
+    const associations: Record<string, IAssociation> = {};
 
     relationships.forEach((relationship) => {
       // For each relationship type, check if we have definitions for it:
@@ -115,21 +119,25 @@ export function convertScaffoldModels(
           }
 
           // Add association details to a lookup for each model
+          const modelAssociation = {
+            type: relationship,
+            model: target,
+            key: options.foreignKey ?? `${model.name.toLowerCase()}_id`,
+            joinTable:
+              relationship === "belongsToMany"
+                ? typeof options.through === "string"
+                  ? options.through
+                  : options.through.model
+                : undefined,
+          };
           associationsLookup[model.name] = {
             ...associationsLookup[model.name],
-            [associationName]: {
-              type: relationship,
-              model: target,
-              key: options.foreignKey ?? `${model.name.toLowerCase()}_id`,
-              joinTable:
-                relationship === "belongsToMany"
-                  ? typeof options.through === "string"
-                    ? options.through
-                    : options.through.model
-                  : undefined,
-            },
+            [associationName]: modelAssociation,
           };
+          associations[associationName] = modelAssociation;
         });
+        // Create the serializer schema for the model
+        registerSchema(serializer, model.name, associations);
       }
     });
   });
