@@ -1,22 +1,23 @@
-import Koa from "koa";
-import { Scaffold } from "..";
-import { KoaMiddleware, ExpressMiddleware } from "../types";
-import { parseScaffoldBody } from "../parse/body";
+import Koa from 'koa'
+import { Scaffold } from '..'
+import { KoaMiddleware, ExpressMiddleware } from '../types'
+import { parseScaffoldBody } from '../parse/body'
+import errorResponseHandler from '../error'
 
 /**
  * Provides a set of exported functions, per Model, that
  * provide Koa Middleware for each operation
  */
 export interface MiddlewareFunctionsKoa {
-  findAll: KoaMiddleware;
-  findOne: KoaMiddleware;
-  findAndCountAll: KoaMiddleware;
-  create: KoaMiddleware;
-  update: KoaMiddleware;
-  destroy: KoaMiddleware;
-  frontend: KoaMiddleware;
-  schema: KoaMiddleware;
-  crud: KoaMiddleware;
+  findAll: KoaMiddleware
+  findOne: KoaMiddleware
+  findAndCountAll: KoaMiddleware
+  create: KoaMiddleware
+  update: KoaMiddleware
+  destroy: KoaMiddleware
+  frontend: KoaMiddleware
+  schema: KoaMiddleware
+  crud: KoaMiddleware
 
   /**
    * The `middleware.allModels.all` Middleware provides the primary hooks
@@ -42,7 +43,7 @@ export interface MiddlewareFunctionsKoa {
    * @return {KoaMiddleware} Koa Middleware function that can be attached to a Koa instance (`app`) using `app.use`
    * @category General Use
    */
-  all: KoaMiddleware;
+  all: KoaMiddleware
 }
 
 /**
@@ -50,12 +51,12 @@ export interface MiddlewareFunctionsKoa {
  * provide Express Middleware for each operation
  */
 export interface MiddlewareFunctionsExpress {
-  findAll: ExpressMiddleware;
-  findOne: ExpressMiddleware;
-  findAndCountAll: ExpressMiddleware;
-  create: ExpressMiddleware;
-  update: ExpressMiddleware;
-  destroy: ExpressMiddleware;
+  findAll: ExpressMiddleware
+  findOne: ExpressMiddleware
+  findAndCountAll: ExpressMiddleware
+  create: ExpressMiddleware
+  update: ExpressMiddleware
+  destroy: ExpressMiddleware
 }
 
 export function buildMiddlewareForModel(
@@ -70,50 +71,50 @@ export function buildMiddlewareForModel(
     destroy: destroyMiddleware(scaffold, modelName),
     update: updateMiddleware(scaffold, modelName),
     frontend: async (ctx) => {
-      ctx.throw(500, "Not Implemented");
+      ctx.throw(500, 'Not Implemented')
     },
     schema: async (ctx) => {
-      ctx.throw(500, "Not Implemented");
+      ctx.throw(500, 'Not Implemented')
     },
     crud: async (ctx) => {
-      ctx.throw(500, "Not Implemented");
+      ctx.throw(500, 'Not Implemented')
     },
-    all: handleAllMiddleware(scaffold),
-  };
+    all: handleAllMiddleware(scaffold)
+  }
 }
 
 export function findAllMiddleware(scaffold: Scaffold, modelName: string) {
   return async function findAllImpl(ctx: Koa.Context) {
     // If this is a wildcard or allModel situation, figure out the model from the route
-    if (modelName === "*") {
-      modelName = resolveWildcard(scaffold, ctx.path);
+    if (modelName === '*') {
+      modelName = resolveWildcard(scaffold, ctx.path)
     }
 
-    ctx.body = await scaffold.everything[modelName].findAll(ctx.querystring);
-  };
+    ctx.body = await scaffold.everything[modelName].findAll(ctx.querystring)
+  }
 }
 
 export function findOneMiddleware(scaffold: Scaffold, modelName: string) {
   return async function findOneImpl(ctx: Koa.Context) {
-    const params = scaffold.getScaffoldURLParamsForRoute(ctx.path);
+    const params = scaffold.getScaffoldURLParamsForRoute(ctx.path)
     if (!params.id) {
-      return ctx.throw(400, "BAD_REQUEST");
+      return ctx.throw(400, 'BAD_REQUEST')
     }
 
     // If this is a wildcard or allModel situation, figure out the model from the route
-    if (modelName === "*") {
+    if (modelName === '*') {
       if (!params.model) {
-        return ctx.throw(400, "BAD_REQUEST");
+        return ctx.throw(400, 'BAD_REQUEST')
       }
 
-      modelName = params.model;
+      modelName = params.model
     }
 
     ctx.body = await scaffold.everything[modelName].findOne(
       ctx.querystring,
       params.id
-    );
-  };
+    )
+  }
 }
 
 export function findAndCountAllMiddleware(
@@ -122,145 +123,163 @@ export function findAndCountAllMiddleware(
 ) {
   return async function findAndCountAllImpl(ctx: Koa.Context) {
     // If this is a wildcard or allModel situation, figure out the model from the route
-    if (modelName === "*") {
-      modelName = resolveWildcard(scaffold, ctx.path);
+    if (modelName === '*') {
+      modelName = resolveWildcard(scaffold, ctx.path)
     }
 
     ctx.body = await scaffold.everything[modelName].findAndCountAll(
       ctx.querystring
-    );
-  };
+    )
+  }
 }
 
 export function createMiddleware(scaffold: Scaffold, modelName: string) {
   return async function createImpl(ctx: Koa.Context) {
     // If this is a wildcard or allModel situation, figure out the model from the route
-    if (modelName === "*") {
-      modelName = resolveWildcard(scaffold, ctx.path);
+    if (modelName === '*') {
+      modelName = resolveWildcard(scaffold, ctx.path)
     }
 
-    const body = await parseScaffoldBody(ctx);
+    const body = await parseScaffoldBody(ctx)
     ctx.body = await scaffold.everything[modelName].create(
       body,
       ctx.querystring
-    );
-  };
+    )
+  }
 }
 
 export function updateMiddleware(scaffold: Scaffold, modelName: string) {
   return async function updateImpl(ctx: Koa.Context) {
     // If this is a wildcard or allModel situation, figure out the model from the route
-    if (modelName === "*") {
-      modelName = resolveWildcard(scaffold, ctx.path);
+    if (modelName === '*') {
+      modelName = resolveWildcard(scaffold, ctx.path)
     }
 
-    const body = await parseScaffoldBody(ctx);
-    const params = scaffold.getScaffoldURLParamsForRoute(ctx.path);
+    const body = await parseScaffoldBody(ctx)
+    const params = scaffold.getScaffoldURLParamsForRoute(ctx.path)
     ctx.body = await scaffold.everything[modelName].update(
       body,
       ctx.querystring,
       params.id
-    );
-  };
+    )
+  }
 }
 
 export function destroyMiddleware(scaffold: Scaffold, modelName: string) {
   return async function destroyImpl(ctx: Koa.Context) {
     // If this is a wildcard or allModel situation, figure out the model from the route
-    if (modelName === "*") {
-      modelName = resolveWildcard(scaffold, ctx.path);
+    if (modelName === '*') {
+      modelName = resolveWildcard(scaffold, ctx.path)
     }
 
-    const params = scaffold.getScaffoldURLParamsForRoute(ctx.path);
+    const params = scaffold.getScaffoldURLParamsForRoute(ctx.path)
     ctx.body = await scaffold.everything[modelName].destroy(
       ctx.querystring,
       params.id
-    );
-  };
+    )
+  }
+}
+
+export async function errorMiddleware(ctx: Koa.Context, next: Koa.Next) {
+  try {
+    await next()
+  } catch (error) {
+    const { errors, status } = errorResponseHandler(error)
+
+    ctx.status = status
+    ctx.body = errors
+  }
 }
 
 export function handleAllMiddleware(scaffold: Scaffold) {
   return async function handleAllImpl(ctx: Koa.Context, next: Koa.Next) {
-    // Check if this request URL takes the format of one that we expect
-    if (!scaffold.isValidScaffoldRoute(ctx.method, ctx.path)) {
-      return await next();
-    }
+    try {
+      // Check if this request URL takes the format of one that we expect
+      if (!scaffold.isValidScaffoldRoute(ctx.method, ctx.path)) {
+        return await next()
+      }
 
-    const params = scaffold.getScaffoldURLParamsForRoute(ctx.path);
-    if (!params.model) {
-      return await next();
-    }
+      const params = scaffold.getScaffoldURLParamsForRoute(ctx.path)
+      if (!params.model) {
+        return await next()
+      }
 
-    switch (ctx.method) {
-      case "GET": {
-        if (params.id) {
-          ctx.body = await scaffold.everything[params.model].findOne(
+      switch (ctx.method) {
+        case 'GET': {
+          if (params.id) {
+            ctx.body = await scaffold.everything[params.model].findOne(
+              ctx.querystring,
+              params.id
+            )
+            return
+          }
+          ctx.body = await scaffold.everything[params.model].findAll(
+            ctx.querystring
+          )
+          return
+        }
+
+        case 'POST': {
+          const body = await parseScaffoldBody(ctx, ctx.request.type)
+          ctx.body = await scaffold.everything[params.model].create(
+            body,
+            ctx.querystring
+          )
+          return
+        }
+
+        case 'PUT': {
+          const body = await parseScaffoldBody(ctx, ctx.request.type)
+          if (!params.id) {
+            throw scaffold.createError({
+              code: '400',
+              title: 'Invalid ID Provided'
+            })
+          }
+          ctx.body = await scaffold.everything[params.model].update(
+            body,
             ctx.querystring,
             params.id
-          );
-          return;
+          )
+          return
         }
-        ctx.body = await scaffold.everything[params.model].findAll(
-          ctx.querystring
-        );
-        return;
-      }
 
-      case "POST": {
-        const body = await parseScaffoldBody(ctx);
-        ctx.body = await scaffold.everything[params.model].create(
-          body,
-          ctx.querystring
-        );
-        return;
-      }
-
-      case "PUT": {
-        const body = await parseScaffoldBody(ctx);
-        if (!params.id) {
-          throw scaffold.createError({
-            code: "400",
-            title: "Invalid ID Provided",
-          });
+        case 'DELETE': {
+          if (!params.id) {
+            throw scaffold.createError({
+              code: '400',
+              title: 'Invalid ID Provided'
+            })
+          }
+          ctx.body = await scaffold.everything[params.model].destroy(
+            ctx.querystring,
+            params.id
+          )
+          return
         }
-        ctx.body = await scaffold.everything[params.model].update(
-          body,
-          ctx.querystring,
-          params.id
-        );
-        return;
-      }
 
-      case "DELETE": {
-        if (!params.id) {
-          throw scaffold.createError({
-            code: "400",
-            title: "Invalid ID Provided",
-          });
+        default: {
+          return await next()
         }
-        ctx.body = await scaffold.everything[params.model].destroy(
-          ctx.querystring,
-          params.id
-        );
-        return;
       }
+    } catch (error) {
+      const { errors, status } = errorResponseHandler(error)
 
-      default: {
-        return await next();
-      }
+      ctx.status = status
+      ctx.body = errors
     }
-  };
+  }
 }
 
 function resolveWildcard(scaffold: Scaffold, path): string {
-  const params = scaffold.getScaffoldURLParamsForRoute(path);
+  const params = scaffold.getScaffoldURLParamsForRoute(path)
   if (!params.model) {
-    throw scaffold.createError({ code: "400", title: "Invalid URL Format" });
+    throw scaffold.createError({ code: '400', title: 'Invalid URL Format' })
   }
 
   if (!scaffold.model[params.model]) {
-    throw scaffold.createError({ code: "400", title: "Bad Model Name: " });
+    throw scaffold.createError({ code: '400', title: 'Bad Model Name: ' })
   }
 
-  return params.model;
+  return params.model
 }

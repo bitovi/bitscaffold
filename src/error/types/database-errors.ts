@@ -1,0 +1,54 @@
+import { statusCodes } from '../constants'
+import {
+  ScaffoldError,
+  UniqueConstraintError,
+  ValidationError
+} from '../errors'
+
+const databaseErrorHandlers = (error) => {
+  const { name, message } = error
+
+  if (name === 'SequelizeValidationError') {
+    const pointer = error.errors[0].path
+
+    if (error.errors[0].type === 'notNull Violation') {
+      error = new ValidationError({
+        title: `${error.errors[0].path} is required.`,
+        status: statusCodes.UNPROCESSABLE_ENTITY,
+        pointer
+      })
+    }
+  } else {
+    switch (name) {
+      case 'SequelizeUniqueConstraintError':
+        const pointer = error.errors[0].path
+
+        error = new UniqueConstraintError({
+          title: `Record with ${pointer} already exists`,
+          pointer
+        })
+
+        break
+
+      case 'SequelizeForeignKeyConstraintError':
+        error = new ScaffoldError({
+          title: 'Foreign key constraint violation',
+          status: statusCodes.CONFLICT,
+          pointer: error.parent.constraint.split('_')[1]
+        })
+        break
+
+      case 'SequelizeDatabaseError':
+      default:
+        error = new ScaffoldError({
+          title: message,
+          status: statusCodes.INTERNAL_SERVER_ERROR
+        })
+        break
+    }
+  }
+
+  return error
+}
+
+export default databaseErrorHandlers
