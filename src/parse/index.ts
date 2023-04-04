@@ -13,7 +13,7 @@ import {
   buildFindOptions,
   buildUpdateOptions,
 } from "./builder";
-import { buildDeserializerForModelStandalone } from "../deserialize";
+// import { buildDeserializerForModelStandalone } from "../deserialize";
 import { JSONObject, ScaffoldModel } from "../types";
 
 /**
@@ -71,38 +71,45 @@ async function findAndCountAllImpl(model: ScaffoldModel, querystring: string) {
 }
 
 async function createImpl<T extends ScaffoldModel = ScaffoldModel>(
+  scaffold: Scaffold,
   model: T,
   body: unknown
 ) {
-  const deserializer = buildDeserializerForModelStandalone();
+  const serializer = scaffold.serializer;
   const { data, errors } = buildCreateOptions("");
   if (errors.length > 0) {
     console.error(errors);
     throw new Error("Bad Request, Invalid Query String");
   }
-
-  const parsed = await deserializer.create(body, {
-    keyForAttribute: "snake_case",
-  });
+  const parsed = await serializer.deserialize(model.name, body as any);
+  // FOR NON-JSON Compliant, it returns an empty object
+  const parsedBody = Object.keys(parsed).length === 0 ? body : parsed;
 
   return {
-    body: parsed,
+    body: parsedBody,
     ops: data,
   };
 }
 
-async function updateImpl(model: ScaffoldModel, body: unknown, id) {
-  const deserializer = buildDeserializerForModelStandalone();
+async function updateImpl(
+  scaffold: Scaffold,
+  model: ScaffoldModel,
+  body: unknown,
+  id
+) {
+  const serializer = scaffold.serializer;
   const { data, errors } = buildUpdateOptions("", id);
   if (errors.length > 0) {
     console.error(errors);
     throw new Error("Bad Request, Invalid Query String");
   }
 
-  const parsed = await deserializer.create(body, {});
+  const parsed = await serializer.deserialize(model.name, body as any);
+  // FOR NON-JSON Compliant, it returns an empty object
+  const parsedBody = Object.keys(parsed).length === 0 ? body : parsed;
 
   return {
-    body: parsed,
+    body: parsedBody,
     ops: data,
   };
 }
@@ -118,6 +125,7 @@ async function destroyImpl(model: ScaffoldModel, querystring: string, id) {
 }
 
 export function buildParserForModelStandalone(
+  scaffold: Scaffold,
   model: ScaffoldModel
 ): ParseFunctions {
   return {
@@ -125,9 +133,9 @@ export function buildParserForModelStandalone(
     findOne: async (querystring, id) => findOneImpl(model, querystring, id),
     findAndCountAll: async (querystring) =>
       findAndCountAllImpl(model, querystring),
-    create: async (body) => createImpl(model, body),
+    create: async (body) => createImpl(scaffold, model, body),
     destroy: async (querystring, id) => destroyImpl(model, querystring, id),
-    update: async (body, id) => updateImpl(model, body, id),
+    update: async (body, id) => updateImpl(scaffold, model, body, id),
   };
 }
 
@@ -136,5 +144,5 @@ export function buildParserForModel(
   modelName: string
 ): ParseFunctions {
   const model = scaffold.models[modelName];
-  return buildParserForModelStandalone(model);
+  return buildParserForModelStandalone(scaffold, model);
 }

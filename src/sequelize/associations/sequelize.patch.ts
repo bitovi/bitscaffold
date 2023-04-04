@@ -27,13 +27,10 @@ export const handleUpdateBelongs = async (
     const key = associationDetails.key;
     updatedModelAttributes[key] = associationAttribute?.id;
   });
-  const modelData = await origUpdate.apply(model, [
+  return origUpdate.apply(model, [
     updatedModelAttributes,
     { ...ops, transaction },
   ]);
-  return {
-    modelData,
-  };
 };
 
 export const handleUpdateOne = async (

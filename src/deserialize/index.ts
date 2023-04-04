@@ -1,5 +1,4 @@
 /* eslint-disable no-unused-vars */
-import { Deserializer, DeserializerOptions } from "jsonapi-serializer";
 import { Scaffold } from "..";
 import { JSONObject } from "../types";
 
@@ -19,46 +18,46 @@ export interface DeserializeFunctions {
    *
    * @returns {JSONObject}
    */
-  create: (data: unknown, options?: DeserializerOptions) => Promise<JSONObject>;
-  update: (data: unknown, options?: DeserializerOptions) => Promise<JSONObject>;
+  create: (data: unknown, options?: any) => Promise<JSONObject>;
+  update: (data: unknown, options?: any) => Promise<JSONObject>;
 }
 
-export function buildDeserializerForModelStandalone() {
-  return {
-    create: async (data, options: DeserializerOptions = {}) => {
-      try {
-        return new Deserializer(options).deserialize(data);
-      } catch (err) {
-        return data;
-      }
-    },
+// export function buildDeserializerForModelStandalone() {
+//   return {
+//     create: async (data: unknown) => {
+//       try {
+//         return
+//       } catch (err) {
+//         return data;
+//       }
+//     },
 
-    update: async (data, options: DeserializerOptions = {}) => {
-      try {
-        return new Deserializer(options).deserialize(data);
-      } catch (err) {
-        return data;
-      }
-    },
-  };
-}
+//     update: async (data: unknown) => {
+//       try {
+//         return Scaffold.serializer.deserialize(data);
+//       } catch (err) {
+//         return data;
+//       }
+//     },
+//   };
+// }
 
 export function buildDeserializerForModel(
   scaffold: Scaffold,
   modelName: string
 ): DeserializeFunctions {
   return {
-    create: async (data, options: DeserializerOptions = {}) => {
+    create: async (data: any) => {
       try {
-        return new Deserializer(options).deserialize(data);
+        return scaffold.serializer.deserialize(modelName, data);
       } catch (err) {
         return data;
       }
     },
 
-    update: async (data, options: DeserializerOptions = {}) => {
+    update: async (data: any) => {
       try {
-        return new Deserializer(options).deserialize(data);
+        return scaffold.serializer.deserialize(modelName, data);
       } catch (err) {
         return data;
       }

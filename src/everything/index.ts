@@ -2,18 +2,19 @@
 import { Scaffold } from "..";
 import { Identifier } from "sequelize";
 import { JSONObject } from "../types";
+import { JSONAPIDocument } from "json-api-serializer";
 
 export interface EverythingFunctions {
-  findAll: (querystring: string) => Promise<JSONObject>;
-  findOne: (querystring: string, id: Identifier) => Promise<JSONObject>;
-  findAndCountAll: (query: string) => Promise<JSONObject>;
-  create: (body: unknown, querystring: string) => Promise<JSONObject>;
+  findAll: (querystring: string) => Promise<JSONAPIDocument>;
+  findOne: (querystring: string, id: Identifier) => Promise<JSONAPIDocument>;
+  findAndCountAll: (query: string) => Promise<JSONAPIDocument>;
+  create: (body: unknown, querystring: string) => Promise<JSONAPIDocument>;
   update: (
     body: unknown,
     querystring: string,
     id?: Identifier
-  ) => Promise<JSONObject>;
-  destroy: (querystring: string, id?: Identifier) => Promise<JSONObject>;
+  ) => Promise<JSONAPIDocument>;
+  destroy: (querystring: string, id?: Identifier) => Promise<JSONAPIDocument>;
 }
 
 export function buildEverythingForModel(
@@ -34,12 +35,9 @@ export function findAllEverything(scaffold: Scaffold, modelName: string) {
   return async function findAllImpl(querystring: string) {
     const params = await scaffold.parse[modelName].findAll(querystring);
     const result = await scaffold.model[modelName].findAll(params);
-    const attributes = (params.attributes ??
-      Object.keys(result[0]?.toJSON() ?? {})) as string[];
-    const response = await scaffold.serialize[modelName].findAll(result, {
-      keyForAttribute: "snake_case",
-      attributes,
-    });
+    // const attributes = (params.attributes ??
+    //   Object.keys(result[0]?.toJSON() ?? {})) as string[];
+    const response = await scaffold.serialize[modelName].findAll(result);
     return response;
   };
 }
@@ -55,13 +53,7 @@ export function findOneEverything(scaffold: Scaffold, modelName: string) {
         detail: modelName + " with id " + id + " was not found",
       });
     }
-    const attributes = (params.attributes ??
-      Object.keys(result?.toJSON()) ??
-      {}) as string[];
-    const response = await scaffold.serialize[modelName].findOne(result, {
-      keyForAttribute: "snake_case",
-      attributes,
-    });
+    const response = await scaffold.serialize[modelName].findOne(result);
     return response;
   };
 }
@@ -82,10 +74,17 @@ export function findAndCountAllEverything(
 
 export function createEverything(scaffold: Scaffold, modelName: string) {
   return async function createImpl(rawbody: unknown) {
-    const { body, ops } = await scaffold.parse[modelName].create(rawbody);
-    const result = await scaffold.model[modelName].create(body, ops);
-    const response = await scaffold.serialize[modelName].create(result);
-    return response;
+    try {
+      const { body, ops } = await scaffold.parse[modelName].create(rawbody);
+      const result = await scaffold.model[modelName].create(body, ops);
+      const response = await scaffold.serialize[modelName].create(
+        result.toJSON()
+      );
+      return response;
+    } catch (error) {
+      console.error(error);
+      throw new Error(error);
+    }
   };
 }
 
@@ -96,7 +95,9 @@ export function updateEverything(scaffold: Scaffold, modelName: string) {
     id?: Identifier
   ) {
     const { body, ops } = await scaffold.parse[modelName].update(rawbody, id);
+    console.log(body);
     const result = await scaffold.model[modelName].update(body, ops);
+    console.log(result);
     const response = await scaffold.serialize[modelName].update(result[0]);
     return response;
   };
