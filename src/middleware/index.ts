@@ -140,7 +140,7 @@ export function createMiddleware(scaffold: Scaffold, modelName: string) {
       modelName = resolveWildcard(scaffold, ctx.path)
     }
 
-    const body = await parseScaffoldBody(ctx);
+    const body = await parseScaffoldBody(ctx)
     ctx.body = await scaffold.everything[modelName].create(
       body,
       ctx.querystring
@@ -155,8 +155,8 @@ export function updateMiddleware(scaffold: Scaffold, modelName: string) {
       modelName = resolveWildcard(scaffold, ctx.path)
     }
 
-    const body = await parseScaffoldBody(ctx);
-    const params = scaffold.getScaffoldURLParamsForRoute(ctx.path);
+    const body = await parseScaffoldBody(ctx)
+    const params = scaffold.getScaffoldURLParamsForRoute(ctx.path)
     ctx.body = await scaffold.everything[modelName].update(
       body,
       ctx.querystring,
@@ -244,22 +244,22 @@ export function handleAllMiddleware(scaffold: Scaffold) {
           return
         }
 
-      case "POST": {
-        const body = await parseScaffoldBody(ctx);
+      case 'POST': {
+        const body = await parseScaffoldBody(ctx)
         ctx.body = await scaffold.everything[params.model].create(
           body,
           ctx.querystring
-        );
-        return;
+        )
+        return
       }
 
-      case "PUT": {
-        const body = await parseScaffoldBody(ctx);
+      case 'PUT': {
+        const body = await parseScaffoldBody(ctx)
         if (!params.id) {
           throw scaffold.createError({
-            code: "400",
-            title: "Invalid ID Provided",
-          });
+            code: '400',
+            title: 'Invalid ID Provided'
+          })
         }
 
         default: {
