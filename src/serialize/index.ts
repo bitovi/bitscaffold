@@ -1,12 +1,12 @@
 /* eslint-disable no-unused-vars */
-import { Model } from 'sequelize'
-import { Scaffold } from '..'
+import { Model } from "sequelize";
+import { Scaffold } from "..";
 
-import * as inflection from 'inflection'
-import JSONAPISerializer from 'json-api-serializer'
-import { JSONAPIDocument } from 'json-api-serializer'
-import { IAssociation } from '../sequelize/types'
-import { ScaffoldModel } from '../types'
+import * as inflection from "inflection";
+import JSONAPISerializer from "json-api-serializer";
+import { JSONAPIDocument } from "json-api-serializer";
+import { IAssociation } from "../sequelize/types";
+import { ScaffoldModel } from "../types";
 
 /**
  * Provides a set of exported functions, per Model, that
@@ -26,39 +26,39 @@ export interface SerializeFunctions<
    *
    * @returns {JSONAPIDocument}
    */
-  findAll: (data: T[]) => Promise<JSONAPIDocument>
-  findOne: (data: T) => Promise<JSONAPIDocument>
+  findAll: (data: T[]) => Promise<JSONAPIDocument>;
+  findOne: (data: T) => Promise<JSONAPIDocument>;
   findAndCountAll: (data: {
-    rows: T[]
-    count: number
-  }) => Promise<JSONAPIDocument>
-  create: (data: T) => Promise<JSONAPIDocument>
-  update: (rowCount: number) => Promise<JSONAPIDocument>
-  destroy: (rowCount: number) => Promise<JSONAPIDocument>
+    rows: T[];
+    count: number;
+  }) => Promise<JSONAPIDocument>;
+  create: (data: T) => Promise<JSONAPIDocument>;
+  update: (rowCount: number) => Promise<JSONAPIDocument>;
+  destroy: (rowCount: number) => Promise<JSONAPIDocument>;
 }
 
 async function findAllImpl(scaffold: Scaffold, name: string, array) {
-  return scaffold.serializer.serialize(name, array)
+  return scaffold.serializer.serialize(name, array);
 }
 
 async function findOneImpl(scaffold: Scaffold, name: string, instance) {
-  return scaffold.serializer.serialize(name, instance)
+  return scaffold.serializer.serialize(name, instance);
 }
 
 async function findAndCountAllImpl(scaffold: Scaffold, name: string, result) {
-  return scaffold.serializer.serialize(name, result.rows)
+  return scaffold.serializer.serialize(name, result.rows);
 }
 
 async function createImpl(scaffold: Scaffold, name: string, instance) {
-  return scaffold.serializer.serialize(name, instance)
+  return scaffold.serializer.serialize(name, instance);
 }
 
 async function destroyImpl(scaffold: Scaffold, name: string, rowCount) {
-  return scaffold.serializer.serialize(name, null, { count: rowCount })
+  return scaffold.serializer.serialize(name, null, { count: rowCount });
 }
 
 async function updateImpl(scaffold: Scaffold, name: string, rowCount) {
-  return scaffold.serializer.serialize(name, null, { count: rowCount })
+  return scaffold.serializer.serialize(name, null, { count: rowCount });
 }
 
 // export function buildSerializerForModelStandalone(
@@ -94,17 +94,17 @@ export function buildSerializerForModel(
       findAndCountAllImpl(scaffold, modelName, result),
     create: async (instance) => createImpl(scaffold, modelName, instance),
     destroy: async (rowCount) => destroyImpl(scaffold, modelName, rowCount),
-    update: async (rowCount) => updateImpl(scaffold, modelName, rowCount)
-  }
+    update: async (rowCount) => updateImpl(scaffold, modelName, rowCount),
+  };
 }
 
 const deserialize = (data: any) => {
   if (data) {
-    const { id } = data
-    return { id }
+    const { id } = data;
+    return { id };
   }
-  return data
-}
+  return data;
+};
 
 export function registerSchema(
   serializer: JSONAPISerializer,
@@ -112,21 +112,21 @@ export function registerSchema(
   associations: Record<string, IAssociation>,
   primaryKey: string
 ) {
-  const relationships: { [key: string]: any } = {}
-  const associationsKeys = Object.keys(associations)
+  const relationships: { [key: string]: any } = {};
+  const associationsKeys = Object.keys(associations);
   associationsKeys.forEach((associationsKey) => {
-    const association = associations[associationsKey]
+    const association = associations[associationsKey];
     const associationType = inflection.pluralize(
       association.model.toLowerCase()
-    )
+    );
     relationships[associationType] = {
       type: association.model,
-      deserialize
-    }
-  })
+      deserialize,
+    };
+  });
   serializer.register(model.name, {
     id: primaryKey,
     whitelist: Object.keys(model.attributes),
-    relationships
-  })
+    relationships,
+  });
 }

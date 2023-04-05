@@ -82,7 +82,7 @@ export class Scaffold {
   private _sequelizeModels: SequelizeModelsCollection
   private _sequelize: Sequelize
   private _serializer: JSONAPISerializer
-  private _allowedMethods: ['GET', 'POST', 'PUT', 'DELETE']
+  private _allowedMethods: ['GET', 'POST', 'PATCH', 'DELETE']
   private _sequelizeModelNames: string[]
   private _prefix: string
 
@@ -117,7 +117,7 @@ export class Scaffold {
     this._sequelizeModels = sequelizeModels
 
     // Types of requests that Scaffold should attempt to process
-    this._allowedMethods = ['GET', 'POST', 'PUT', 'DELETE']
+    this._allowedMethods = ['GET', 'POST', 'PATCH', 'DELETE']
 
     // Do some quick work up front to get the list of model names
     this._sequelizeModelNames = Object.keys(this._sequelizeModels)
