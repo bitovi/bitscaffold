@@ -87,6 +87,7 @@ export function convertScaffoldModels(
 
   const associationsLookup: Record<string, Record<string, IAssociation>> = {}
 
+
   models.forEach((model) => {
     const relationships = ['belongsTo', 'belongsToMany', 'hasOne', 'hasMany']
     const associations: Record<string, IAssociation> = {}
@@ -139,10 +140,10 @@ export function convertScaffoldModels(
           }
           associations[associationName] = modelAssociation
         })
-        // Create the serializer schema for the model
-        registerSchema(serializer, model, associations, primaryKeys[model.name])
       }
     })
+    // Create the serializer schema for the model
+    registerSchema(serializer, model, associations, primaryKeys[model.name])
   })
 
   return {

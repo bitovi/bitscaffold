@@ -37,8 +37,6 @@ export function findAllEverything(scaffold: Scaffold, modelName: string) {
   return async function findAllImpl(querystring: string) {
     const params = await scaffold.parse[modelName].findAll(querystring)
     const result = await scaffold.model[modelName].findAll(params)
-    // const attributes = (params.attributes ??
-    //   Object.keys(result[0]?.toJSON() ?? {})) as string[];
     const response = await scaffold.serialize[modelName].findAll(result)
     return response
   }
@@ -86,9 +84,7 @@ export function updateEverything(scaffold: Scaffold, modelName: string) {
     id?: Identifier
   ) {
     const { body, ops } = await scaffold.parse[modelName].update(rawbody, id)
-    console.log(body)
     const result = await scaffold.model[modelName].update(body, ops)
-    console.log(result)
     const response = await scaffold.serialize[modelName].update(result[0])
     return response
   }

@@ -1,11 +1,6 @@
 import { Identifier, Sequelize } from 'sequelize'
 import JSONAPISerializer from 'json-api-serializer'
 import { match } from 'path-to-regexp'
-import {
-  Error as SerializedError,
-  JSONAPIErrorOptions
-} from 'jsonapi-serializer'
-import createHttpError from 'http-errors'
 import { capitalize, singularize } from 'inflection'
 
 import {
