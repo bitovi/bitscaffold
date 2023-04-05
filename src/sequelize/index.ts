@@ -1,44 +1,44 @@
-import { Model, Sequelize, Options, DataTypes } from "sequelize";
-import JSONAPISerializer from "json-api-serializer";
-import inflection from "inflection";
+import { Model, Sequelize, Options, DataTypes } from 'sequelize'
+import JSONAPISerializer from 'json-api-serializer'
+import inflection from 'inflection'
 import {
   ScaffoldModel,
   SequelizeModelsCollection,
   ScaffoldSymbolModel,
   ScaffoldModelCollection,
-  Virtuals,
-} from "../types";
-import { extendedSequelize } from "./extended";
-import { Scaffold } from "..";
-import { IAssociation, ICreateScaffoldModel } from "./types";
-import { registerSchema } from "../serialize";
+  Virtuals
+} from '../types'
+import { extendedSequelize } from './extended'
+import { Scaffold } from '..'
+import { IAssociation, ICreateScaffoldModel } from './types'
+import { registerSchema } from '../serialize'
 
 export function buildScaffoldModelObject(
   models: SequelizeModelsCollection
 ): ScaffoldModelCollection {
-  const names = Object.keys(models);
+  const names = Object.keys(models)
 
-  const result: ScaffoldModelCollection = {};
+  const result: ScaffoldModelCollection = {}
   names.forEach((name) => {
-    result[name] = models[name][ScaffoldSymbolModel];
-  });
-  return result;
+    result[name] = models[name][ScaffoldSymbolModel]
+  })
+  return result
 }
 
 export function createSequelizeInstance(
   scaffold: Scaffold,
   options?: Options
 ): Sequelize {
-  const ScaffoldSequelize = extendedSequelize(scaffold);
+  const ScaffoldSequelize = extendedSequelize(scaffold)
 
   if (!options) {
-    return new ScaffoldSequelize("sqlite::memory:", {
-      logging: false,
-    });
+    return new ScaffoldSequelize('sqlite::memory:', {
+      logging: false
+    })
   }
 
-  const sequelize: Sequelize = new ScaffoldSequelize(options);
-  return sequelize;
+  const sequelize: Sequelize = new ScaffoldSequelize(options)
+  return sequelize
 }
 
 export function convertScaffoldModels(
@@ -46,28 +46,28 @@ export function convertScaffoldModels(
   serializer: JSONAPISerializer,
   models: ScaffoldModel[]
 ): ICreateScaffoldModel {
-  const virtuals: Virtuals = {};
-  const primaryKeys: Record<string, string> = {};
+  const virtuals: Virtuals = {}
+  const primaryKeys: Record<string, string> = {}
   models.forEach((model) => {
     for (const attributeKey in model.attributes) {
-      const attribute = model.attributes[attributeKey];
+      const attribute = model.attributes[attributeKey]
 
-      const { type, include } = attribute;
+      const { type, include } = attribute
 
       if (type instanceof DataTypes.VIRTUAL) {
         if (virtuals[model.name]) {
-          virtuals[model.name][attributeKey] = include || "";
+          virtuals[model.name][attributeKey] = include || ''
         } else {
           virtuals[model.name] = {
-            [attributeKey]: include || "",
-          };
+            [attributeKey]: include || ''
+          }
         }
 
-        include && delete attribute.include;
+        include && delete attribute.include
       }
     }
 
-    const temp = sequelize.define<Model<ScaffoldModel["attributes"]>>(
+    const temp = sequelize.define<Model<ScaffoldModel['attributes']>>(
       model.name,
       model.attributes,
       {
@@ -75,21 +75,21 @@ export function convertScaffoldModels(
         underscored: true,
         createdAt: false,
         updatedAt: false,
-        freezeTableName: true,
+        freezeTableName: true
       }
-    );
+    )
 
     // GET THE PRIMARY KEY
-    primaryKeys[model.name] = temp.primaryKeyAttribute;
+    primaryKeys[model.name] = temp.primaryKeyAttribute
 
-    temp[ScaffoldSymbolModel] = model;
-  });
+    temp[ScaffoldSymbolModel] = model
+  })
 
-  const associationsLookup: Record<string, Record<string, IAssociation>> = {};
+  const associationsLookup: Record<string, Record<string, IAssociation>> = {}
 
   models.forEach((model) => {
-    const relationships = ["belongsTo", "belongsToMany", "hasOne", "hasMany"];
-    const associations: Record<string, IAssociation> = {};
+    const relationships = ['belongsTo', 'belongsToMany', 'hasOne', 'hasMany']
+    const associations: Record<string, IAssociation> = {}
 
     relationships.forEach((relationship) => {
       // For each relationship type, check if we have definitions for it:
@@ -98,26 +98,26 @@ export function convertScaffoldModels(
         model[relationship].forEach(({ target, options }) => {
           if (!target || !sequelize.models[target]) {
             throw new Error(
-              "Unknown Model association for " +
+              'Unknown Model association for ' +
                 model.name +
-                " in " +
+                ' in ' +
                 relationship
-            );
+            )
           }
 
           // Pull the models off sequelize.models
-          const current = sequelize.models[model.name];
-          const associated = sequelize.models[target];
+          const current = sequelize.models[model.name]
+          const associated = sequelize.models[target]
 
           // Create the relationship
-          current[relationship](associated, options);
+          current[relationship](associated, options)
 
           //Get association name for lookup
-          let associationName = options.as;
+          let associationName = options.as
           if (!associationName) {
-            associationName = target.toLowerCase();
-            if (relationship !== "hasOne" && relationship !== "belongsTo") {
-              associationName = inflection.pluralize("target");
+            associationName = target.toLowerCase()
+            if (relationship !== 'hasOne' && relationship !== 'belongsTo') {
+              associationName = inflection.pluralize('target')
             }
           }
 
@@ -127,32 +127,27 @@ export function convertScaffoldModels(
             model: target,
             key: options.foreignKey ?? `${model.name.toLowerCase()}_id`,
             joinTable:
-              relationship === "belongsToMany"
-                ? typeof options.through === "string"
+              relationship === 'belongsToMany'
+                ? typeof options.through === 'string'
                   ? options.through
                   : options.through.model
-                : undefined,
-          };
+                : undefined
+          }
           associationsLookup[model.name] = {
             ...associationsLookup[model.name],
-            [associationName]: modelAssociation,
-          };
-          associations[associationName] = modelAssociation;
-        });
-        // Create the serializer schema for the model
-        registerSchema(
-          serializer,
-          model,
-          associations,
-          primaryKeys[model.name]
-        );
+            [associationName]: modelAssociation
+          }
+          associations[associationName] = modelAssociation
+        })
       }
-    });
-  });
+    })
+    // Create the serializer schema for the model
+    registerSchema(serializer, model, associations, primaryKeys[model.name])
+  })
 
   return {
     associationsLookup,
     models: sequelize.models as SequelizeModelsCollection,
-    virtuals,
-  };
+    virtuals
+  }
 }

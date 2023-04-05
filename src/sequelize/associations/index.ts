@@ -32,8 +32,7 @@ export const getValidAttributesAndAssociations = (
         if (Array.isArray(currentModelAttributes)) {
           data = currentModelAttributes.map((attribute: any) => {
             const { [association]: _, ...attributesleft } = attribute;
-            const otherAttr = otherAssociationAttributes[association] ?? [];
-            otherAssociationAttributes[association] = [...otherAttr, _];
+            otherAssociationAttributes[association] = _;
             return attributesleft;
           });
         } else {
@@ -121,6 +120,9 @@ export const handleBulkCreateAssociations = async (
   for (const association of validAssociations) {
     const associationDetails = associations[association];
     const associationAttribute = attributes[association];
+
+    console.log("k2->", association);
+    console.log("k->", associationAttribute);
 
     switch (associationDetails.type) {
       case "hasOne":
