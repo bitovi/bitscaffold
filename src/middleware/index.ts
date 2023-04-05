@@ -3,6 +3,8 @@ import { Scaffold } from '..'
 import { KoaMiddleware, ExpressMiddleware } from '../types'
 import { parseScaffoldBody } from '../parse/body'
 import errorResponseHandler from '../error'
+import { ValidationError } from '../error/errors'
+import { codes, statusCodes } from '../error/constants'
 
 /**
  * Provides a set of exported functions, per Model, that
@@ -220,7 +222,8 @@ export function handleAllMiddleware(scaffold: Scaffold) {
         }
 
         case 'POST': {
-          const body = await parseScaffoldBody(ctx, ctx.request.type)
+          const body = await parseScaffoldBody(ctx)
+
           ctx.body = await scaffold.everything[params.model].create(
             body,
             ctx.querystring
@@ -229,10 +232,11 @@ export function handleAllMiddleware(scaffold: Scaffold) {
         }
 
         case 'PUT': {
-          const body = await parseScaffoldBody(ctx, ctx.request.type)
+          const body = await parseScaffoldBody(ctx)
           if (!params.id) {
-            throw scaffold.createError({
-              code: '400',
+            throw new ValidationError({
+              status: statusCodes.UNPROCESSABLE_ENTITY,
+              code: codes.ERR_INVALID_PARAMETER,
               title: 'Invalid ID Provided'
             })
           }
@@ -244,22 +248,19 @@ export function handleAllMiddleware(scaffold: Scaffold) {
           return
         }
 
-      case 'POST': {
-        const body = await parseScaffoldBody(ctx)
-        ctx.body = await scaffold.everything[params.model].create(
-          body,
-          ctx.querystring
-        )
-        return
-      }
-
-      case 'PUT': {
-        const body = await parseScaffoldBody(ctx)
-        if (!params.id) {
-          throw scaffold.createError({
-            code: '400',
-            title: 'Invalid ID Provided'
-          })
+        case 'DELETE': {
+          if (!params.id) {
+            throw new ValidationError({
+              status: statusCodes.UNPROCESSABLE_ENTITY,
+              code: codes.ERR_INVALID_PARAMETER,
+              title: 'Invalid ID Provided'
+            })
+          }
+          ctx.body = await scaffold.everything[params.model].destroy(
+            ctx.querystring,
+            params.id
+          )
+          return
         }
 
         default: {
@@ -278,11 +279,19 @@ export function handleAllMiddleware(scaffold: Scaffold) {
 function resolveWildcard(scaffold: Scaffold, path): string {
   const params = scaffold.getScaffoldURLParamsForRoute(path)
   if (!params.model) {
-    throw scaffold.createError({ code: '400', title: 'Invalid URL Format' })
+    throw new ValidationError({
+      status: statusCodes.UNPROCESSABLE_ENTITY,
+      code: codes.ERR_INVALID_PARAMETER,
+      title: 'Invalid URL Format'
+    })
   }
 
   if (!scaffold.model[params.model]) {
-    throw scaffold.createError({ code: '400', title: 'Bad Model Name: ' })
+    throw new ValidationError({
+      status: statusCodes.UNPROCESSABLE_ENTITY,
+      code: codes.ERR_INVALID_PARAMETER,
+      title: 'Bad Model Name: '
+    })
   }
 
   return params.model

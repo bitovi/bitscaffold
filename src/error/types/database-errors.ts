@@ -1,4 +1,4 @@
-import { statusCodes } from '../constants'
+import { codes, statusCodes } from '../constants'
 import {
   ScaffoldError,
   UniqueConstraintError,
@@ -21,6 +21,7 @@ const databaseErrorHandlers = (error) => {
   } else {
     switch (name) {
       case 'SequelizeUniqueConstraintError':
+        // eslint-disable-next-line no-case-declarations
         const pointer = error.errors[0].path
 
         error = new UniqueConstraintError({
@@ -32,6 +33,7 @@ const databaseErrorHandlers = (error) => {
 
       case 'SequelizeForeignKeyConstraintError':
         error = new ScaffoldError({
+          code: codes.ERR_CONFLICT,
           title: 'Foreign key constraint violation',
           status: statusCodes.CONFLICT,
           pointer: error.parent.constraint.split('_')[1]
@@ -41,6 +43,7 @@ const databaseErrorHandlers = (error) => {
       case 'SequelizeDatabaseError':
       default:
         error = new ScaffoldError({
+          code: codes.ERR_DATABASE_ERROR,
           title: message,
           status: statusCodes.INTERNAL_SERVER_ERROR
         })

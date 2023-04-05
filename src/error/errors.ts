@@ -10,6 +10,16 @@ class Source {
   }
 }
 
+interface ScaffoldErrorOptions {
+  pointer?: string
+  parameter?: string
+  status: number
+  code: string
+  detail?: string
+  source?: Source
+  title?: string
+}
+
 class ScaffoldError extends Error {
   status: number
   code: string
@@ -24,15 +34,7 @@ class ScaffoldError extends Error {
     detail,
     pointer,
     parameter
-  }: {
-    pointer?: string
-    parameter?: string
-    status: number
-    code: string
-    detail?: string
-    source?: Source
-    title?: string
-  }) {
+  }: ScaffoldErrorOptions) {
     super()
     this.status = status || statusCodes.INTERNAL_SERVER_ERROR
     this.code = code
@@ -77,6 +79,7 @@ class ConflictError extends ScaffoldError {
 }
 
 export {
+  ScaffoldErrorOptions,
   ScaffoldError,
   ValidationError,
   NotFoundError,

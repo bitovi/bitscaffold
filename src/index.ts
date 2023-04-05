@@ -33,10 +33,15 @@ import {
   // buildSerializerForModelStandalone,
   SerializeFunctions
 } from './serialize'
-import { buildMiddlewareForModel, MiddlewareFunctionsKoa } from './middleware'
+import {
+  buildMiddlewareForModel,
+  errorMiddleware,
+  MiddlewareFunctionsKoa
+} from './middleware'
 import { buildEverythingForModel, EverythingFunctions } from './everything'
 import { buildSchemaForModel } from './schema'
 import { IAssociation } from './sequelize/types'
+import { ScaffoldError, ScaffoldErrorOptions } from './error/errors'
 
 /**
  * Parse can be imported from the `@bitovi/scaffold` package
@@ -85,7 +90,6 @@ export class Scaffold {
   private _allowedMethods: ['GET', 'POST', 'PUT', 'DELETE']
   private _sequelizeModelNames: string[]
   private _prefix: string
-  private _exposeErrors: boolean
 
   virtuals: Virtuals
 
@@ -125,9 +129,6 @@ export class Scaffold {
 
     // Store the route prefix if the user set one
     this._prefix = options.prefix || ''
-
-    // Store the error expose settings if the user set it
-    this._exposeErrors = options.expose || false
 
     if (options.sync) {
       this.createDatabase()
@@ -210,24 +211,14 @@ export class Scaffold {
   /**
    * Create a JSON:API Compliant Error Result
    *
-   * The behavior of this function depends on the value of `expose` set
-   * in the Scaffold options. If `expose` is true then additional details
-   * will be returned to the client.
-   *
-   * If `expost` is false only the HTTP error code and high level message
-   * will be returned to the client.
-   *
-   * @param {JSONAPIErrorOptions} options
-   * @returns { createHttpError.HttpError}
+   * @param {ScaffoldError} options
+   * @returns { ScaffoldError}
    */
-  createError(options: JSONAPIErrorOptions): createHttpError.HttpError {
-    const error = createHttpError(
-      Number.parseInt(options.code || '500'),
-      new SerializedError(options)
-    )
-    error.expose = this._exposeErrors
+  static createError(options: ScaffoldErrorOptions): ScaffoldError {
+    const error = new ScaffoldError(options)
 
     console.error(error)
+
     return error
   }
 

@@ -1,10 +1,10 @@
 /* eslint-disable no-unused-vars */
-import { Model } from "sequelize";
-import { Serializer, SerializerOptions } from "jsonapi-serializer";
-import { Scaffold } from "..";
-import { JSONObject, ScaffoldModel } from "../types";
-import { JSONAPIErrorOptions } from "jsonapi-serializer";
-import createHttpError from "http-errors";
+import { Model } from 'sequelize'
+import { Serializer, SerializerOptions } from 'jsonapi-serializer'
+import { Scaffold } from '..'
+import { JSONObject, ScaffoldModel } from '../types'
+import { JSONAPIErrorOptions } from 'jsonapi-serializer'
+import createHttpError from 'http-errors'
 
 /**
  * Provides a set of exported functions, per Model, that
@@ -24,22 +24,18 @@ export interface SerializeFunctions<
    *
    * @returns {JSONObject}
    */
-  findAll: (data: T[], options?: SerializerOptions) => Promise<JSONObject>;
-  findOne: (data: T, options?: SerializerOptions) => Promise<JSONObject>;
+  findAll: (data: T[], options?: SerializerOptions) => Promise<JSONObject>
+  findOne: (data: T, options?: SerializerOptions) => Promise<JSONObject>
   findAndCountAll: (
     data: { rows: T[]; count: number },
     options?: SerializerOptions
-  ) => Promise<JSONObject>;
-  create: (data: T, options?: SerializerOptions) => Promise<JSONObject>;
-  update: (
-    rowCount: number,
-    options?: SerializerOptions
-  ) => Promise<JSONObject>;
+  ) => Promise<JSONObject>
+  create: (data: T, options?: SerializerOptions) => Promise<JSONObject>
+  update: (rowCount: number, options?: SerializerOptions) => Promise<JSONObject>
   destroy: (
     rowCount: number,
     options?: SerializerOptions
-  ) => Promise<JSONObject>;
-  error: (options: JSONAPIErrorOptions) => createHttpError.HttpError;
+  ) => Promise<JSONObject>
 }
 
 async function findAllImpl(
@@ -47,7 +43,7 @@ async function findAllImpl(
   array,
   options: SerializerOptions = {}
 ) {
-  return new Serializer(name, options).serialize(array);
+  return new Serializer(name, options).serialize(array)
 }
 
 async function findOneImpl(
@@ -55,7 +51,7 @@ async function findOneImpl(
   instance,
   options: SerializerOptions = {}
 ) {
-  return new Serializer(name, options).serialize(instance);
+  return new Serializer(name, options).serialize(instance)
 }
 
 async function findAndCountAllImpl(
@@ -63,8 +59,8 @@ async function findAndCountAllImpl(
   result,
   options: SerializerOptions = {}
 ) {
-  options = Object.assign(options, { meta: { count: result.count } });
-  return new Serializer(name, options).serialize(result.rows);
+  options = Object.assign(options, { meta: { count: result.count } })
+  return new Serializer(name, options).serialize(result.rows)
 }
 
 async function createImpl(
@@ -72,7 +68,7 @@ async function createImpl(
   instance,
   options: SerializerOptions = {}
 ) {
-  return new Serializer(name, options).serialize(instance);
+  return new Serializer(name, options).serialize(instance)
 }
 
 async function destroyImpl(
@@ -80,8 +76,8 @@ async function destroyImpl(
   rowCount,
   options: SerializerOptions = {}
 ) {
-  options = Object.assign(options, { meta: { count: rowCount } });
-  return new Serializer(name, options).serialize(null);
+  options = Object.assign(options, { meta: { count: rowCount } })
+  return new Serializer(name, options).serialize(null)
 }
 
 async function updateImpl(
@@ -89,8 +85,8 @@ async function updateImpl(
   rowCount,
   options: SerializerOptions = {}
 ) {
-  options = Object.assign(options, { meta: { count: rowCount } });
-  return new Serializer(name, options).serialize(null);
+  options = Object.assign(options, { meta: { count: rowCount } })
+  return new Serializer(name, options).serialize(null)
 }
 
 export function buildSerializerForModelStandalone(
@@ -107,11 +103,8 @@ export function buildSerializerForModelStandalone(
     destroy: async (rowCount, options) =>
       destroyImpl(model.name, rowCount, options),
     update: async (rowCount, options) =>
-      updateImpl(model.name, rowCount, options),
-    error: (options: JSONAPIErrorOptions) => {
-      throw new Error(options.title);
-    },
-  };
+      updateImpl(model.name, rowCount, options)
+  }
 }
 
 export function buildSerializerForModel(
@@ -129,9 +122,6 @@ export function buildSerializerForModel(
     destroy: async (rowCount, options) =>
       destroyImpl(modelName, rowCount, options),
     update: async (rowCount, options) =>
-      updateImpl(modelName, rowCount, options),
-    error: (options: JSONAPIErrorOptions) => {
-      return scaffold.createError(options);
-    },
-  };
+      updateImpl(modelName, rowCount, options)
+  }
 }

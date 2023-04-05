@@ -3,6 +3,8 @@ import { Scaffold } from '..'
 import { Identifier } from 'sequelize'
 import { JSONObject } from '../types'
 import { JSONAPIDocument } from 'json-api-serializer'
+import { statusCodes } from '../error/constants'
+import { NotFoundError } from '../error/errors'
 
 export interface EverythingFunctions {
   findAll: (querystring: string) => Promise<JSONAPIDocument>
@@ -47,9 +49,7 @@ export function findOneEverything(scaffold: Scaffold, modelName: string) {
     const params = await scaffold.parse[modelName].findOne(querystring, id)
     const result = await scaffold.model[modelName].findByPk(id, params)
     if (!result) {
-      throw scaffold.createError({
-        code: '404',
-        title: 'Not Found',
+      throw new NotFoundError({
         detail: modelName + ' with id ' + id + ' was not found'
       })
     }
@@ -72,17 +72,10 @@ export function findAndCountAllEverything(
 
 export function createEverything(scaffold: Scaffold, modelName: string) {
   return async function createImpl(rawbody: unknown) {
-    try {
-      const { body, ops } = await scaffold.parse[modelName].create(rawbody)
-      const result = await scaffold.model[modelName].create(body, ops)
-      const response = await scaffold.serialize[modelName].create(
-        result.toJSON()
-      )
-      return response
-    } catch (error) {
-      console.error(error)
-      throw new Error(error)
-    }
+    const { body, ops } = await scaffold.parse[modelName].create(rawbody)
+    const result = await scaffold.model[modelName].create(body, ops)
+    const response = await scaffold.serialize[modelName].create(result.toJSON())
+    return response
   }
 }
 
