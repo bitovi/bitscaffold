@@ -1,9 +1,8 @@
 import { createServer, GET, POST } from '../utils'
 import { codes, statusCodes } from '../../error/constants'
-import request from 'supertest'
-import Koa, { Context } from 'koa'
+import Koa from 'koa'
 import KoaRouter from '@koa/router'
-import { Scaffold, errorHandlerMiddleware, Error } from '../..'
+import { Scaffold, errorHandlerMiddleware } from '../..'
 import { Skill } from './models/Skill'
 import { Assignment } from './models/Assignment'
 import { Employee } from './models/Employee'
@@ -97,7 +96,7 @@ describe('Errors', () => {
       status: statusCodes.UNPROCESSABLE_ENTITY
     }
 
-    router.get('/err', async (ctx: Context) => {
+    router.get('/err', async () => {
       throw Scaffold.createError(errorDetails)
     })
 
