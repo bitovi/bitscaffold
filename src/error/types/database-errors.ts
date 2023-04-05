@@ -1,57 +1,56 @@
-import { codes, statusCodes } from "../constants";
+import { codes, statusCodes } from '../constants'
 import {
   ScaffoldError,
   UniqueConstraintError,
-  ValidationError,
-} from "../errors";
+  ValidationError
+} from '../errors'
 
 const databaseErrorHandlers = (error) => {
-  const { name, message } = error;
+  const { name, message } = error
 
-  if (name === "SequelizeValidationError") {
-    const pointer = error.errors[0].path;
+  if (name === 'SequelizeValidationError') {
+    const pointer = error.errors[0].path
 
-    if (error.errors[0].type === "notNull Violation") {
+    if (error.errors[0].type === 'notNull Violation') {
       error = new ValidationError({
         title: `${error.errors[0].path} is required.`,
         status: statusCodes.UNPROCESSABLE_ENTITY,
-        pointer,
-      });
+        pointer
+      })
     }
   } else {
     switch (name) {
-      case "SequelizeUniqueConstraintError":
+      case 'SequelizeUniqueConstraintError':
         // eslint-disable-next-line no-case-declarations
-        const pointer = error.errors[0].path;
+        const pointer = error.errors[0].path
 
         error = new UniqueConstraintError({
           title: `Record with ${pointer} already exists`,
-          pointer,
-        });
+          pointer
+        })
 
-        break;
+        break
 
-      case "SequelizeForeignKeyConstraintError":
+      case 'SequelizeForeignKeyConstraintError':
         error = new ScaffoldError({
           code: codes.ERR_CONFLICT,
-          title: "Foreign key constraint violation",
-          status: statusCodes.CONFLICT,
-          pointer: error.parent.constraint.split("_")[1],
-        });
-        break;
+          title: 'Foreign key constraint violation',
+          status: statusCodes.CONFLICT
+        })
+        break
 
-      case "SequelizeDatabaseError":
+      case 'SequelizeDatabaseError':
       default:
         error = new ScaffoldError({
           code: codes.ERR_DATABASE_ERROR,
           title: message,
-          status: statusCodes.INTERNAL_SERVER_ERROR,
-        });
-        break;
+          status: statusCodes.INTERNAL_SERVER_ERROR
+        })
+        break
     }
   }
 
-  return error;
-};
+  return error
+}
 
-export default databaseErrorHandlers;
+export default databaseErrorHandlers

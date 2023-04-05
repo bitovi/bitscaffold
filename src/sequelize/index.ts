@@ -139,10 +139,10 @@ export function convertScaffoldModels(
           }
           associations[associationName] = modelAssociation
         })
-        // Create the serializer schema for the model
-        registerSchema(serializer, model, associations, primaryKeys[model.name])
       }
     })
+    // Create the serializer schema for the model
+    registerSchema(serializer, model, associations, primaryKeys[model.name])
   })
 
   return {

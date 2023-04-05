@@ -1,13 +1,14 @@
 const codes = {
-  ERR_PARAMETER_REQUIRED: "parameter-required",
-  ERR_CONFLICT: "resource-conflict-occurred",
-  ERR_RANGE: "range-error",
-  ERR_INVALID_PARAMETER: "invalid-parameter",
-  ERR_DUPLICATE_PARAMETER: "duplicate-parameter",
-  ERR_NO_RESULTS_FOUND: "no-results-found",
-  ERR_NOT_FOUND: "not-found",
-  ERR_DATABASE_ERROR: "database-error",
-};
+  ERR_PARAMETER_REQUIRED: 'parameter-required',
+  ERR_CONFLICT: 'resource-conflict-occurred',
+  ERR_RANGE: 'range-error',
+  ERR_INVALID_PARAMETER: 'invalid-parameter',
+  ERR_DUPLICATE_PARAMETER: 'duplicate-parameter',
+  ERR_NO_RESULTS_FOUND: 'no-results-found',
+  ERR_NOT_FOUND: 'not-found',
+  ERR_DATABASE_ERROR: 'database-error',
+  ERR_INVALID_RESULT: 'invalid-result'
+}
 
 const statusCodes = {
   BAD_REQUEST: 400,
@@ -17,7 +18,7 @@ const statusCodes = {
   METHOD_NOT_ALLOWED: 405,
   CONFLICT: 409,
   UNPROCESSABLE_ENTITY: 422,
-  INTERNAL_SERVER_ERROR: 500,
-};
+  INTERNAL_SERVER_ERROR: 500
+}
 
-export { codes, statusCodes };
+export { codes, statusCodes }
