@@ -6,7 +6,7 @@ export const addVirtuals = function ({ queryOptions, scaffold, modelName }) {
 
   if (queryOptions) {
     if (!queryOptions.attributes) {
-      options.include = { all: true };
+      options.include = [];
     } else {
       queryOptions.attributes.forEach((attribute) => {
         const scaffoldVirtuals = scaffold.virtuals[modelName];
@@ -33,7 +33,7 @@ export const addVirtuals = function ({ queryOptions, scaffold, modelName }) {
 
     options = Object.assign(options, queryOptions);
   } else {
-    options.include = { all: true };
+    options.include = [];
   }
 
   options.include.length < 1 && delete options.include;
