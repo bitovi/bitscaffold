@@ -23,8 +23,13 @@ export const handleCreateBelongs = async (
     const associationDetails = associations[association];
     const associationAttribute = attributes[association];
     const key = associationDetails.key;
-    updatedModelAttributes[key] = associationAttribute?.[primaryKey];
+    updatedModelAttributes[key] =
+      typeof associationAttribute === "string"
+        ? associationAttribute
+        : associationAttribute?.[primaryKey];
   });
+
+  console.log(updatedModelAttributes);
 
   return origCreate.apply(model, [updatedModelAttributes, { transaction }]);
 };
@@ -47,7 +52,10 @@ export const handleBulkCreateBelongs = async (
       const associationDetails = associations[association];
       const associationAttribute = otherAttributes[association][i];
       const key = associationDetails.key;
-      updatedModelAttributes[key] = associationAttribute?.[primaryKey];
+      updatedModelAttributes[key] =
+        typeof associationAttribute === "string"
+          ? associationAttribute
+          : associationAttribute?.[primaryKey];
     });
     bulkModelAttributes.push(updatedModelAttributes);
     i++;
