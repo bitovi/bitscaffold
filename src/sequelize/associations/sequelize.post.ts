@@ -29,8 +29,6 @@ export const handleCreateBelongs = async (
         : associationAttribute?.[primaryKey];
   });
 
-  console.log(updatedModelAttributes);
-
   return origCreate.apply(model, [updatedModelAttributes, { transaction }]);
 };
 
