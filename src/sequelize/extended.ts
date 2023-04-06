@@ -202,7 +202,6 @@ export function extendedSequelize(scaffold: Scaffold) {
       }
       await transaction.commit()
     } catch (error) {
-      console.error('error =>', error)
       await transaction.rollback()
       throw error
     }
@@ -288,7 +287,6 @@ export function extendedSequelize(scaffold: Scaffold) {
       }
       await transaction.commit()
     } catch (error) {
-      console.error('error =>', error)
       await transaction.rollback()
       throw error
     }
@@ -381,7 +379,6 @@ export function extendedSequelize(scaffold: Scaffold) {
 
       await transaction.commit()
     } catch (error) {
-      console.error(error)
       await transaction.rollback()
       throw error
     }
