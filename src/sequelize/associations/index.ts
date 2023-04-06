@@ -90,6 +90,7 @@ export const handleCreateAssociations = async (
         break;
       case "hasMany":
       case "belongsToMany":
+        console.log("has many");
         await handleCreateMany(
           scaffold,
           {

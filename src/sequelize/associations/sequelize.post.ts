@@ -1,12 +1,12 @@
-import * as inflection from 'inflection'
-import { Attributes, ModelStatic, Transaction } from 'sequelize'
+import * as inflection from "inflection";
+import { Attributes, ModelStatic, Transaction } from "sequelize";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Scaffold } from '../..'
-import { codes, statusCodes } from '../../error/constants'
-import { ScaffoldError } from '../../error/errors'
-import { JSONAnyObject } from '../../types'
-import { IAssociation, IAssociationBody } from '../types'
+import { Scaffold } from "../..";
+import { codes, statusCodes } from "../../error/constants";
+import { ScaffoldError } from "../../error/errors";
+import { JSONAnyObject } from "../../types";
+import { IAssociation, IAssociationBody } from "../types";
 
 export const handleCreateBelongs = async (
   model: ModelStatic<any>,
@@ -16,18 +16,18 @@ export const handleCreateBelongs = async (
   associations: Record<string, IAssociation>,
   attributes: Attributes<any>,
   transaction: Transaction,
-  primaryKey = 'id'
+  primaryKey = "id"
 ) => {
-  const updatedModelAttributes = currentModelAttributes
+  const updatedModelAttributes = currentModelAttributes;
   belongsAssociation.forEach((association) => {
-    const associationDetails = associations[association]
-    const associationAttribute = attributes[association]
-    const key = associationDetails.key
-    updatedModelAttributes[key] = associationAttribute?.[primaryKey]
-  })
+    const associationDetails = associations[association];
+    const associationAttribute = attributes[association];
+    const key = associationDetails.key;
+    updatedModelAttributes[key] = associationAttribute?.[primaryKey];
+  });
 
-  return origCreate.apply(model, [updatedModelAttributes, { transaction }])
-}
+  return origCreate.apply(model, [updatedModelAttributes, { transaction }]);
+};
 
 export const handleBulkCreateBelongs = async (
   model: ModelStatic<any>,
@@ -37,132 +37,133 @@ export const handleBulkCreateBelongs = async (
   associations: Record<string, IAssociation>,
   otherAttributes: Attributes<any>,
   transaction: Transaction,
-  primaryKey = 'id'
+  primaryKey = "id"
 ) => {
-  const bulkModelAttributes: Array<any> = []
+  const bulkModelAttributes: Array<any> = [];
   currentModelAttributes.forEach((currentModelAttribute) => {
-    let i = 0
-    const updatedModelAttributes = currentModelAttribute
+    let i = 0;
+    const updatedModelAttributes = currentModelAttribute;
     belongsAssociation.forEach((association) => {
-      const associationDetails = associations[association]
-      const associationAttribute = otherAttributes[association][i]
-      const key = associationDetails.key
-      updatedModelAttributes[key] = associationAttribute?.[primaryKey]
-    })
-    bulkModelAttributes.push(updatedModelAttributes)
-    i++
-  })
+      const associationDetails = associations[association];
+      const associationAttribute = otherAttributes[association][i];
+      const key = associationDetails.key;
+      updatedModelAttributes[key] = associationAttribute?.[primaryKey];
+    });
+    bulkModelAttributes.push(updatedModelAttributes);
+    i++;
+  });
 
-  return origBulkCreate.apply(model, [bulkModelAttributes, { transaction }])
-}
+  return origBulkCreate.apply(model, [bulkModelAttributes, { transaction }]);
+};
 
 export const handleCreateHasOne = async (
   scaffold: Scaffold,
   association: IAssociationBody<JSONAnyObject | Array<JSONAnyObject>>,
   model: { name: string; id?: string | Array<string> },
   transaction: Transaction,
-  primaryKey = 'id',
+  primaryKey = "id",
   isCreateOne = true
 ) => {
-  const key = association.details.key
+  const key = association.details.key;
   if (isCreateOne) {
     const data = {
       ...association.attributes,
-      [key]: model[primaryKey]
-    }
+      [key]: model[primaryKey],
+    };
     await scaffold.model[association.details.model].create(data, {
-      transaction
-    })
+      transaction,
+    });
   } else {
-    let i = 0
+    let i = 0;
     const data = association.attributes.map((attribute) => {
-      i++
+      i++;
       return {
         ...attribute,
-        [key]: model[i]?.[primaryKey]
-      }
-    })
+        [key]: model[i]?.[primaryKey],
+      };
+    });
     await scaffold.model[association.details.model].bulkCreate(data, {
-      transaction
-    })
+      transaction,
+    });
   }
-}
+};
 
 export const handleCreateMany = async (
   scaffold: Scaffold,
   association: IAssociationBody<Array<JSONAnyObject>>,
   model: { name: string; id: string },
   transaction: Transaction,
-  primaryKey = 'id'
+  primaryKey = "id"
 ) => {
   // Create an instance of the model using the id
   const modelInstance = await scaffold.model[model.name].findByPk(
     model[primaryKey],
     {
-      transaction
+      transaction,
     }
-  )
+  );
+  console.log("model =>", modelInstance);
   if (!modelInstance) {
     throw new ScaffoldError({
-      title: 'Unable to find Created Model',
+      title: "Unable to find Created Model",
       status: statusCodes.NOT_FOUND,
-      code: codes.ERR_NOT_FOUND
-    })
+      code: codes.ERR_NOT_FOUND,
+    });
   }
-  const isCreate = !association.attributes[0][primaryKey]
-  let joinIds: Array<string> = []
+  const isCreate = !association.attributes[0][primaryKey];
+  let joinIds: Array<string> = [];
   if (isCreate) {
     // Create the models first and add their ids to the joinIds.
     const associationData = await scaffold.model[
       association.details.model
-    ].bulkCreate(association.attributes, { transaction })
-    joinIds = associationData.map((data) => data.getDataValue(primaryKey))
+    ].bulkCreate(association.attributes, { transaction });
+    joinIds = associationData.map((data) => data.getDataValue(primaryKey));
   } else {
     // Assign the ids to the through table if the model is present
-    joinIds = association.attributes.map((data) => data[primaryKey])
+    joinIds = association.attributes.map((data) => data[primaryKey]);
   }
-  const modelNameInPlural = inflection.pluralize(association.details.model)
+  const modelNameInPlural = inflection.pluralize(association.details.model);
   await modelInstance[`add${modelNameInPlural}`](joinIds, {
-    transaction
-  })
-}
+    transaction,
+  });
+};
 
 export const handleBulkCreateMany = async (
   scaffold: Scaffold,
   association: IAssociationBody<Array<JSONAnyObject>>,
   model: { name: string; id: Array<string> },
   transaction: Transaction,
-  primaryKey = 'id'
+  primaryKey = "id"
 ) => {
   // Create an instance of the model using the id
   const modelInstances = await scaffold.model[model.name].findAll({
     where: {
-      [primaryKey]: model.id
+      [primaryKey]: model.id,
     },
-    transaction
-  })
+    transaction,
+  });
   if (modelInstances.length !== model.id.length) {
-    return
+    return;
   }
-  console.log(modelInstances)
-  let i = 0
+  console.log(modelInstances);
+  let i = 0;
   for (const modelInstance of modelInstances) {
-    const isCreate = !association.attributes[i].id
-    let joinIds: Array<string> = []
+    const isCreate = !association.attributes[i].id;
+    let joinIds: Array<string> = [];
     if (isCreate) {
       // Create the models first and add their ids to the joinIds.
       const associationData = await scaffold.model[
         association.details.model
-      ].bulkCreate(association.attributes, { transaction })
-      joinIds = associationData.map((data) => data.getDataValue('id'))
+      ].bulkCreate(association.attributes, { transaction });
+      joinIds = associationData.map((data) => data.getDataValue("id"));
     } else {
       // Assign the ids to the through table if the model is present
-      joinIds = association.attributes.map((data) => data.id)
+      joinIds = association.attributes.map((data) => data.id);
     }
-    const modelNameInPlural = inflection.pluralize(association.details.model)
+    const modelNameInPlural = inflection.pluralize(association.details.model);
     await modelInstance[`add${modelNameInPlural}`](joinIds, {
-      transaction
-    })
-    i++
+      transaction,
+    });
+    i++;
   }
-}
+};
