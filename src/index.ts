@@ -212,8 +212,6 @@ export class Scaffold {
   static createError(options: ScaffoldErrorOptions): ScaffoldError {
     const error = new ScaffoldError(options)
 
-    console.error(error)
-
     return error
   }
 

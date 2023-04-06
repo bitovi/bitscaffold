@@ -37,7 +37,7 @@ class ScaffoldError extends Error {
   }: ScaffoldErrorOptions) {
     super()
     this.status = status || statusCodes.INTERNAL_SERVER_ERROR
-    this.code = code
+    this.code = code || codes.ERR_SERVER_ERROR
     this.detail = detail
     this.source = new Source(pointer, parameter)
     this.title = title || 'Server Error ocurred'

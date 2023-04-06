@@ -12,6 +12,8 @@ import { extendedSequelize } from './extended'
 import { Scaffold } from '..'
 import { IAssociation, ICreateScaffoldModel } from './types'
 import { registerSchema } from '../serialize'
+import { ScaffoldError } from '../error/errors'
+import { codes, statusCodes } from '../error/constants'
 
 export function buildScaffoldModelObject(
   models: SequelizeModelsCollection
@@ -97,12 +99,15 @@ export function convertScaffoldModels(
         // Grab the array of targets and options
         model[relationship].forEach(({ target, options }) => {
           if (!target || !sequelize.models[target]) {
-            throw new Error(
-              'Unknown Model association for ' +
+            throw new ScaffoldError({
+              title:
+                'Unknown Model association for ' +
                 model.name +
                 ' in ' +
-                relationship
-            )
+                relationship,
+              status: statusCodes.CONFLICT,
+              code: codes.ERR_CONFLICT
+            })
           }
 
           // Pull the models off sequelize.models
