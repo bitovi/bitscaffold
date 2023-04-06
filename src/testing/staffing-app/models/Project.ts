@@ -21,7 +21,7 @@ export const Project: ScaffoldModel = {
       type: DataTypes.VIRTUAL(DataTypes.INTEGER),
       include: "roles",
       get() {
-        return this.roles.length;
+        return this.roles && this.roles.length;
       },
     },
   },

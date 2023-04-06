@@ -72,7 +72,7 @@ export function createEverything(scaffold: Scaffold, modelName: string) {
   return async function createImpl(rawbody: unknown) {
     const { body, ops } = await scaffold.parse[modelName].create(rawbody)
     const result = await scaffold.model[modelName].create(body, ops)
-    const response = await scaffold.serialize[modelName].create(result.toJSON())
+    const response = await scaffold.serialize[modelName].create(result)
     return response
   }
 }
