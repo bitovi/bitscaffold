@@ -18,7 +18,7 @@ export function createStaffingAppInstance(): [Koa, Scaffold] {
   // Create a Scaffold instance containing your Models
   const scaffold = new Scaffold([Assignment, Employee, Project, Role, Skill], {
     prefix: "/api",
-    expose: true
+    expose: true,
   });
 
   // Set up your Koa app as normal, for example, a logging middleware
