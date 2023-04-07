@@ -61,11 +61,15 @@ export const handleUpdateMany = async (
   transaction: Transaction,
   primaryKey = "id"
 ) => {
-  const modelInstance = await scaffold.model[model.name].findByPk(model[primaryKey]);
+  const modelInstance = await scaffold.model[model.name].findByPk(
+    model[primaryKey]
+  );
   if (!modelInstance) {
     return;
   }
-  const joinIds: Array<string> = association.attributes.map((data) => data[primaryKey]);
+  const joinIds: Array<string> = association.attributes.map(
+    (data) => data[primaryKey]
+  );
   if (joinIds.length === 0) return;
   const modelNameInPlural = inflection.pluralize(association.details.model);
   return await modelInstance[`set${modelNameInPlural}`](joinIds, {
