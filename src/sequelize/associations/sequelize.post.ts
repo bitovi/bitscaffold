@@ -167,11 +167,11 @@ export const handleBulkCreateMany = async (
     } else {
       // Assign the ids to the through table if the model is present
       joinIds = association.attributes[i].map((data) => data[primaryKey]);
-    const modelNameInPlural = inflection.pluralize(association.details.model);
-    await modelInstance[`add${modelNameInPlural}`](joinIds, {
-      transaction,
-    });
-    i++;
-  }
+      const modelNameInPlural = inflection.pluralize(association.details.model);
+      await modelInstance[`add${modelNameInPlural}`](joinIds, {
+        transaction,
+      });
+      i++;
+    }
   }
 };
