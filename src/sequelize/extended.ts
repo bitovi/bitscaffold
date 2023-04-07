@@ -265,7 +265,8 @@ export function extendedSequelize(scaffold: Scaffold) {
           belongsAssociation,
           associations as Record<string, IAssociation>,
           attributes,
-          transaction
+          transaction,
+          modelPrimaryKey
         );
         modelUpdateData = _model;
       }
@@ -286,7 +287,8 @@ export function extendedSequelize(scaffold: Scaffold) {
           associations as Record<string, IAssociation>,
           attributes,
           transaction,
-          modelId
+          modelId,
+          modelPrimaryKey
         );
       }
 
