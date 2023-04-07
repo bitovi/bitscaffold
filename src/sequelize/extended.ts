@@ -82,7 +82,7 @@ export function extendedSequelize(scaffold: Scaffold) {
 
     try {
       if (belongsAssociation.length > 0) {
-        const { modelData: _model } = await handleCreateBelongs(
+        const _model = await handleCreateBelongs(
           this,
           origCreate,
           currentModelAttributes,
@@ -148,8 +148,6 @@ export function extendedSequelize(scaffold: Scaffold) {
       belongsAssociation,
       currentModelAttributes: _attributes,
     } = getValidAttributesAndAssociations(attributes, associations);
-
-    console.log(otherAssociationAttributes);
 
     currentModelAttributes = _attributes;
     // All associations
