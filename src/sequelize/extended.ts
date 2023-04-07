@@ -209,91 +209,6 @@ export function extendedSequelize(scaffold: Scaffold) {
     return modelData;
   };
 
-  Model.bulkCreate = async function <
-    M extends Model,
-    O extends CreateOptions<Attributes<M>> = CreateOptions<Attributes<M>>
-  >(
-    this: ModelStatic<M>,
-    attributes: MakeNullishOptional<M["_creationAttributes"]>[],
-    options?: O
-  ) {
-    const associations = scaffold.associationsLookup[this.name];
-    const modelPrimaryKey = this.primaryKeyAttribute;
-
-    let modelData:
-      | undefined
-      | (O extends { returning: false } | { ignoreDuplicates: true }
-          ? void
-          : M)[];
-    let currentModelAttributes = attributes;
-
-    const {
-      otherAssociationAttributes,
-      externalAssociations,
-      belongsAssociation,
-      currentModelAttributes: _attributes,
-    } = getValidAttributesAndAssociations(attributes, associations);
-
-    currentModelAttributes = _attributes;
-    // All associations
-    const validAssociationsInAttributes = [
-      ...externalAssociations,
-      ...belongsAssociation,
-    ];
-
-    // If there are no associations, create the model with all attributes.
-    if (validAssociationsInAttributes.length === 0) {
-      return origBulkCreate.apply(this, [attributes, options]);
-    }
-
-    const transaction = await scaffold.orm.transaction();
-
-    try {
-      if (belongsAssociation.length > 0) {
-        const _model = await handleBulkCreateBelongs(
-          this,
-          origBulkCreate,
-          currentModelAttributes,
-          belongsAssociation,
-          associations as Record<string, IAssociation>,
-          otherAssociationAttributes,
-          transaction,
-          modelPrimaryKey
-        );
-        modelData = _model;
-      }
-
-      if (externalAssociations.length > 0) {
-        // create the model first if it does not exist
-        if (!modelData) {
-          modelData = await origBulkCreate.apply(this, [
-            currentModelAttributes,
-            { transaction },
-          ]);
-        }
-        const modelIds = modelData?.map((data) =>
-          data.getDataValue(modelPrimaryKey)
-        ) as string[];
-        await handleBulkCreateAssociations(
-          scaffold,
-          this,
-          externalAssociations,
-          associations as Record<string, IAssociation>,
-          otherAssociationAttributes,
-          transaction,
-          modelIds,
-          modelPrimaryKey
-        );
-      }
-      await transaction.commit();
-    } catch (error) {
-      await transaction.rollback();
-      throw error;
-    }
-
-    return modelData;
-  };
-
   Model.update = async function <M extends Model<any, any>>(
     this: ModelStatic<M>,
     attributes: {
@@ -395,7 +310,7 @@ export function extendedSequelize(scaffold: Scaffold) {
       modelName: this.name,
     });
 
-    return await origFindAll.apply(this, [options]);
+    return origFindAll.apply(this, [options]);
   };
 
   Model.findOne = async function (queryOptions) {
@@ -405,7 +320,7 @@ export function extendedSequelize(scaffold: Scaffold) {
       modelName: this.name,
     });
 
-    return await origFindOne.apply(this, [options]);
+    return origFindOne.apply(this, [options]);
   };
 
   Model.findByPk = async function (id, queryOptions) {
@@ -415,7 +330,7 @@ export function extendedSequelize(scaffold: Scaffold) {
       modelName: this.name,
     });
 
-    return await origFindByPk.apply(this, [id, options]);
+    return origFindByPk.apply(this, [id, options]);
   };
 
   Model.findOrCreate = async function (queryOptions) {
@@ -425,7 +340,7 @@ export function extendedSequelize(scaffold: Scaffold) {
       modelName: this.name,
     });
 
-    return await origFindOrCreate.apply(this, [options]);
+    return origFindOrCreate.apply(this, [options]);
   };
 
   return Sequelize;

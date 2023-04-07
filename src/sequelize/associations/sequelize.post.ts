@@ -3,6 +3,7 @@ import { Attributes, ModelStatic, Transaction } from "sequelize";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Scaffold } from "../..";
+import { codes, statusCodes } from "../../error/constants";
 import { ScaffoldError } from "../../error/errors";
 import { JSONAnyObject } from "../../types";
 import { IAssociation, IAssociationBody } from "../types";
@@ -22,7 +23,10 @@ export const handleCreateBelongs = async (
     const associationDetails = associations[association];
     const associationAttribute = attributes[association];
     const key = associationDetails.key;
-    updatedModelAttributes[key] = associationAttribute?.[primaryKey];
+    updatedModelAttributes[key] =
+      typeof associationAttribute === "string"
+        ? associationAttribute
+        : associationAttribute?.[primaryKey];
   });
 
   return origCreate.apply(model, [updatedModelAttributes, { transaction }]);
@@ -39,14 +43,17 @@ export const handleBulkCreateBelongs = async (
   primaryKey = "id"
 ) => {
   const bulkModelAttributes: Array<any> = [];
-  let i = 0;
   currentModelAttributes.forEach((currentModelAttribute) => {
+    let i = 0;
     const updatedModelAttributes = currentModelAttribute;
     belongsAssociation.forEach((association) => {
       const associationDetails = associations[association];
       const associationAttribute = otherAttributes[association][i];
       const key = associationDetails.key;
-      updatedModelAttributes[key] = associationAttribute?.[primaryKey];
+      updatedModelAttributes[key] =
+        typeof associationAttribute === "string"
+          ? associationAttribute
+          : associationAttribute?.[primaryKey];
     });
     bulkModelAttributes.push(updatedModelAttributes);
     i++;
@@ -102,7 +109,11 @@ export const handleCreateMany = async (
     }
   );
   if (!modelInstance) {
-    throw new Error("Unable to find Created Model");
+    throw new ScaffoldError({
+      title: "Unable to find Created Model",
+      status: statusCodes.NOT_FOUND,
+      code: codes.ERR_NOT_FOUND,
+    });
   }
   const isCreate = !association.attributes[0][primaryKey];
   let joinIds: Array<string> = [];
@@ -156,11 +167,11 @@ export const handleBulkCreateMany = async (
     } else {
       // Assign the ids to the through table if the model is present
       joinIds = association.attributes[i].map((data) => data[primaryKey]);
-    }
     const modelNameInPlural = inflection.pluralize(association.details.model);
     await modelInstance[`add${modelNameInPlural}`](joinIds, {
       transaction,
     });
     i++;
+  }
   }
 };
