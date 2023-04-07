@@ -3,6 +3,7 @@ import { Attributes, ModelStatic, Transaction } from "sequelize";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Scaffold } from "../..";
+import {  ScaffoldError } from "../../error/errors";
 import { JSONAnyObject } from "../../types";
 import { IAssociation, IAssociationBody } from "../types";
 
@@ -136,11 +137,15 @@ export const handleBulkCreateMany = async (
     transaction,
   });
   if (modelInstances.length !== model.id.length) {
-    return;
+    throw new ScaffoldError({
+      title: 'All Models not successfully created',
+      status: 500,
+      code: 'bulk-create-model'
+    });
   }
   let i = 0;
   for (const modelInstance of modelInstances) {
-    const isCreate = !association.attributes[i][0].id;
+    const isCreate = !association.attributes[i][0][primaryKey];
     let joinIds: Array<string> = [];
     if (isCreate) {
       // Create the models first and add their ids to the joinIds.
@@ -158,4 +163,4 @@ export const handleBulkCreateMany = async (
     });
     i++;
   }
-};
+};  

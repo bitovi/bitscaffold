@@ -2,6 +2,9 @@ import Koa from "koa";
 import { Scaffold } from "..";
 import { KoaMiddleware, ExpressMiddleware } from "../types";
 import { parseScaffoldBody } from "../parse/body";
+import errorResponseHandler from "../error";
+import { ValidationError } from "../error/errors";
+import { codes, statusCodes } from "../error/constants";
 
 /**
  * Provides a set of exported functions, per Model, that
@@ -179,75 +182,96 @@ export function destroyMiddleware(scaffold: Scaffold, modelName: string) {
   };
 }
 
+export async function errorMiddleware(ctx: Koa.Context, next: Koa.Next) {
+  try {
+    await next();
+  } catch (error) {
+    const { errors, status } = errorResponseHandler(error);
+
+    ctx.status = status;
+    ctx.body = errors;
+  }
+}
+
 export function handleAllMiddleware(scaffold: Scaffold) {
   return async function handleAllImpl(ctx: Koa.Context, next: Koa.Next) {
-    // Check if this request URL takes the format of one that we expect
-    if (!scaffold.isValidScaffoldRoute(ctx.method, ctx.path)) {
-      return await next();
-    }
+    try {
+      // Check if this request URL takes the format of one that we expect
+      if (!scaffold.isValidScaffoldRoute(ctx.method, ctx.path)) {
+        return await next();
+      }
 
-    const params = scaffold.getScaffoldURLParamsForRoute(ctx.path);
-    if (!params.model) {
-      return await next();
-    }
+      const params = scaffold.getScaffoldURLParamsForRoute(ctx.path);
+      if (!params.model) {
+        return await next();
+      }
 
-    switch (ctx.method) {
-      case "GET": {
-        if (params.id) {
-          ctx.body = await scaffold.everything[params.model].findOne(
+      switch (ctx.method) {
+        case "GET": {
+          if (params.id) {
+            ctx.body = await scaffold.everything[params.model].findOne(
+              ctx.querystring,
+              params.id
+            );
+            return;
+          }
+          ctx.body = await scaffold.everything[params.model].findAll(
+            ctx.querystring
+          );
+          return;
+        }
+
+        case "POST": {
+          const body = await parseScaffoldBody(ctx);
+
+          ctx.body = await scaffold.everything[params.model].create(
+            body,
+            ctx.querystring
+          );
+          return;
+        }
+
+        case "PATCH": {
+          const body = await parseScaffoldBody(ctx);
+          if (!params.id) {
+            throw new ValidationError({
+              status: statusCodes.UNPROCESSABLE_ENTITY,
+              code: codes.ERR_INVALID_PARAMETER,
+              title: "Invalid ID Provided",
+            });
+          }
+          ctx.body = await scaffold.everything[params.model].update(
+            body,
             ctx.querystring,
             params.id
           );
           return;
         }
-        ctx.body = await scaffold.everything[params.model].findAll(
-          ctx.querystring
-        );
-        return;
-      }
 
-      case "POST": {
-        const body = await parseScaffoldBody(ctx);
-        ctx.body = await scaffold.everything[params.model].create(
-          body,
-          ctx.querystring
-        );
-        return;
-      }
-
-      case "PUT": {
-        const body = await parseScaffoldBody(ctx);
-        if (!params.id) {
-          throw scaffold.createError({
-            code: "400",
-            title: "Invalid ID Provided",
-          });
+        case "DELETE": {
+          if (!params.id) {
+            throw new ValidationError({
+              status: statusCodes.UNPROCESSABLE_ENTITY,
+              code: codes.ERR_INVALID_PARAMETER,
+              title: "Invalid ID Provided",
+            });
+          }
+          ctx.body = await scaffold.everything[params.model].destroy(
+            ctx.querystring,
+            params.id
+          );
+          return;
         }
-        ctx.body = await scaffold.everything[params.model].update(
-          body,
-          ctx.querystring,
-          params.id
-        );
-        return;
-      }
 
-      case "DELETE": {
-        if (!params.id) {
-          throw scaffold.createError({
-            code: "400",
-            title: "Invalid ID Provided",
-          });
+        default: {
+          return await next();
         }
-        ctx.body = await scaffold.everything[params.model].destroy(
-          ctx.querystring,
-          params.id
-        );
-        return;
       }
+    } catch (error) {
+      const { errors, status } = errorResponseHandler(error);
 
-      default: {
-        return await next();
-      }
+      ctx.status = status;
+      ctx.body = errors;
     }
   };
 }
@@ -255,11 +279,19 @@ export function handleAllMiddleware(scaffold: Scaffold) {
 function resolveWildcard(scaffold: Scaffold, path): string {
   const params = scaffold.getScaffoldURLParamsForRoute(path);
   if (!params.model) {
-    throw scaffold.createError({ code: "400", title: "Invalid URL Format" });
+    throw new ValidationError({
+      status: statusCodes.UNPROCESSABLE_ENTITY,
+      code: codes.ERR_INVALID_PARAMETER,
+      title: "Invalid URL Format",
+    });
   }
 
   if (!scaffold.model[params.model]) {
-    throw scaffold.createError({ code: "400", title: "Bad Model Name: " });
+    throw new ValidationError({
+      status: statusCodes.UNPROCESSABLE_ENTITY,
+      code: codes.ERR_INVALID_PARAMETER,
+      title: "Bad Model Name: ",
+    });
   }
 
   return params.model;

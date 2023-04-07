@@ -1,31 +1,37 @@
-import { ScaffoldModel, DataTypes } from "../../../types";
+import { codes, statusCodes } from '../../../error/constants'
+import { ValidationError } from '../../../error/errors'
+import { ScaffoldModel, DataTypes } from '../../../types'
 
 export const Employee: ScaffoldModel = {
-  name: "Employee",
+  name: 'Employee',
   attributes: {
     id: {
       type: DataTypes.UUID,
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4,
-      allowNull: false,
+      allowNull: false
     },
     name: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: false
     },
     start_date: DataTypes.DATE,
     end_date: DataTypes.DATE,
     age: {
       type: DataTypes.INTEGER,
       validate: {
-        min: 18,
-      },
-    },
+        min: 18
+      }
+    }
   },
   validation: {
     startDateBeforeEndDate() {
       if (this.start_date && this.end_date && this.start_date < this.end_date) {
-        throw new Error("START_DATE_MUST_BE_BEFORE_END_DATE");
+        throw new ValidationError({
+          title: 'START_DATE_MUST_BE_BEFORE_END_DATE',
+          code: codes.ERR_INVALID_PARAMETER,
+          status: statusCodes.UNPROCESSABLE_ENTITY
+        })
       }
     },
     endDateAfterStartDate() {
@@ -34,14 +40,18 @@ export const Employee: ScaffoldModel = {
         this.end_date &&
         this.start_date >= this.end_date
       ) {
-        throw new Error("START_DATE_MUST_BE_BEFORE_END_DATE");
+        throw new ValidationError({
+          title: 'START_DATE_MUST_BE_BEFORE_END_DATE',
+          code: codes.ERR_INVALID_PARAMETER,
+          status: statusCodes.UNPROCESSABLE_ENTITY
+        })
       }
-    },
+    }
   },
   belongsToMany: [
-    { target: "Role", options: { through: "role__employee", as: "roles" } },
-  ],
-};
+    { target: 'Role', options: { through: 'role__employee', as: 'roles' } }
+  ]
+}
 
 /*
 -- public.employee definition

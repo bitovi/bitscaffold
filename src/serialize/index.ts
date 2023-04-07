@@ -35,7 +35,6 @@ export interface SerializeFunctions<
   create: (data: T) => Promise<JSONAPIDocument>;
   update: (rowCount: number) => Promise<JSONAPIDocument>;
   destroy: (rowCount: number) => Promise<JSONAPIDocument>;
-  //   error: (options: JSONAPIErrorOptions) => createHttpError.HttpError;
 }
 
 async function findAllImpl(scaffold: Scaffold, name: string, array) {
@@ -96,9 +95,6 @@ export function buildSerializerForModel(
     create: async (instance) => createImpl(scaffold, modelName, instance),
     destroy: async (rowCount) => destroyImpl(scaffold, modelName, rowCount),
     update: async (rowCount) => updateImpl(scaffold, modelName, rowCount),
-    // error: (options: JSONAPIErrorOptions) => {
-    //   return scaffold.createError(options);
-    // },
   };
 }
 
