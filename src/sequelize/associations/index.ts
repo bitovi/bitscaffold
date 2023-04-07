@@ -32,7 +32,8 @@ export const getValidAttributesAndAssociations = (
         if (Array.isArray(currentModelAttributes)) {
           data = currentModelAttributes.map((attribute: any) => {
             const { [association]: _, ...attributesleft } = attribute;
-            otherAssociationAttributes[association] = _;
+            const otherAttr = otherAssociationAttributes[association] ?? [];
+            otherAssociationAttributes[association] = [...otherAttr, _];
             return attributesleft;
           });
         } else {
@@ -90,7 +91,6 @@ export const handleCreateAssociations = async (
         break;
       case "hasMany":
       case "belongsToMany":
-        console.log("has many");
         await handleCreateMany(
           scaffold,
           {
@@ -121,9 +121,6 @@ export const handleBulkCreateAssociations = async (
   for (const association of validAssociations) {
     const associationDetails = associations[association];
     const associationAttribute = attributes[association];
-
-    console.log("k2->", association);
-    console.log("k->", associationAttribute);
 
     switch (associationDetails.type) {
       case "hasOne":
@@ -164,8 +161,7 @@ export const handleUpdateAssociations = async (
   associations: Record<string, IAssociation>,
   attributes: Attributes<any>,
   transaction: Transaction,
-  modelId: string,
-  primaryKey = "id"
+  modelId: string
 ) => {
   for (const association of validAssociations) {
     const associationDetails = associations[association];
@@ -183,8 +179,7 @@ export const handleUpdateAssociations = async (
             name: model.name,
             id: modelId,
           },
-          transaction,
-          primaryKey
+          transaction
         );
         break;
       case "hasMany":
@@ -199,8 +194,7 @@ export const handleUpdateAssociations = async (
             name: model.name,
             id: modelId,
           },
-          transaction,
-          primaryKey
+          transaction
         );
         break;
       default:
