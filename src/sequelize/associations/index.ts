@@ -164,7 +164,8 @@ export const handleUpdateAssociations = async (
   associations: Record<string, IAssociation>,
   attributes: Attributes<any>,
   transaction: Transaction,
-  modelId: string
+  modelId: string,
+  primaryKey = "id"
 ) => {
   for (const association of validAssociations) {
     const associationDetails = associations[association];
@@ -182,7 +183,8 @@ export const handleUpdateAssociations = async (
             name: model.name,
             id: modelId,
           },
-          transaction
+          transaction,
+          primaryKey
         );
         break;
       case "hasMany":
@@ -197,7 +199,8 @@ export const handleUpdateAssociations = async (
             name: model.name,
             id: modelId,
           },
-          transaction
+          transaction,
+          primaryKey
         );
         break;
       default:

@@ -267,7 +267,8 @@ export function extendedSequelize(scaffold: Scaffold) {
           belongsAssociation,
           associations as Record<string, IAssociation>,
           attributes,
-          transaction
+          transaction,
+          modelPrimaryKey
         );
         modelUpdateData = _model;
       }
@@ -288,7 +289,8 @@ export function extendedSequelize(scaffold: Scaffold) {
           associations as Record<string, IAssociation>,
           attributes,
           transaction,
-          modelId
+          modelId,
+          modelPrimaryKey
         );
       }
 
@@ -307,7 +309,8 @@ export function extendedSequelize(scaffold: Scaffold) {
       scaffold,
       modelName: this.name,
     });
-    return await origFindAll.apply(this, [options]);
+
+    return origFindAll.apply(this, [options]);
   };
 
   Model.findOne = async function (queryOptions) {
@@ -317,7 +320,7 @@ export function extendedSequelize(scaffold: Scaffold) {
       modelName: this.name,
     });
 
-    return await origFindOne.apply(this, [options]);
+    return origFindOne.apply(this, [options]);
   };
 
   Model.findByPk = async function (id, queryOptions) {
@@ -327,7 +330,7 @@ export function extendedSequelize(scaffold: Scaffold) {
       modelName: this.name,
     });
 
-    return await origFindByPk.apply(this, [id, options]);
+    return origFindByPk.apply(this, [id, options]);
   };
 
   Model.findOrCreate = async function (queryOptions) {
@@ -337,7 +340,7 @@ export function extendedSequelize(scaffold: Scaffold) {
       modelName: this.name,
     });
 
-    return await origFindOrCreate.apply(this, [options]);
+    return origFindOrCreate.apply(this, [options]);
   };
 
   return Sequelize;

@@ -18,14 +18,15 @@ export const handleUpdateBelongs = async (
   belongsAssociation: Array<string>,
   associations: Record<string, IAssociation>,
   attributes: Attributes<any>,
-  transaction: Transaction
+  transaction: Transaction,
+  primaryKey = "id"
 ) => {
   const updatedModelAttributes = currentModelAttributes;
   belongsAssociation.forEach((association) => {
     const associationDetails = associations[association];
     const associationAttribute = attributes[association];
     const key = associationDetails.key;
-    updatedModelAttributes[key] = associationAttribute?.id;
+    updatedModelAttributes[key] = associationAttribute?.[primaryKey];
   });
   return origUpdate.apply(model, [
     updatedModelAttributes,
@@ -37,7 +38,8 @@ export const handleUpdateOne = async (
   scaffold: Scaffold,
   association: IAssociationBody<Array<Record<string, any>>>,
   model: { name: string; id: string },
-  transaction: Transaction
+  transaction: Transaction,
+  primaryKey = "id"
 ) => {
   const key = association.details.key;
 
@@ -45,7 +47,7 @@ export const handleUpdateOne = async (
     association.attributes,
     {
       where: {
-        [key]: model.id,
+        [key]: model[primaryKey],
       },
       transaction,
     }
@@ -56,13 +58,18 @@ export const handleUpdateMany = async (
   scaffold: Scaffold,
   association: IAssociationBody<Array<Record<string, any>>>,
   model: { name: string; id: string },
-  transaction: Transaction
+  transaction: Transaction,
+  primaryKey = "id"
 ) => {
-  const modelInstance = await scaffold.model[model.name].findByPk(model.id);
+  const modelInstance = await scaffold.model[model.name].findByPk(
+    model[primaryKey]
+  );
   if (!modelInstance) {
     return;
   }
-  const joinIds: Array<string> = association.attributes.map((data) => data.id);
+  const joinIds: Array<string> = association.attributes.map(
+    (data) => data[primaryKey]
+  );
   if (joinIds.length === 0) return;
   const modelNameInPlural = inflection.pluralize(association.details.model);
   return await modelInstance[`set${modelNameInPlural}`](joinIds, {

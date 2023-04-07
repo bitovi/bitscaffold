@@ -108,7 +108,6 @@ export const handleCreateMany = async (
       transaction,
     }
   );
-  console.log("model =>", modelInstance);
   if (!modelInstance) {
     throw new ScaffoldError({
       title: "Unable to find Created Model",
@@ -136,7 +135,7 @@ export const handleCreateMany = async (
 
 export const handleBulkCreateMany = async (
   scaffold: Scaffold,
-  association: IAssociationBody<Array<JSONAnyObject>>,
+  association: IAssociationBody<Array<JSONAnyObject[]>>,
   model: { name: string; id: Array<string> },
   transaction: Transaction,
   primaryKey = "id"
@@ -149,27 +148,30 @@ export const handleBulkCreateMany = async (
     transaction,
   });
   if (modelInstances.length !== model.id.length) {
-    return;
+    throw new ScaffoldError({
+      title: "All Models not successfully created",
+      status: 500,
+      code: "bulk-create-model",
+    });
   }
-  console.log(modelInstances);
   let i = 0;
   for (const modelInstance of modelInstances) {
-    const isCreate = !association.attributes[i].id;
+    const isCreate = !association.attributes[i][0][primaryKey];
     let joinIds: Array<string> = [];
     if (isCreate) {
       // Create the models first and add their ids to the joinIds.
       const associationData = await scaffold.model[
         association.details.model
-      ].bulkCreate(association.attributes, { transaction });
-      joinIds = associationData.map((data) => data.getDataValue("id"));
+      ].bulkCreate(association.attributes[i], { transaction });
+      joinIds = associationData.map((data) => data.getDataValue(primaryKey));
     } else {
       // Assign the ids to the through table if the model is present
-      joinIds = association.attributes.map((data) => data.id);
-    }
+      joinIds = association.attributes[i].map((data) => data[primaryKey]);
     const modelNameInPlural = inflection.pluralize(association.details.model);
     await modelInstance[`add${modelNameInPlural}`](joinIds, {
       transaction,
     });
     i++;
+  }
   }
 };
