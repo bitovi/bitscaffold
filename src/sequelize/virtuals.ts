@@ -6,12 +6,12 @@ export const addVirtuals = function ({
 }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let options: any = {
-    include: all ? [ { all: true } ] : [],
+    include: [],
   };
 
   if (queryOptions) {
     if (!queryOptions.attributes) {
-      options.include = [];
+      options.include = { all : true }, [];
     } else {
       queryOptions.attributes.forEach((attribute) => {
         const scaffoldVirtuals = scaffold.virtuals[modelName];
@@ -38,7 +38,7 @@ export const addVirtuals = function ({
 
     options = Object.assign(options, queryOptions);
   } else {
-    options.include = all ? [ { all: true } ] : [];
+    options.include = all ? { all: true } : [];
   }
 
   options.include.length < 1 && delete options.include;
