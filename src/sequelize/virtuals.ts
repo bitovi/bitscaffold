@@ -6,7 +6,7 @@ export const addVirtuals = function ({
 }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let options: any = {
-    include: all ? { all: true } : [],
+    include: all ? [ { all: true } ] : [],
   };
 
   if (queryOptions) {
@@ -38,7 +38,7 @@ export const addVirtuals = function ({
 
     options = Object.assign(options, queryOptions);
   } else {
-    options.include = all ? { all: true } : [];
+    options.include = all ? [ { all: true } ] : [];
   }
 
   options.include.length < 1 && delete options.include;
