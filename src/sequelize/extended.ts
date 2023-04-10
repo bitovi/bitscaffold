@@ -328,7 +328,7 @@ export function extendedSequelize(scaffold: Scaffold) {
       queryOptions,
       scaffold,
       modelName: this.name,
-      all: true
+      all: true,
     });
 
     return origFindByPk.apply(this, [id, options]);
