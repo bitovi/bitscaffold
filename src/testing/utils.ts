@@ -3,7 +3,7 @@ import Koa from "koa";
 import request from "supertest";
 import { Deserializer } from "jsonapi-serializer";
 import { ScaffoldError } from "../error/errors";
-import { codes } from "../error/constants";
+import { codes, statusCodes } from "../error/constants";
 
 export function createServer(app: Koa) {
   return http.createServer(app.callback());
@@ -19,6 +19,7 @@ async function parse(result) {
     throw new ScaffoldError({
       title: "Invalid Result",
       code: codes.ERR_INVALID_RESULT,
+      status: statusCodes.UNPROCESSABLE_ENTITY,
     });
   }
 
