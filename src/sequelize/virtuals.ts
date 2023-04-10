@@ -11,7 +11,7 @@ export const addVirtuals = function ({
 
   if (queryOptions) {
     if (!queryOptions.attributes) {
-      options.include = { all : true }, [];
+      options.include = all ? { all: true } : [];
     } else {
       queryOptions.attributes.forEach((attribute) => {
         const scaffoldVirtuals = scaffold.virtuals[modelName];

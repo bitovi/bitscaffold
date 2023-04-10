@@ -3,7 +3,6 @@
 import { Model } from "sequelize";
 import { Scaffold } from "..";
 
-import * as inflection from "inflection";
 import JSONAPISerializer from "json-api-serializer";
 import { JSONAPIDocument } from "json-api-serializer";
 import { IAssociation } from "../sequelize/types";
@@ -117,10 +116,7 @@ export function registerSchema(
   const associationsKeys = Object.keys(associations);
   associationsKeys.forEach((associationsKey) => {
     const association = associations[associationsKey];
-    const associationType = inflection.pluralize(
-      association.model.toLowerCase()
-    );
-    relationships[associationType] = {
+    relationships[associationsKey] = {
       type: association.model,
       deserialize,
     };
