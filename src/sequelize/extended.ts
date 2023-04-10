@@ -116,7 +116,6 @@ export function extendedSequelize(scaffold: Scaffold) {
       }
       await transaction.commit();
     } catch (error) {
-      console.log("error =>", error);
       await transaction.rollback();
       throw error;
     }
@@ -329,6 +328,7 @@ export function extendedSequelize(scaffold: Scaffold) {
       queryOptions,
       scaffold,
       modelName: this.name,
+      all: true
     });
 
     return origFindByPk.apply(this, [id, options]);

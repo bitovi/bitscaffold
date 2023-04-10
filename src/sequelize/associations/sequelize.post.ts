@@ -43,8 +43,8 @@ export const handleBulkCreateBelongs = async (
   primaryKey = "id"
 ) => {
   const bulkModelAttributes: Array<any> = [];
+  let i = 0;
   currentModelAttributes.forEach((currentModelAttribute) => {
-    let i = 0;
     const updatedModelAttributes = currentModelAttribute;
     belongsAssociation.forEach((association) => {
       const associationDetails = associations[association];
@@ -55,10 +55,9 @@ export const handleBulkCreateBelongs = async (
           ? associationAttribute
           : associationAttribute?.[primaryKey];
     });
-    bulkModelAttributes.push(updatedModelAttributes);
     i++;
+    bulkModelAttributes.push(updatedModelAttributes);
   });
-
   return origBulkCreate.apply(model, [bulkModelAttributes, { transaction }]);
 };
 
