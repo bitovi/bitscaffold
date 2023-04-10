@@ -324,14 +324,18 @@ export function extendedSequelize(scaffold: Scaffold) {
   };
 
   Model.findByPk = async function (id, queryOptions) {
+   try {
     const options = addVirtuals({
       queryOptions,
       scaffold,
       modelName: this.name,
-      all: true
+      // all: true
     });
 
     return origFindByPk.apply(this, [id, options]);
+   } catch (error) {
+    console.error(error);
+   }
   };
 
   Model.findOrCreate = async function (queryOptions) {
