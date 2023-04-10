@@ -1,34 +1,35 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   DataTypes,
   ModelAttributes,
-  Model,
-  Sequelize,
-  InferAttributes,
-  InferCreationAttributes,
-  ModelStatic,
-  ModelCtor,
+  // Model,
+  // Sequelize,
+  // InferAttributes,
+  // InferCreationAttributes,
+  // ModelStatic,
+  // ModelCtor
 } from "sequelize";
-const _seqModelSymbol = Symbol("underlying-sequelize-model");
+// const _seqModelSymbol = Symbol("underlying-sequelize-model");
 
 interface ScaffoldModelDefinition {
   attributes: ModelAttributes;
   name: string;
 }
 
-type InferModel<T extends Model<any, any>> = Model<
-  InferAttributes<T>,
-  InferCreationAttributes<T>
->;
+// type InferModel<T extends Model<any, any>> = Model<
+//   InferAttributes<T>,
+//   InferCreationAttributes<T>
+// >
 
-interface ScaffoldModel<T extends InferModel<T>>
-  extends ScaffoldModelDefinition {
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  findAll: ModelCtor<T>["findAll"];
-  findOne: ModelCtor<T>["findOne"];
-  create: ModelCtor<T>["create"];
-  update: ModelCtor<T>["update"];
-  destroy: ModelCtor<T>["destroy"];
-}
+// interface ScaffoldModel<T extends InferModel<T>>
+//   extends ScaffoldModelDefinition {
+//   // eslint-disable-next-line @typescript-eslint/ban-types
+//   findAll: ModelCtor<T>['findAll']
+//   findOne: ModelCtor<T>['findOne']
+//   create: ModelCtor<T>['create']
+//   update: ModelCtor<T>['update']
+//   destroy: ModelCtor<T>['destroy']
+// }
 
 export const Skill: ScaffoldModelDefinition = {
   name: "Skill",
@@ -49,35 +50,35 @@ export const Skill: ScaffoldModelDefinition = {
 
 // I dont really want to have to define this interface.
 // I want it to figure these properties out via the Definition only...
-interface SkillModel extends InferModel<SkillModel> {
-  id: string;
-  name: string;
-}
+// interface SkillModel extends InferModel<SkillModel> {
+//   id: string
+//   name: string
+// }
 
-const sequelize = new Sequelize("sqlite::memory:", {
-  logging: false,
-});
+// const sequelize = new Sequelize('sqlite::memory:', {
+//   logging: false
+// })
 
-function createModel<
-  Q extends Model<any, any>,
-  T extends ScaffoldModelDefinition = ScaffoldModelDefinition
->(modeldef: T): ScaffoldModel<Q> {
-  const temp = sequelize.define<Q>(modeldef.name, modeldef.attributes);
+// function createModel<
+//   Q extends Model<any, any>,
+//   T extends ScaffoldModelDefinition = ScaffoldModelDefinition
+// >(modeldef: T): ScaffoldModel<Q> {
+//   const temp = sequelize.define<Q>(modeldef.name, modeldef.attributes);
 
-  const model: ScaffoldModel<Q> = {
-    name: modeldef.name,
-    attributes: modeldef.attributes,
-    findAll: temp.findAll,
-    findOne: temp.findOne,
-    create: temp.create,
-    update: temp.update,
-    destroy: temp.destroy,
-  };
+//   const model: ScaffoldModel<Q> = {
+//     name: modeldef.name,
+//     attributes: modeldef.attributes,
+//     findAll: temp.findAll,
+//     findOne: temp.findOne,
+//     create: temp.create,
+//     update: temp.update,
+//     destroy: temp.destroy,
+//   };
 
-  return model;
-}
+//   return model;
+// }
 
-const TestSkillModel = createModel<SkillModel>(Skill);
+// const TestSkillModel = createModel<SkillModel>(Skill)
 
 // These attributes, I assume, should be typechecked based on the actual property names in SkillModel or Skill definitions
 const result = null; // TestSkillModel.findAll({ attributes: ["name", "id", "fish"] });

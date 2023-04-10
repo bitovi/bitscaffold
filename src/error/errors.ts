@@ -13,7 +13,7 @@ class Source {
 interface ScaffoldErrorOptions {
   pointer?: string;
   parameter?: string;
-  status?: number;
+  status: number;
   code: string;
   detail?: string;
   source?: Source;

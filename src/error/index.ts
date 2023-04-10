@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { statusCodes } from "./constants";
 import databaseErrorHandlers from "./types/database-errors";
 import ScaffoldErrorHandler from "./types/general-errors";
