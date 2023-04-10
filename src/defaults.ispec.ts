@@ -1,3 +1,4 @@
+/* eslint-disable jest/no-commented-out-tests */
 // import { Scaffold, Parse, Serialize } from "./index";
 // import Koa from "koa";
 // import { DataTypes, ScaffoldModel } from "./types";

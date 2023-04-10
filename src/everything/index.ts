@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-unused-vars */
 import { Scaffold } from "..";
 import { Identifier } from "sequelize";
-import { JSONObject } from "../types";
+// import { JSONObject } from "../types";
 import { JSONAPIDocument } from "json-api-serializer";
-import { statusCodes } from "../error/constants";
+// import { statusCodes } from "../error/constants";
 import { NotFoundError } from "../error/errors";
 
 export interface EverythingFunctions {
