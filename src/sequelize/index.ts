@@ -1,6 +1,6 @@
 import { Model, Sequelize, Options, DataTypes } from "sequelize";
 import JSONAPISerializer from "json-api-serializer";
-import inflection from "inflection";
+import * as inflection from "inflection";
 import {
   ScaffoldModel,
   SequelizeModelsCollection,

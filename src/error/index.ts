@@ -5,8 +5,6 @@ import ScaffoldErrorHandler from "./types/general-errors";
 const errorResponseHandler = (error) => {
   const errors: any[] = [];
 
-  console.error("Error =>", error);
-
   let status = statusCodes.INTERNAL_SERVER_ERROR;
 
   if (
