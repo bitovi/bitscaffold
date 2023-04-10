@@ -1,7 +1,12 @@
-export const addVirtuals = function ({ queryOptions, scaffold, modelName }) {
+export const addVirtuals = function ({
+  queryOptions,
+  scaffold,
+  modelName,
+  all = false,
+}) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let options: any = {
-    include: [],
+    include: all ? { all: true } : [],
   };
 
   if (queryOptions) {
@@ -33,7 +38,7 @@ export const addVirtuals = function ({ queryOptions, scaffold, modelName }) {
 
     options = Object.assign(options, queryOptions);
   } else {
-    options.include = [];
+    options.include = all ? { all: true } : [];
   }
 
   options.include.length < 1 && delete options.include;

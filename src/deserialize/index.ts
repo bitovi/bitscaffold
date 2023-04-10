@@ -22,26 +22,6 @@ export interface DeserializeFunctions {
   update: (data: unknown, options?: any) => Promise<JSONObject>;
 }
 
-// export function buildDeserializerForModelStandalone() {
-//   return {
-//     create: async (data: unknown) => {
-//       try {
-//         return
-//       } catch (err) {
-//         return data;
-//       }
-//     },
-
-//     update: async (data: unknown) => {
-//       try {
-//         return Scaffold.serializer.deserialize(data);
-//       } catch (err) {
-//         return data;
-//       }
-//     },
-//   };
-// }
-
 export function buildDeserializerForModel(
   scaffold: Scaffold,
   modelName: string

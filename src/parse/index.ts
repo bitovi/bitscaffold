@@ -48,8 +48,6 @@ export interface ParseFunctions {
 async function findAllImpl(model: ScaffoldModel, querystring: string) {
   const { data, errors } = buildFindOptions(model, querystring);
   if (errors.length > 0) {
-    console.error(errors);
-
     throw new ValidationError({
       code: codes.ERR_INVALID_PARAMETER,
       status: statusCodes.UNPROCESSABLE_ENTITY,
@@ -62,8 +60,6 @@ async function findAllImpl(model: ScaffoldModel, querystring: string) {
 async function findOneImpl(model: ScaffoldModel, querystring: string, id) {
   const { data, errors } = buildFindOptions(model, querystring, id);
   if (errors.length > 0) {
-    console.error(errors);
-
     throw new ValidationError({
       code: codes.ERR_INVALID_PARAMETER,
       status: statusCodes.UNPROCESSABLE_ENTITY,
@@ -76,8 +72,6 @@ async function findOneImpl(model: ScaffoldModel, querystring: string, id) {
 async function findAndCountAllImpl(model: ScaffoldModel, querystring: string) {
   const { data, errors } = buildFindOptions(model, querystring);
   if (errors.length > 0) {
-    console.error(errors);
-
     throw new ValidationError({
       code: codes.ERR_INVALID_PARAMETER,
       status: statusCodes.UNPROCESSABLE_ENTITY,
@@ -95,8 +89,6 @@ async function createImpl<T extends ScaffoldModel = ScaffoldModel>(
   const serializer = scaffold.serializer;
   const { data, errors } = buildCreateOptions("");
   if (errors.length > 0) {
-    console.error(errors);
-
     throw new ValidationError({
       code: codes.ERR_INVALID_PARAMETER,
       status: statusCodes.UNPROCESSABLE_ENTITY,
@@ -122,8 +114,6 @@ async function updateImpl(
   const serializer = scaffold.serializer;
   const { data, errors } = buildUpdateOptions("", id);
   if (errors.length > 0) {
-    console.error(errors);
-
     throw new ValidationError({
       code: codes.ERR_INVALID_PARAMETER,
       status: statusCodes.UNPROCESSABLE_ENTITY,
@@ -144,8 +134,6 @@ async function updateImpl(
 async function destroyImpl(model: ScaffoldModel, querystring: string, id) {
   const { data, errors } = buildDestroyOptions(querystring, id);
   if (errors.length > 0) {
-    console.error(errors);
-
     throw new ValidationError({
       code: codes.ERR_INVALID_PARAMETER,
       status: statusCodes.UNPROCESSABLE_ENTITY,
