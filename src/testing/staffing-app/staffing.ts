@@ -111,7 +111,7 @@ export function createStaffingAppInstance(): [Koa, Scaffold] {
   // app.use(scaffold.middleware.allModels);
 
   // Attach the Scaffold default middleware to your Koa application
-  app.use(scaffold.middleware.allModels.all);
+  app.use(scaffold.middleware.Project.all);
 
   // Set up any other Koa routes, middleware, etc, that you want.
   app.use(async (ctx) => {

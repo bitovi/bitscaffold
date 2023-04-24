@@ -8,20 +8,21 @@ export const addVirtuals = function ({
   let options: any = {
     include: [],
   };
-
   if (queryOptions) {
     if (!queryOptions.attributes) {
       options.include = all ? { all: true } : [];
     } else {
       queryOptions.attributes.forEach((attribute) => {
         const scaffoldVirtuals = scaffold.virtuals[modelName];
-
         if (
           scaffoldVirtuals &&
           scaffoldVirtuals[attribute] &&
           scaffoldVirtuals[attribute] !== ""
         ) {
-          options.include.push(...options.include, scaffoldVirtuals[attribute]);
+          options.include.push(
+            ...options.include,
+            ...scaffoldVirtuals[attribute]
+          );
         }
       });
 

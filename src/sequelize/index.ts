@@ -1,6 +1,7 @@
 import { Model, Sequelize, Options, DataTypes } from "sequelize";
 import JSONAPISerializer from "json-api-serializer";
 import * as inflection from "inflection";
+import querystringParser from "@bitovi/sequelize-querystring-parser";
 import {
   ScaffoldModel,
   SequelizeModelsCollection,
@@ -14,6 +15,10 @@ import { IAssociation, ICreateScaffoldModel } from "./types";
 import { registerSchema } from "../serialize";
 import { ScaffoldError } from "../error/errors";
 import { codes, statusCodes } from "../error/constants";
+
+const splitIncludeToJSONAPiQuery = (include) => {
+  return `include=${include.join(",")}`;
+};
 
 export function buildScaffoldModelObject(
   models: SequelizeModelsCollection
@@ -53,18 +58,27 @@ export function convertScaffoldModels(
   models.forEach((model) => {
     for (const attributeKey in model.attributes) {
       const attribute = model.attributes[attributeKey];
-
       const { type, include } = attribute;
+
+      let updatedInclude = include;
+      if (updatedInclude) {
+        updatedInclude = Array.isArray(include) ? include : [include];
+        const query = splitIncludeToJSONAPiQuery(updatedInclude);
+        const parser = querystringParser.parse(query);
+        if (parser.errors.length === 0) {
+          updatedInclude = parser.data.include;
+        }
+      }
 
       if (
         type instanceof DataTypes.VIRTUAL ||
         (type && type.key === "VIRTUAL")
       ) {
         if (virtuals[model.name]) {
-          virtuals[model.name][attributeKey] = include || "";
+          virtuals[model.name][attributeKey] = updatedInclude || [];
         } else {
           virtuals[model.name] = {
-            [attributeKey]: include || "",
+            [attributeKey]: updatedInclude || [],
           };
         }
 

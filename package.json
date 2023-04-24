@@ -32,8 +32,7 @@
   },
   "homepage": "https://github.com/bitovi/bitscaffold#readme",
   "dependencies": {
-    "@bitovi/querystring-parser": "^0.6.3",
-    "@bitovi/sequelize-querystring-parser": "^0.1.3",
+    "@bitovi/sequelize-querystring-parser": "^0.1.6",
     "@koa/cors": "^4.0.0",
     "@koa/router": "^12.0.0",
     "@sequelize/core": "^7.0.0-alpha.10",
