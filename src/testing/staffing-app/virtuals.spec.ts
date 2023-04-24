@@ -31,7 +31,9 @@ describe("Virtuals Tests", () => {
 
     const scaffold = new Scaffold([Sample]);
 
-    expect(scaffold.virtuals).toStrictEqual({ Sample: { noOfRoles: [ { association: "roles", include : [] } ]} });
+    expect(scaffold.virtuals).toStrictEqual({
+      Sample: { noOfRoles: [{ association: "roles", include: [] }] },
+    });
   });
 
   it("should return scaffold virtuals without include", () => {
