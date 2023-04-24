@@ -78,7 +78,8 @@ export function extendedSequelize(scaffold: Scaffold) {
       return origCreate.apply(this, [attributes, options]);
     }
 
-    const transaction = await scaffold.orm.transaction();
+    const transaction =
+      options?.transaction ?? (await scaffold.orm.transaction());
 
     try {
       if (belongsAssociation.length > 0) {
@@ -114,9 +115,10 @@ export function extendedSequelize(scaffold: Scaffold) {
           modelPrimaryKey
         );
       }
-      await transaction.commit();
+
+      !options?.transaction && (await transaction.commit());
     } catch (error) {
-      await transaction.rollback();
+      !options?.transaction && (await transaction.rollback());
       throw error;
     }
 
@@ -147,7 +149,6 @@ export function extendedSequelize(scaffold: Scaffold) {
       belongsAssociation,
       currentModelAttributes: _attributes,
     } = getValidAttributesAndAssociations(attributes, associations);
-
     currentModelAttributes = _attributes;
     // All associations
     const validAssociationsInAttributes = [
@@ -160,7 +161,8 @@ export function extendedSequelize(scaffold: Scaffold) {
       return origBulkCreate.apply(this, [attributes, options]);
     }
 
-    const transaction = await scaffold.orm.transaction();
+    const transaction =
+      options?.transaction ?? (await scaffold.orm.transaction());
 
     try {
       if (belongsAssociation.length > 0) {
@@ -199,9 +201,9 @@ export function extendedSequelize(scaffold: Scaffold) {
           modelPrimaryKey
         );
       }
-      await transaction.commit();
+      !options?.transaction && (await transaction.commit());
     } catch (error) {
-      await transaction.rollback();
+      !options?.transaction && (await transaction.rollback());
       throw error;
     }
 
@@ -293,9 +295,9 @@ export function extendedSequelize(scaffold: Scaffold) {
         );
       }
 
-      await transaction.commit();
+      !ops?.transaction && (await transaction.commit());
     } catch (error) {
-      await transaction.rollback();
+      !ops?.transaction && (await transaction.rollback());
       throw error;
     }
 

@@ -14,6 +14,12 @@ export const Skill: ScaffoldModel = {
       allowNull: false,
       unique: true,
     },
+    vname: {
+      type: DataTypes.VIRTUAL(DataTypes.INTEGER),
+      get() {
+        return this.name;
+      },
+    },
   },
   belongsToMany: [
     { target: "Role", options: { through: "role__skill", as: "roles" } },
