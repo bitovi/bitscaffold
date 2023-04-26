@@ -1,6 +1,6 @@
 # Scaffold Development Recommentations
 
-### Getting Started
+## Getting Started
 
 1. Clone this repository: https://github.com/bitovi/bitscaffold
 2. `cd bitscaffold`

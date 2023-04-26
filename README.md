@@ -6,7 +6,7 @@ Scaffold enables you to make changes to your database schema and customize app b
 
 Scaffold is NOT code generation, its a system of modular and hierarchial libraries that can be consumed piecemeal to use as much or as little of Scaffolds abilities as you require.
 
-# Quick Start Guide
+## Quick Start Guide
 
 Create a new Koa + Scaffold project. You can use `npm init` to create a new nodejs project.
 
@@ -14,10 +14,12 @@ Create a new Koa + Scaffold project. You can use `npm init` to create a new node
 npm init
 ```
 
-Install Scaffold along with the Koa web framework into your newly defined project
+Install Scaffold along with the Koa web framework into your newly defined project.
+
+Scaffold is not currently available on the npmjs repository, so it must be installed from a git URL or local path.
 
 ```bash
-npm i koa @bitovi/scaffold
+npm i koa && npm i /path/to/bitscaffold/repo
 ```
 
 Create an `index.js` file containing the following 'Hello World' example code
@@ -25,7 +27,7 @@ Create an `index.js` file containing the following 'Hello World' example code
 ```typescript
 import Koa from "koa";
 import path from "path";
-import { Scaffold, DataTypes } from "@bitovi/scaffold";
+import { Scaffold, DataTypes } from "bitscaffold";
 
 const User = {
   name: "User",
@@ -56,7 +58,7 @@ app.listen(3000, () => {
 });
 ```
 
-Run the example using `node index.js` to see it in action! At this point you can created an entire application that can perform CRUD operations to a persistant sqlite database for our example `User` model.
+Run the example using `node index.js` to see it in action! At this point you can create an entire application that can perform CRUD operations to a persistant sqlite database for our example `User` model.
 
 ```bash
 node index.js
@@ -77,7 +79,7 @@ Have more questions? Check out our Slack!
 
 [![Join our Slack](https://img.shields.io/badge/slack-join%20chat-611f69.svg)](https://www.bitovi.com/community/slack?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-# How It Works
+## How It Works
 
 A project using Scaffold is generally made up of a few different parts, the backend service layer, the frontend display layer, and a database schema layer. Scaffold builds on top of the popular Koa web framework and can be added to any Koa app via Middleware.
 
@@ -87,62 +89,16 @@ The first part is a Koa Application, Koa is a robust web framework for creating 
 
 Scaffold can be integrated into any Koa Application as Middleware.
 
-# Getting Started Tutorial
+## Getting Started Tutorial
 
-Create a new Koa + Scaffold project. You can use `npm init` to create a new nodejs project.
-
-```bash
-npm init
-```
-
-Install Scaffold along with the Koa web framework into your newly defined project
-
-```bash
-npm i koa @bitovi/scaffold
-```
-
-Create an `index.js` file containing the following 'Hello World' example code
-
-```typescript
-import Koa from "koa";
-import path from "path";
-import { Scaffold, DataTypes } from "@bitovi/scaffold";
-
-const User = {
-  name: "User",
-  attributes: {
-    firstName: DataTypes.STRING,
-    lastName: DataTypes.STRING,
-  },
-};
-
-const app = new Koa();
-const scaffold = new Scaffold([User], {
-  name: "Scaffold Demo",
-  prefix: "/api",
-  db: {
-    dialect: "sqlite",
-    storage: path.join(__dirname, "example.sqlite"),
-  },
-});
-
-app.use(scaffold.middleware.allModels.all);
-
-app.use(async (ctx) => {
-  ctx.body = "Hello From Koa";
-});
-
-app.listen(3000, () => {
-  console.log("Started on port 3000");
-});
-```
+Create the `index.js` file described above.
 
 At this point you have created a Koa application with Scaffold connected as Middleware. In this above example we are configuring Scaffold to use sqlite as a database and to store any of our data in the `example.sqlite` file.
 
 The most important step in working with Scaffold is creating Models that define the data within your application. Lets take a look at this example `Models.js` file containing two different exported Models:
 
 ```typescript
-import { DataTypes } from "@bitovi/scaffold/types";
+import { DataTypes } from "bitscaffold";
 
 export const Player = {
   name: "Player",
@@ -152,7 +108,7 @@ export const Player = {
     startDate: DataTypes.DATE,
     endDate: DataTypes.DATE,
   },
-  belongsTo: [{ target: "Team" }],
+  belongsTo: [{ target: "Team", options: { as: "team" } }],
 };
 
 export const Team = {
@@ -203,7 +159,7 @@ If you create additional schema files you can simply import them the same way, p
 
 Next we can start up the Scaffold to see everything in action.
 
-```
+```shell
 node index.js
 ```
 
@@ -250,7 +206,7 @@ export const Team = {
 
 Now that we have this new field defined within our model we can start the Scaffold application again.
 
-```
+```shell
 node index.js
 ```
 
@@ -259,13 +215,13 @@ You can use a REST Client to experiment with some of the following endpoints to 
 - GET http://localhost:3000/api/Players
 - POST http://localhost:3000/api/Players
 
-# Project Customization
+## Project Customization
 
-While Scaffold gives you a lot of power out of the box many applications, especially as they grow in complexity, need to apply custom rules and logic to their CRUD operations. Scaffold is prepared for this as well, allowing you to easily and flexibly override any of the default behavior to fit your needs. Even though you have customized the solution you can still use many of the Scaffold helper functions and features to accelerate even your custom workflow development.
+While Scaffold gives you a lot of power out of the box, many applications, especially as they grow in complexity, need to apply custom rules and logic to their CRUD operations. Scaffold is prepared for this as well, allowing you to easily and flexibly override any of the default behavior to fit your needs. Even though you have customized the solution you can still use many of the Scaffold helper functions and features to accelerate your custom workflow development.
 
 For example, if you had a new `User` model that needed special authorization rules you can quickly add this functionality yourself while still retaining all the other benefits of the Scaffold system.
 
-Lets take a look at our same sample application again, but this time make a few customizations
+Lets take a look at our same sample application again, but this time make a few customizations:
 
 ```typescript
 import Koa from "koa";
@@ -308,7 +264,7 @@ app.listen(3000, () => {
 
 From this example you can see a few of the functions that Scaffold exports for you. These model functions, along with more generic helpers, allow you to manipulate models, format data, and parse incoming request params with ease.
 
-# Alternative Database Configuration
+## Alternative Database Configuration
 
 The main Scaffold constructor can, optionally, take a database parameter that can be used to configure a large variety of relational database connections.
 
@@ -354,11 +310,11 @@ The following options are allowed within the db options object:
 
 For a more complete references see the Sequelize documentation [for the instance constructor](https://sequelize.org/api/v6/class/src/sequelize.js~sequelize#instance-constructor-constructor)
 
-# Additional Endpoints
+## Additional Endpoints
 
 Because Scaffold goes hand in hand with the Koa web framework adding additional routes is very easy and flexible. You can start by adding Koa Router with npm i @koa/router to your project.
 
-```
+```shell
 npm i @koa/router
 ```
 
@@ -434,7 +390,7 @@ app.listen(3000, () => {
 });
 ```
 
-# API Endpoint Enhancement
+## API Endpoint Enhancement
 
 One common need when building expressive REST APIs is the ability to create friendly aliases for certain things. Lets look at an example creating a special query param value that gets mapped into a different value.
 
@@ -487,7 +443,7 @@ app.listen(3000, () => {
 
 In this example if we see the string ‘today’ or ‘yesterday’ as our stateDate query parameter we can override the value to replace it with a proper JavaScript Date object.
 
-# Application Data Validation
+## Application Data Validation
 
 One of the most important things when building CRUD applications is data integrity. Scaffold can help here as well by providing easy hooks to provide validation logic. These functions are extremely helpful when trying to compare between values within your model when creating or updateing a record.
 
@@ -518,7 +474,7 @@ export const Employee = {
 };
 ```
 
-# Advanced Data Validation
+## Advanced Data Validation
 
 Lets take a look at doing more complicated data validation using Scaffold. In the example below we have two Models, Assignment and Employee. In this situation we have employees that we need to assign work to, but an employee can only be on one assignment at a time.
 
@@ -609,10 +565,9 @@ app.use(scaffold.middleware.allModels.all);
 app.listen(3000, () => {
     console.log("Started on port 3000");
 });
-
 ```
 
-# Model Relationships
+## Model Relationships
 
 Scaffold can help you define and build complex relationships between different models within your application. In our previous examples we have used Players and Teams to briefly describe a relationship. Lets take a look at that example again:
 
@@ -679,7 +634,7 @@ In this case both models contain a belongsToMany type relationship. One of the d
 
 For more information on these relationships and the options available check the [documentation for Sequelize](https://sequelize.org/docs/v6/core-concepts/assocs/).
 
-# Need help or have questions?
+## Need help or have questions?
 
 This project is supported by [Bitovi](https://www.bitovi.com/backend-consulting/nodejs-consulting) a Nodejs consultancy. You can get help or ask questions on our:
 
