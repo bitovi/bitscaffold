@@ -49,7 +49,9 @@ export function findAllEverything(scaffold: Scaffold, modelName: string) {
 export function findOneEverything(scaffold: Scaffold, modelName: string) {
   return async function findOneImpl(querystring: string, id: Identifier) {
     const params = await scaffold.parse[modelName].findOne(querystring, id);
-    const result = await scaffold.model[modelName].findByPk(id, params);
+    const result = (await scaffold.model[modelName].findByPk(id, params))?.get({
+      plain: true,
+    });
     if (!result) {
       throw new NotFoundError({
         detail: modelName + " with id " + id + " was not found",
@@ -66,7 +68,10 @@ export function findAndCountAllEverything(
 ) {
   return async function findAndCountAllImpl(querystring: string) {
     const params = await scaffold.parse[modelName].findAndCountAll(querystring);
-    const result = await scaffold.model[modelName].findAndCountAll(params);
+    let result = await scaffold.model[modelName].findAndCountAll(params);
+
+    result.rows = result.rows.map((record) => record.get({ plain: true }));
+
     const response = await scaffold.serialize[modelName].findAndCountAll(
       result
     );

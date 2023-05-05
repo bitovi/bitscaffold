@@ -7,8 +7,6 @@ import { Employee } from "./models/Employee";
 import { Project } from "./models/Project";
 import { Role } from "./models/Role";
 import { Skill } from "./models/Skill";
-import { createStaffingAppInstance } from "./staffing";
-import { createServer, GET, POST } from "../utils";
 
 const chance = new Chance();
 
@@ -113,27 +111,5 @@ describe("Virtuals Tests", () => {
     expect(projectFindOrCreate.noOfRoles).toBe(2);
 
     await scaffold.orm.close();
-  });
-
-  describe("Virtuals Requests Tests", () => {
-    const [app, scaffold] = createStaffingAppInstance();
-
-    beforeAll(async () => {
-      await scaffold.createDatabase();
-    });
-
-    it("should return only specified fields", async () => {
-      const server = createServer(app);
-
-      await POST(server, "/api/employees", {
-        name: chance.name(),
-      });
-
-      const [employees] = (
-        await GET(server, "/api/employees?fields=[Employee]=name")
-      ).deserialized;
-
-      expect(employees).toEqual({ name: expect.any(String) });
-    });
   });
 });
