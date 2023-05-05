@@ -37,10 +37,11 @@ export function buildEverythingForModel(
 export function findAllEverything(scaffold: Scaffold, modelName: string) {
   return async function findAllImpl(querystring: string) {
     const params = await scaffold.parse[modelName].findAll(querystring);
-    const result = (await scaffold.model[modelName].findAll(params)).map(
-      (record) => record.get({ plain: true })
+    const result = await scaffold.model[modelName].findAll(params);
+    const response = await scaffold.serialize[modelName].findAll(
+      result,
+      params.attributes
     );
-    const response = await scaffold.serialize[modelName].findAll(result);
 
     return response;
   };
@@ -49,15 +50,16 @@ export function findAllEverything(scaffold: Scaffold, modelName: string) {
 export function findOneEverything(scaffold: Scaffold, modelName: string) {
   return async function findOneImpl(querystring: string, id: Identifier) {
     const params = await scaffold.parse[modelName].findOne(querystring, id);
-    const result = (await scaffold.model[modelName].findByPk(id, params))?.get({
-      plain: true,
-    });
+    const result = await scaffold.model[modelName].findByPk(id, params);
     if (!result) {
       throw new NotFoundError({
         detail: modelName + " with id " + id + " was not found",
       });
     }
-    const response = await scaffold.serialize[modelName].findOne(result);
+    const response = await scaffold.serialize[modelName].findOne(
+      result,
+      params.attributes
+    );
     return response;
   };
 }
@@ -68,12 +70,11 @@ export function findAndCountAllEverything(
 ) {
   return async function findAndCountAllImpl(querystring: string) {
     const params = await scaffold.parse[modelName].findAndCountAll(querystring);
-    let result = await scaffold.model[modelName].findAndCountAll(params);
-
-    result.rows = result.rows.map((record) => record.get({ plain: true }));
+    const result = await scaffold.model[modelName].findAndCountAll(params);
 
     const response = await scaffold.serialize[modelName].findAndCountAll(
-      result
+      result,
+      params.attributes
     );
     return response;
   };
