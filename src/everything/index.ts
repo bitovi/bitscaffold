@@ -37,8 +37,11 @@ export function buildEverythingForModel(
 export function findAllEverything(scaffold: Scaffold, modelName: string) {
   return async function findAllImpl(querystring: string) {
     const params = await scaffold.parse[modelName].findAll(querystring);
-    const result = await scaffold.model[modelName].findAll(params);
+    const result = (await scaffold.model[modelName].findAll(params)).map(
+      (record) => record.get({ plain: true })
+    );
     const response = await scaffold.serialize[modelName].findAll(result);
+
     return response;
   };
 }
