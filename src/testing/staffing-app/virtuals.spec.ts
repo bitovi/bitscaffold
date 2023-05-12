@@ -32,7 +32,7 @@ describe("Virtuals Tests", () => {
     const scaffold = new Scaffold([Sample]);
 
     expect(scaffold.virtuals).toStrictEqual({
-      Sample: { noOfRoles: ["roles"] },
+      Sample: { noOfRoles: [{ association: "roles", include: [] }] },
     });
   });
 
