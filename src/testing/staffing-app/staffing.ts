@@ -30,7 +30,10 @@ export function createStaffingAppInstance(): [Koa, Scaffold] {
   router.get("/skill", async (ctx: Context) => {
     const params = await scaffold.parse.Skill.findAndCountAll(ctx.querystring);
     const result = await scaffold.model.Skill.findAndCountAll(params);
-    const response = await scaffold.serialize.Skill.findAndCountAll(result);
+    const response = await scaffold.serialize.Skill.findAndCountAll(
+      result,
+      params.attributes
+    );
     ctx.body = { customRouteTest1: true, data: response };
   });
 

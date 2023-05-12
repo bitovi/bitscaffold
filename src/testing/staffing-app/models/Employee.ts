@@ -23,7 +23,14 @@ export const Employee: ScaffoldModel = {
         min: 18,
       },
     },
+    current_project: {
+      type: DataTypes.VIRTUAL(DataTypes.INTEGER),
+      get() {
+        return "Yum";
+      },
+    },
   },
+
   validation: {
     startDateBeforeEndDate() {
       if (this.start_date && this.end_date && this.start_date < this.end_date) {

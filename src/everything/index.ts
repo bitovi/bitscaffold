@@ -38,7 +38,11 @@ export function findAllEverything(scaffold: Scaffold, modelName: string) {
   return async function findAllImpl(querystring: string) {
     const params = await scaffold.parse[modelName].findAll(querystring);
     const result = await scaffold.model[modelName].findAll(params);
-    const response = await scaffold.serialize[modelName].findAll(result);
+    const response = await scaffold.serialize[modelName].findAll(
+      result,
+      params.attributes
+    );
+
     return response;
   };
 }
@@ -52,7 +56,10 @@ export function findOneEverything(scaffold: Scaffold, modelName: string) {
         detail: modelName + " with id " + id + " was not found",
       });
     }
-    const response = await scaffold.serialize[modelName].findOne(result);
+    const response = await scaffold.serialize[modelName].findOne(
+      result,
+      params.attributes
+    );
     return response;
   };
 }
@@ -64,8 +71,10 @@ export function findAndCountAllEverything(
   return async function findAndCountAllImpl(querystring: string) {
     const params = await scaffold.parse[modelName].findAndCountAll(querystring);
     const result = await scaffold.model[modelName].findAndCountAll(params);
+
     const response = await scaffold.serialize[modelName].findAndCountAll(
-      result
+      result,
+      params.attributes
     );
     return response;
   };
