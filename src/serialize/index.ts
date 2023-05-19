@@ -190,10 +190,9 @@ const serializeWithoutUnsolicitedVirtuals = (
   attributes,
   virtualsForModel
 ) => {
-  const queriedAttributes = attributes ?? scaffold.models[name].attributes;
-  const blackListArray = virtualsForModel.filter(
-    (virtual) => ![queriedAttributes].includes(virtual)
-  );
+  const blackListArray = attributes
+    ? virtualsForModel.filter((virtual) => !attributes.includes(virtual))
+    : virtualsForModel;
 
   return scaffold.serializer.serialize(
     name,
