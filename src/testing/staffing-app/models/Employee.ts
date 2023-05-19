@@ -24,7 +24,7 @@ export const Employee: ScaffoldModel = {
       },
     },
     current_project: {
-      type: DataTypes.VIRTUAL(DataTypes.INTEGER),
+      type: DataTypes.VIRTUAL(DataTypes.STRING),
       get() {
         return "Yum";
       },

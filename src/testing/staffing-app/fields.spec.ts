@@ -143,7 +143,7 @@ describe("Tests for fields parameter", () => {
     });
   });
 
-  it("should not return virtual fields in field all if no field is specified", async () => {
+  it("should not return virtual fields if not specified", async () => {
     const server = createServer(app);
 
     await POST(server, "/api/employees", {
@@ -166,5 +166,22 @@ describe("Tests for fields parameter", () => {
         currentProject: expect.any(String),
       })
     );
+  });
+
+  it("should return virtual fields if specified", async () => {
+    const server = createServer(app);
+
+    await POST(server, "/api/employees", {
+      name: chance.name(),
+      age: chance.age(),
+    });
+    const [employees] = (
+      await GET(server, "/api/employees?fields=[Employee]=name,current_project")
+    ).deserialized;
+
+    expect(employees).toEqual({
+      name: expect.any(String),
+      current_project: "Yum",
+    });
   });
 });
