@@ -19,6 +19,10 @@ export function createStaffingAppInstance(): [Koa, Scaffold] {
   const scaffold = new Scaffold([Assignment, Employee, Project, Role, Skill], {
     prefix: "/api",
     expose: true,
+    database: {
+      storage: "test.sqlite",
+      dialect: "sqlite",
+    },
   });
 
   // Set up your Koa app as normal, for example, a logging middleware
@@ -114,7 +118,7 @@ export function createStaffingAppInstance(): [Koa, Scaffold] {
   // app.use(scaffold.middleware.allModels);
 
   // Attach the Scaffold default middleware to your Koa application
-  app.use(scaffold.middleware.Project.all);
+  app.use(scaffold.middleware.allModels.all);
 
   // Set up any other Koa routes, middleware, etc, that you want.
   app.use(async (ctx) => {

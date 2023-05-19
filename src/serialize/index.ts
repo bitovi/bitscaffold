@@ -5,7 +5,6 @@ import { Scaffold } from "..";
 
 import JSONAPISerializer from "json-api-serializer";
 import { JSONAPIDocument } from "json-api-serializer";
-import { IAssociation } from "../sequelize/types";
 import { ScaffoldModel } from "../types";
 
 /**
@@ -164,7 +163,7 @@ const deserialize = (data: any) => {
 export function registerSchema(
   serializer: JSONAPISerializer,
   model: ScaffoldModel,
-  associations: Record<string, IAssociation>,
+  associations: Record<string, string>,
   primaryKey: string
 ) {
   const relationships: { [key: string]: any } = {};
@@ -172,7 +171,7 @@ export function registerSchema(
   associationsKeys.forEach((associationsKey) => {
     const association = associations[associationsKey];
     relationships[associationsKey] = {
-      type: association.model,
+      type: association,
       deserialize,
     };
   });

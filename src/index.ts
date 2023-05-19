@@ -35,7 +35,6 @@ import {
 } from "./middleware";
 import { buildEverythingForModel, EverythingFunctions } from "./everything";
 import { buildSchemaForModel } from "./schema";
-import { IAssociation } from "./sequelize/types";
 import { ScaffoldError, ScaffoldErrorOptions } from "./error/errors";
 
 /**
@@ -89,7 +88,6 @@ export class Scaffold {
   virtuals: Virtuals;
 
   // this is a lookup that shows all associations for each model.
-  associationsLookup: Record<string, Record<string, IAssociation> | undefined>;
 
   /**
    * Creates a new Scaffold instance
@@ -107,13 +105,13 @@ export class Scaffold {
 
     // Fetch the scaffold models and associations look up
     const {
-      associationsLookup,
+      // associationsLookup,
       models: sequelizeModels,
       virtuals,
     } = convertScaffoldModels(this._sequelize, this._serializer, models);
 
     this.virtuals = virtuals;
-    this.associationsLookup = associationsLookup;
+    // this.associationsLookup = associationsLookup;
     this._sequelizeModels = sequelizeModels;
 
     // Types of requests that Scaffold should attempt to process
