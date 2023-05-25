@@ -39,7 +39,7 @@ export function createSequelizeInstance(
   const ScaffoldSequelize = extendedSequelize(scaffold);
 
   if (!options) {
-    return new ScaffoldSequelize("sqlite::memory:", {
+    return new ScaffoldSequelize("sqlite:memory:", {
       logging: false,
     });
   }
